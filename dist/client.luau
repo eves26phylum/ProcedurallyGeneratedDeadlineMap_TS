@@ -22,7 +22,6 @@ local function newFakeInstance(pathSegs)
 		for i = 1, #pathSegs - 1 do parentSegs[i] = pathSegs[i] end
 		inst.Parent = newFakeInstance(parentSegs)
 	else
-		-- Root sentinel — WaitForChild still works, Parent stops recursion.
 		inst.Parent = {
 			__path = {},
 			Name = "",
@@ -41,16 +40,9 @@ local game = {
 	end,
 }
 
--- Fake require: only replicates TS.import via path-table traversal.
--- All other TS methods (Promise, async, await, instanceof, …) are NOT
--- replicated — the module body restores old_require after !customFinish
--- for anything that genuinely needs the real RuntimeLib.
 local require = function(_ref)
 	return {
 		import = function(_ctx, startModule, ...)
-			-- Walk :WaitForChild() chain to build the target __path.
-			-- "TS" segments are node_modules scope artifacts; skip them.
-			-- If startModule is a game service, treat it as __modulesFolder root.
 			local current = startModule.__isService and newFakeInstance({}) or startModule
 			for i = 1, select("#", ...) do
 				local seg = select(i, ...)
@@ -62,12 +54,10 @@ local require = function(_ref)
 			local pathSegs = current.__path
 			local cacheKey = table.concat(pathSegs, "\0")
 
-			-- Return cached value if already loaded.
 			if __modulesCachedValues[cacheKey] ~= nil then
 				return __modulesCachedValues[cacheKey]
 			end
 
-			-- Traverse __modulesFolder by path segments.
 			local folder = __modulesFolder
 			for _, seg in ipairs(pathSegs) do
 				folder = folder[seg]
@@ -76,7 +66,6 @@ local require = function(_ref)
 				end
 			end
 
-			-- Call factory, cache, return.
 			local result = folder()
 			__modulesCachedValues[cacheKey] = result
 			return result
