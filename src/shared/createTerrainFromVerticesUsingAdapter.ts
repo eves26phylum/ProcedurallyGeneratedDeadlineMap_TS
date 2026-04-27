@@ -12,6 +12,7 @@ export interface WedgeCell {
         averageHeight: number;
         averageHeightSized: number;
     };
+    _self: createTerrain
 }
 
 export class createTerrain {
@@ -37,8 +38,8 @@ export class createTerrain {
         const WedgeB = this.adapter.newInstance("WedgePart");
         this.adapter.setProperty(WedgeA, "Anchored", true);
         this.adapter.setProperty(WedgeB, "Anchored", true);
-        assign(WedgeA, AData, returnFunctionWithIdentity(this.adapter.setProperty, this.adapter));
-        assign(WedgeB, BData, returnFunctionWithIdentity(this.adapter.setProperty, this.adapter));
+        assign(WedgeA, AData, returnFunctionWithIdentity((item, key, value) => {this.adapter.setProperty(item, key, value);}, this.adapter));
+        assign(WedgeB, BData, returnFunctionWithIdentity((item, key, value) => {this.adapter.setProperty(item, key, value);}, this.adapter));
         return [WedgeA, WedgeB];
     }
 
@@ -98,7 +99,8 @@ export class createTerrain {
                         vertices: [topLeft, topRight, bottomLeft, bottomRight],
                         averageHeight: getFromXY(x, y) / maxSize,
                         averageHeightSized: getFromXY(x, y),
-                    }
+                    },
+                    _self: this
                 };
 
                 wedges[x][y] = cell;

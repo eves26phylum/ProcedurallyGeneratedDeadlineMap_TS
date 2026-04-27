@@ -29,14 +29,20 @@ if (wedgesFolderToDestroy) { adapterToUse.destroy(wedgesFolderToDestroy); }
 const wedgesFolder = adapterToUse.newInstance("Folder");
 adapterToUse.setProperty(wedgesFolder, "Name", "Wedges");
 adapterToUse.setProperty(wedgesFolder, "Parent", workspace);
-function getColourAndMaterialFromHeight(height: number) {
-    if (height < 0.1) return [Enum.Material.Grass]
+function getColourAndMaterialFromHeight(height: number): [Enum.Material, Color3] {
+    if (height < 0.1) return [Enum.Material.Grass, Color3.fromRGB(105, 209, 105)];
+    const secondaryAngs = math.random(-20, 10);
+    return [Enum.Material.Sand, Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs)]
 }
-function operateOnThisTriangleInstance(data: WedgeCell, triangle: AnyInstance) {
-    const height = data.data.averageHeight;
-    const [material, colour] = [Enum.Material.Sand, ColorSequence.fromRGB()];
-}
-const createTerrainDefault = new createTerrain(function(thisData: WedgeCell) {
+const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
+    const _self = thisData._self;
+    const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance) => {
+        const height = data.data.averageHeight;
+        const [material, colour] = getColourAndMaterialFromHeight(height);
+        _self.adapter.setProperty(triangle, "Parent", wedgesFolder);
+        _self.adapter.setProperty(triangle, "Color", colour);
+        _self.adapter.setProperty(triangle, "Material", material);
+    }
     operateOnThisTriangleInstance(thisData, thisData.triangles[0][0]);
     operateOnThisTriangleInstance(thisData, thisData.triangles[0][1]);
     operateOnThisTriangleInstance(thisData, thisData.triangles[1][0]);
