@@ -337,11 +337,9 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 			local _modifiers = self.modifiers
 			local _yourObject = yourObject
 			table.insert(_modifiers, _yourObject)
-			local _exp = self.modifiers
-			table.sort(_exp, function(a, b)
+			table.sort(self.modifiers, function(a, b)
 				return a.priority > b.priority
 			end)
-			self.modifiers = _exp
 		end
 	end
 	return {

@@ -337,11 +337,9 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 			local _modifiers = self.modifiers
 			local _yourObject = yourObject
 			table.insert(_modifiers, _yourObject)
-			local _exp = self.modifiers
-			table.sort(_exp, function(a, b)
+			table.sort(self.modifiers, function(a, b)
 				return a.priority > b.priority
 			end)
-			self.modifiers = _exp
 		end
 	end
 	return {
@@ -694,10 +692,6 @@ task.defer(function()
 	adapterToUse.setProperty(wedgesFolder, "Name", "Wedges")
 	adapterToUse.setProperty(wedgesFolder, "Parent", workspace)
 	local standardBox = biomeBox.new()
-	local createTerrainDefault = createTerrain.new(function(thisData)
-		standardBox:executeAllModifiers(thisData._self, thisData)
-	end, EgoMoose, adapterToUse)
-	local triangles = createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
 	local NuristanStandardBiome
 	do
 		NuristanStandardBiome = setmetatable({}, {
@@ -724,7 +718,6 @@ task.defer(function()
 			local operateOnThisTriangleInstance = function(data, triangle)
 				local height = data.data.averageHeight
 				local propMap = self:getColourAndMaterialFromHeight(height)
-				yourSelf.adapter.setProperty(triangle, "Parent", wedgesFolder)
 				assign(triangle, propMap, function(a, b, c)
 					yourSelf.adapter.setProperty(a, b, c)
 				end)
@@ -737,18 +730,27 @@ task.defer(function()
 	end
 	standardBox:registerModifier(NuristanStandardBiome.new({
 		grass = function()
-			local secondaryAngs = math.random(-20, 10)
 			return {
 				Material = Enum.Material.Grass,
-				Color = Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs),
+				Color = Color3.fromRGB(43, 219, 84),
 			}
 		end,
 		desert = function()
+			local secondaryAngs = math.random(-20, 10)
 			return {
 				Material = Enum.Material.Sand,
-				Color = Color3.fromRGB(237, 201, 175),
+				Color = Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs),
 			}
 		end,
 	}))
+	local createTerrainDefault = createTerrain.new(function(thisData)
+		local _self = thisData._self
+		_self.adapter.setProperty(thisData.triangles[1][1], "Parent", wedgesFolder)
+		_self.adapter.setProperty(thisData.triangles[1][2], "Parent", wedgesFolder)
+		_self.adapter.setProperty(thisData.triangles[2][1], "Parent", wedgesFolder)
+		_self.adapter.setProperty(thisData.triangles[2][2], "Parent", wedgesFolder)
+		standardBox:executeAllModifiers(thisData._self, thisData)
+	end, EgoMoose, adapterToUse)
+	local triangles = createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
 
 end)

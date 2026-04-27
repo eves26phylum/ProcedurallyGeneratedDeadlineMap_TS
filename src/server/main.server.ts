@@ -33,10 +33,6 @@ const wedgesFolder = adapterToUse.newInstance("Folder");
 adapterToUse.setProperty(wedgesFolder, "Name", "Wedges");
 adapterToUse.setProperty(wedgesFolder, "Parent", workspace);
 const standardBox = new biomeBox();
-const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
-    standardBox.executeAllModifiers(thisData._self, thisData);
-}, EgoMoose, adapterToUse);
-const triangles = createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);
 
 interface NuristanStandardBiomeConfig {
     desert: () => Partial<InstanceProperties<WedgePart>>
@@ -57,7 +53,6 @@ class NuristanStandardBiome {
         const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance) => {
             const height = data.data.averageHeight;
             const propMap: Partial<InstanceProperties<WedgePart>> = this.getColourAndMaterialFromHeight(height);
-            yourSelf.adapter.setProperty(triangle, "Parent", wedgesFolder);
             assign(triangle, propMap, (a, b, c) => {yourSelf.adapter.setProperty(a, b, c);});
         }
         operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][0]);
@@ -69,13 +64,23 @@ class NuristanStandardBiome {
 standardBox.registerModifier(new NuristanStandardBiome(
     {
         grass: () => {
-            const secondaryAngs = math.random(-20, 10);
             return {
-                 Material: Enum.Material.Grass, Color: Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs)
+                Material: Enum.Material.Grass, Color: Color3.fromRGB(43, 219, 84)
             }
         },
         desert: () => { 
-            return {Material: Enum.Material.Sand, Color: Color3.fromRGB(237, 201, 175)}
+            const secondaryAngs = math.random(-20, 10);
+            return {Material: Enum.Material.Sand, Color: Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs)}
         }
     }
 ))
+
+const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
+    const _self = thisData._self;
+    _self.adapter.setProperty(thisData.triangles[0][0], "Parent", wedgesFolder);
+    _self.adapter.setProperty(thisData.triangles[0][1], "Parent", wedgesFolder);
+    _self.adapter.setProperty(thisData.triangles[1][0], "Parent", wedgesFolder);
+    _self.adapter.setProperty(thisData.triangles[1][1], "Parent", wedgesFolder);
+    standardBox.executeAllModifiers(thisData._self, thisData);
+}, EgoMoose, adapterToUse);
+const triangles = createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);
