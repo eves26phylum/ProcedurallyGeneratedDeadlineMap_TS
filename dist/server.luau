@@ -331,8 +331,8 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 			local self = setmetatable({}, createTerrain)
 			return self:constructor(...) or self
 		end
-		function createTerrain:constructor(materialiseTriangle, operateOnData, EgoMoose, adapter)
-			self.materialiseTriangle = materialiseTriangle
+		function createTerrain:constructor(operateOnData, EgoMoose, adapter, materialiseTriangle)
+			self.materialiseTriangle = materialiseTriangle or self.materialiseTriangle
 			self.adapter = adapter
 			self.operateOnData = operateOnData
 			self.EgoMoose = EgoMoose
@@ -341,12 +341,16 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 			local _binding = self.EgoMoose.draw3dTriangle(a, b, c)
 			local AData = _binding[1]
 			local BData = _binding[2]
-			local WedgeA = self.adapter.newInstance("WedgePart")
-			local WedgeB = self.adapter.newInstance("WedgePart")
-			self.adapter.setProperty(WedgeA, "Anchored", true)
-			self.adapter.setProperty(WedgeB, "Anchored", true)
-			assign(WedgeA, AData, returnFunctionWithIdentity(self.adapter.setProperty, self.adapter))
-			assign(WedgeB, BData, returnFunctionWithIdentity(self.adapter.setProperty, self.adapter))
+			local WedgeA = self.adapter:newInstance("WedgePart")
+			local WedgeB = self.adapter:newInstance("WedgePart")
+			self.adapter:setProperty(WedgeA, "Anchored", true)
+			self.adapter:setProperty(WedgeB, "Anchored", true)
+			assign(WedgeA, AData, returnFunctionWithIdentity(function(item, key, value)
+				self.adapter:setProperty(item, key, value)
+			end, self.adapter))
+			assign(WedgeB, BData, returnFunctionWithIdentity(function(item, key, value)
+				self.adapter:setProperty(item, key, value)
+			end, self.adapter))
 			return { WedgeA, WedgeB }
 		end
 		function createTerrain:createTrianglesFromData(data, resolution, partSize, offsetVector3)
@@ -449,6 +453,7 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 									averageHeight = getFromXY(x, y) / maxSize,
 									averageHeightSized = getFromXY(x, y),
 								},
+								_self = self,
 							}
 							wedges[x][y] = cell
 							if not self.operateOnData then
@@ -480,18 +485,23 @@ __modulesFolder["deadlineAdapter"] = function()
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local deadlineAdapter = {}
 	do
+		local _container = deadlineAdapter
 		local function newInstance(className, Parent)
 			return create_instance(className, Parent)
 		end
+		_container.newInstance = newInstance
 		local function setProperty(property, key, value)
 			property[key] = value
 		end
+		_container.setProperty = setProperty
 		local function findFirstChild(target, targetName, recursive)
 			return target:find_first_child(targetName, recursive)
 		end
+		_container.findFirstChild = findFirstChild
 		local function destroy(target)
 			return target:destroy()
 		end
+		_container.destroy = destroy
 	end
 	return {
 		deadlineAdapter = deadlineAdapter,
@@ -511,18 +521,23 @@ __modulesFolder["robloxAdapter"] = function()
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local robloxAdapter = {}
 	do
+		local _container = robloxAdapter
 		local function newInstance(className, Parent)
 			return Instance.new(className, Parent)
 		end
+		_container.newInstance = newInstance
 		local function setProperty(property, key, value)
 			property[key] = value
 		end
+		_container.setProperty = setProperty
 		local function findFirstChild(target, targetName, recursive)
 			return target:FindFirstChild(targetName, recursive)
 		end
+		_container.findFirstChild = findFirstChild
 		local function destroy(target)
 			return target:Destroy()
 		end
+		_container.destroy = destroy
 	end
 	return {
 		robloxAdapter = robloxAdapter,
@@ -560,11 +575,65 @@ do
 	local script
 	script = newFakeInstance({"main"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
+	local createTerrain = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "createTerrainFromVerticesUsingAdapter").createTerrain
+	local robloxAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "robloxAdapter").robloxAdapter
+	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
+	local PerlinNoise = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "PerlinNoise").PerlinNoise
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
 	local game = nil
 	local __modulesFolder = nil
+	local isDeadline = game ~= nil
+	local adapterToUse = if isDeadline then robloxAdapter else deadlineAdapter
+	local workspace = if isDeadline then game:GetService("Workspace") else get_map_root()
+	local PART_SIZE = 100
+	local RESOLUTION = Vector2.new(math.round(10000 / PART_SIZE), math.round(10000 / PART_SIZE))
+	local ROUGHNESS = 4
+	local PARAMS = {
+		lacunarity = 4,
+		persistence = 0.25,
+		octaves = 2,
+		exaggeratedness = 20,
+		power = 3,
+		scale = math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS,
+	}
+	local POSITION_OFFSET = Vector3.new(0, 0, 0)
+	local offset = Vector2.new(math.random(1, 10e6), math.random(1, 10e6))
+	local noiseData = PerlinNoise.new():generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power)
+	local wedgesFolderToDestroy = adapterToUse:findFirstChild(workspace, "Wedges")
+	if wedgesFolderToDestroy then
+		adapterToUse:destroy(wedgesFolderToDestroy)
+	end
+	local wedgesFolder = adapterToUse:newInstance("Folder")
+	adapterToUse:setProperty(wedgesFolder, "Name", "Wedges")
+	adapterToUse:setProperty(wedgesFolder, "Parent", workspace)
+	local function getColourAndMaterialFromHeight(height)
+		if height < 0.1 then
+			return { Enum.Material.Grass, Color3.fromRGB(105, 209, 105) }
+		end
+		local secondaryAngs = math.random(-20, 10)
+		return { Enum.Material.Sand, Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs) }
+	end
+	local createTerrainDefault = createTerrain.new(function(thisData)
+		local _self = thisData._self
+		local operateOnThisTriangleInstance = function(data, triangle)
+			local height = data.data.averageHeight
+			local _binding = getColourAndMaterialFromHeight(height)
+			local material = _binding[1]
+			local colour = _binding[2]
+			_self.adapter:setProperty(triangle, "Parent", wedgesFolder)
+			_self.adapter:setProperty(triangle, "Color", colour)
+			_self.adapter:setProperty(triangle, "Material", material)
+		end
+		operateOnThisTriangleInstance(thisData, thisData.triangles[1][1])
+		operateOnThisTriangleInstance(thisData, thisData.triangles[1][2])
+		operateOnThisTriangleInstance(thisData, thisData.triangles[2][1])
+		operateOnThisTriangleInstance(thisData, thisData.triangles[2][2])
+	end, EgoMoose, adapterToUse)
+	local triangles = createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
 
 end

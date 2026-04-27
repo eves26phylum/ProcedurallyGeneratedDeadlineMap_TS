@@ -331,8 +331,8 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 			local self = setmetatable({}, createTerrain)
 			return self:constructor(...) or self
 		end
-		function createTerrain:constructor(materialiseTriangle, operateOnData, EgoMoose, adapter)
-			self.materialiseTriangle = materialiseTriangle
+		function createTerrain:constructor(operateOnData, EgoMoose, adapter, materialiseTriangle)
+			self.materialiseTriangle = materialiseTriangle or self.materialiseTriangle
 			self.adapter = adapter
 			self.operateOnData = operateOnData
 			self.EgoMoose = EgoMoose
@@ -341,12 +341,16 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 			local _binding = self.EgoMoose.draw3dTriangle(a, b, c)
 			local AData = _binding[1]
 			local BData = _binding[2]
-			local WedgeA = self.adapter.newInstance("WedgePart")
-			local WedgeB = self.adapter.newInstance("WedgePart")
-			self.adapter.setProperty(WedgeA, "Anchored", true)
-			self.adapter.setProperty(WedgeB, "Anchored", true)
-			assign(WedgeA, AData, returnFunctionWithIdentity(self.adapter.setProperty, self.adapter))
-			assign(WedgeB, BData, returnFunctionWithIdentity(self.adapter.setProperty, self.adapter))
+			local WedgeA = self.adapter:newInstance("WedgePart")
+			local WedgeB = self.adapter:newInstance("WedgePart")
+			self.adapter:setProperty(WedgeA, "Anchored", true)
+			self.adapter:setProperty(WedgeB, "Anchored", true)
+			assign(WedgeA, AData, returnFunctionWithIdentity(function(item, key, value)
+				self.adapter:setProperty(item, key, value)
+			end, self.adapter))
+			assign(WedgeB, BData, returnFunctionWithIdentity(function(item, key, value)
+				self.adapter:setProperty(item, key, value)
+			end, self.adapter))
 			return { WedgeA, WedgeB }
 		end
 		function createTerrain:createTrianglesFromData(data, resolution, partSize, offsetVector3)
@@ -449,6 +453,7 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 									averageHeight = getFromXY(x, y) / maxSize,
 									averageHeightSized = getFromXY(x, y),
 								},
+								_self = self,
 							}
 							wedges[x][y] = cell
 							if not self.operateOnData then
@@ -480,18 +485,23 @@ __modulesFolder["deadlineAdapter"] = function()
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local deadlineAdapter = {}
 	do
+		local _container = deadlineAdapter
 		local function newInstance(className, Parent)
 			return create_instance(className, Parent)
 		end
+		_container.newInstance = newInstance
 		local function setProperty(property, key, value)
 			property[key] = value
 		end
+		_container.setProperty = setProperty
 		local function findFirstChild(target, targetName, recursive)
 			return target:find_first_child(targetName, recursive)
 		end
+		_container.findFirstChild = findFirstChild
 		local function destroy(target)
 			return target:destroy()
 		end
+		_container.destroy = destroy
 	end
 	return {
 		deadlineAdapter = deadlineAdapter,
@@ -511,18 +521,23 @@ __modulesFolder["robloxAdapter"] = function()
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local robloxAdapter = {}
 	do
+		local _container = robloxAdapter
 		local function newInstance(className, Parent)
 			return Instance.new(className, Parent)
 		end
+		_container.newInstance = newInstance
 		local function setProperty(property, key, value)
 			property[key] = value
 		end
+		_container.setProperty = setProperty
 		local function findFirstChild(target, targetName, recursive)
 			return target:FindFirstChild(targetName, recursive)
 		end
+		_container.findFirstChild = findFirstChild
 		local function destroy(target)
 			return target:Destroy()
 		end
+		_container.destroy = destroy
 	end
 	return {
 		robloxAdapter = robloxAdapter,
