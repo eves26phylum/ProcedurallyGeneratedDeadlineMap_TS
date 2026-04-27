@@ -587,9 +587,9 @@ do
 	local newFakeInstance = nil
 	local game = nil
 	local __modulesFolder = nil
-	local isDeadline = game ~= nil
-	local adapterToUse = if isDeadline then robloxAdapter else deadlineAdapter
-	local workspace = if isDeadline then game:GetService("Workspace") else get_map_root()
+	local isDeadline = get_map_root ~= nil
+	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
+	local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
 	local PART_SIZE = 100
 	local RESOLUTION = Vector2.new(math.round(10000 / PART_SIZE), math.round(10000 / PART_SIZE))
 	local ROUGHNESS = 4
