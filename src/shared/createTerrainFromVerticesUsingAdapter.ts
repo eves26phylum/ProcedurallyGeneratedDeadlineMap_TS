@@ -38,8 +38,8 @@ export class createTerrain {
         const WedgeB = this.adapter.newInstance("WedgePart");
         this.adapter.setProperty(WedgeA, "Anchored", true);
         this.adapter.setProperty(WedgeB, "Anchored", true);
-        assign(WedgeA, AData, returnFunctionWithIdentity((item, key, value) => {this.adapter.setProperty(item, key, value);}, this.adapter));
-        assign(WedgeB, BData, returnFunctionWithIdentity((item, key, value) => {this.adapter.setProperty(item, key, value);}, this.adapter));
+        assign<AnyInstance>(WedgeA, AData, (item, key, value) => {this.adapter.setProperty(item, key, value);});
+        assign<AnyInstance>(WedgeB, BData, (item, key, value) => {this.adapter.setProperty(item, key, value);});
         return [WedgeA, WedgeB];
     }
 

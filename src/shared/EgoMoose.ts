@@ -14,11 +14,9 @@ export namespace EgoMoose {
         let acd = ac.Dot(ac);
         let bcd = bc.Dot(bc);
         if (abd > acd && abd > bcd) {
-            c = a;
-            a = c;
+            [c, a] = [a, c];
         } else if(acd > bcd && acd > abd) {
-            a = b;
-            b = a;
+            [a, b] = [b, a];
         }
 	    ab = b.sub(a);
         ac = c.sub(a);
@@ -30,7 +28,8 @@ export namespace EgoMoose {
         return [
             {
                 Size: new Vector3(0, height, math.abs(ab.Dot(back))), 
-                CFrame: CFrame.fromMatrix((a.add(b)).div(2), right, up, back)}, 
+                CFrame: CFrame.fromMatrix((a.add(b)).div(2), right, up, back)
+            }, 
             {
                 Size: new Vector3(0, height, math.abs(ac.Dot(back))), 
                 CFrame: CFrame.fromMatrix((a.add(c)).div(2), right.mul(-1), up, back.mul(-1))

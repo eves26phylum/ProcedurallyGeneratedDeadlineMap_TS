@@ -48,4 +48,5 @@ const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
     operateOnThisTriangleInstance(thisData, thisData.triangles[1][0]);
     operateOnThisTriangleInstance(thisData, thisData.triangles[1][1]);
 }, EgoMoose, adapterToUse);
+print(noiseData);
 const triangles = createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);

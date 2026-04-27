@@ -31,7 +31,7 @@ local function newFakeInstance(pathSegs)
 	end
 	return inst
 end
-
+local old_game = game
 local game = {
 	GetService = function(self, name)
 		local inst = newFakeInstance({ name })
@@ -94,7 +94,8 @@ __modulesFolder["EgoMoose"] = function()
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = nil
+	local game = old_game
+	local old_game = nil
 	local __modulesFolder = nil
 	local EgoMoose = {}
 	do
@@ -113,11 +114,9 @@ __modulesFolder["EgoMoose"] = function()
 			local acd = ac:Dot(ac)
 			local bcd = bc:Dot(bc)
 			if abd > acd and abd > bcd then
-				c = a
-				a = c
+				c, a = a, c
 			elseif acd > bcd and acd > abd then
-				a = b
-				b = a
+				a, b = b, a
 			end
 			local _b_2 = b
 			local _a_2 = a
@@ -174,7 +173,8 @@ __modulesFolder["PerlinNoise"] = function()
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = nil
+	local game = old_game
+	local old_game = nil
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -281,7 +281,8 @@ __modulesFolder["Util"] = function()
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = nil
+	local game = old_game
+	local old_game = nil
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -311,13 +312,13 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
-	local returnFunctionWithIdentity = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "selfProp").returnFunctionWithIdentity
 	-- modules go above
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = nil
+	local game = old_game
+	local old_game = nil
 	local __modulesFolder = nil
 	local createTerrain
 	do
@@ -341,16 +342,16 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 			local _binding = self.EgoMoose.draw3dTriangle(a, b, c)
 			local AData = _binding[1]
 			local BData = _binding[2]
-			local WedgeA = self.adapter:newInstance("WedgePart")
-			local WedgeB = self.adapter:newInstance("WedgePart")
-			self.adapter:setProperty(WedgeA, "Anchored", true)
-			self.adapter:setProperty(WedgeB, "Anchored", true)
-			assign(WedgeA, AData, returnFunctionWithIdentity(function(item, key, value)
-				self.adapter:setProperty(item, key, value)
-			end, self.adapter))
-			assign(WedgeB, BData, returnFunctionWithIdentity(function(item, key, value)
-				self.adapter:setProperty(item, key, value)
-			end, self.adapter))
+			local WedgeA = self.adapter.newInstance("WedgePart")
+			local WedgeB = self.adapter.newInstance("WedgePart")
+			self.adapter.setProperty(WedgeA, "Anchored", true)
+			self.adapter.setProperty(WedgeB, "Anchored", true)
+			assign(WedgeA, AData, function(item, key, value)
+				self.adapter.setProperty(item, key, value)
+			end)
+			assign(WedgeB, BData, function(item, key, value)
+				self.adapter.setProperty(item, key, value)
+			end)
 			return { WedgeA, WedgeB }
 		end
 		function createTerrain:createTrianglesFromData(data, resolution, partSize, offsetVector3)
@@ -479,7 +480,8 @@ __modulesFolder["deadlineAdapter"] = function()
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = nil
+	local game = old_game
+	local old_game = nil
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -515,7 +517,8 @@ __modulesFolder["robloxAdapter"] = function()
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = nil
+	local game = old_game
+	local old_game = nil
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -551,7 +554,8 @@ __modulesFolder["selfProp"] = function()
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = nil
+	local game = old_game
+	local old_game = nil
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
