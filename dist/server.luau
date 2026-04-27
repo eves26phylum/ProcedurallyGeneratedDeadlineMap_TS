@@ -1,3 +1,6 @@
+function assert(condition, messageIfFalse)
+    if not condition then error(messageIfFalse or _VERSION.." assertion error") end
+end
 local old_require = require
 local __modulesFolder = {}
 local __modulesCachedValues = {}
@@ -165,10 +168,150 @@ __modulesFolder["EgoMoose"] = function()
 
 end
 
+__modulesFolder["PerlinNoise"] = function()
+	local script
+	script = newFakeInstance({"PerlinNoise"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function FUCKROBLOX(a)
+		-- fuck roblox basically fucks roblox and also avoids integer noise
+		if math.floor(a) == a then
+			return a + 0.001
+		end
+		return a
+	end
+	local PerlinNoise
+	do
+		PerlinNoise = setmetatable({}, {
+			__tostring = function()
+				return "PerlinNoise"
+			end,
+		})
+		PerlinNoise.__index = PerlinNoise
+		function PerlinNoise.new(...)
+			local self = setmetatable({}, PerlinNoise)
+			return self:constructor(...) or self
+		end
+		function PerlinNoise:constructor()
+		end
+		function PerlinNoise:generate(scale, resolution, offset, exaggeratedness, lacunarity, persistence, octaves, POWER)
+			local resolvedOffset = offset or Vector2.new(0, 0)
+			local noiseMap = {}
+			local minRaw = math.huge
+			local maxRaw = -math.huge
+			do
+				local x = 0
+				local _shouldIncrement = false
+				while true do
+					if _shouldIncrement then
+						x += 1
+					else
+						_shouldIncrement = true
+					end
+					if not (x <= resolution.X) then
+						break
+					end
+					do
+						local y = 0
+						local _shouldIncrement_1 = false
+						while true do
+							if _shouldIncrement_1 then
+								y += 1
+							else
+								_shouldIncrement_1 = true
+							end
+							if not (y <= resolution.Y) then
+								break
+							end
+							local offsetX = x + resolvedOffset.X
+							local offsetY = y + resolvedOffset.Y
+							local frequency = 1
+							local amplitude = 1
+							local noiseHeight = 0
+							do
+								local i = 0
+								local _shouldIncrement_2 = false
+								while true do
+									if _shouldIncrement_2 then
+										i += 1
+									else
+										_shouldIncrement_2 = true
+									end
+									if not (i < octaves) then
+										break
+									end
+									local sampleX = (offsetX / scale) * frequency
+									local sampleY = (offsetY / scale) * frequency
+									local computedNoise = math.noise(FUCKROBLOX(sampleX), FUCKROBLOX(sampleY))
+									local clampedNoise = computedNoise / 2 + 0.5
+									noiseHeight += clampedNoise * amplitude
+									amplitude *= persistence
+									frequency *= lacunarity
+								end
+							end
+							local endHeight = (noiseHeight ^ POWER) * exaggeratedness
+							if endHeight < minRaw then
+								minRaw = endHeight
+							end
+							if endHeight > maxRaw then
+								maxRaw = endHeight
+							end
+							table.insert(noiseMap, endHeight)
+						end
+					end
+				end
+			end
+			return noiseMap
+		end
+	end
+	return {
+		PerlinNoise = PerlinNoise,
+	}
+
+end
+
+__modulesFolder["Util"] = function()
+	local script
+	script = newFakeInstance({"Util"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function assign(a, b, optionalFunc)
+		if optionalFunc == nil then
+			optionalFunc = function(a, index, value)
+				a[index] = value
+			end
+		end
+		local _a = a
+		assert(_a, "A is missing")
+		local _b = b
+		assert(_b, "B is missing")
+		for index, value in pairs(b) do
+			optionalFunc(a, index, value)
+		end
+	end
+	return {
+		assign = assign,
+	}
+
+end
+
 __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 	local script
 	script = newFakeInstance({"createTerrainFromVerticesUsingAdapter"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	local returnFunctionWithIdentity = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "selfProp").returnFunctionWithIdentity
 	-- modules go above
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
@@ -188,13 +331,135 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 			local self = setmetatable({}, createTerrain)
 			return self:constructor(...) or self
 		end
-		function createTerrain:constructor(materialiseTriangle, operateOnData, EgoMoose)
+		function createTerrain:constructor(materialiseTriangle, operateOnData, EgoMoose, adapter)
 			self.materialiseTriangle = materialiseTriangle
+			self.adapter = adapter
 			self.operateOnData = operateOnData
 			self.EgoMoose = EgoMoose
 		end
+		function createTerrain:materialiseTriangle(a, b, c)
+			local _binding = self.EgoMoose.draw3dTriangle(a, b, c)
+			local AData = _binding[1]
+			local BData = _binding[2]
+			local WedgeA = self.adapter.newInstance("WedgePart")
+			local WedgeB = self.adapter.newInstance("WedgePart")
+			self.adapter.setProperty(WedgeA, "Anchored", true)
+			self.adapter.setProperty(WedgeB, "Anchored", true)
+			assign(WedgeA, AData, returnFunctionWithIdentity(self.adapter.setProperty, self.adapter))
+			assign(WedgeB, BData, returnFunctionWithIdentity(self.adapter.setProperty, self.adapter))
+			return { WedgeA, WedgeB }
+		end
 		function createTerrain:createTrianglesFromData(data, resolution, partSize, offsetVector3)
-			create_instance("Part")
+			local getFromXY = function(x, y)
+				return data[x * (resolution.Y + 1) + y + 1]
+			end
+			local multiplyVectorByPartSize = function(x, y, h)
+				return Vector3.new(x * partSize, h * partSize, y * partSize)
+			end
+			local minSize = math.huge
+			local maxSize = -math.huge
+			do
+				local x = 0
+				local _shouldIncrement = false
+				while true do
+					if _shouldIncrement then
+						x += 1
+					else
+						_shouldIncrement = true
+					end
+					if not (x < resolution.X) then
+						break
+					end
+					do
+						local y = 0
+						local _shouldIncrement_1 = false
+						while true do
+							if _shouldIncrement_1 then
+								y += 1
+							else
+								_shouldIncrement_1 = true
+							end
+							if not (y < resolution.Y) then
+								break
+							end
+							local val = getFromXY(x, y)
+							if val < minSize then
+								minSize = val
+							end
+							if val > maxSize then
+								maxSize = val
+							end
+						end
+					end
+				end
+			end
+			local minSizeVector3 = Vector3.new(0, minSize * partSize, 0)
+			local wedges = {}
+			do
+				local x = 0
+				local _shouldIncrement = false
+				while true do
+					if _shouldIncrement then
+						x += 1
+					else
+						_shouldIncrement = true
+					end
+					if not (x < resolution.X) then
+						break
+					end
+					do
+						local y = 0
+						local _shouldIncrement_1 = false
+						while true do
+							if _shouldIncrement_1 then
+								y += 1
+							else
+								_shouldIncrement_1 = true
+							end
+							if not (y < resolution.Y) then
+								break
+							end
+							local topLeftOffset = Vector2.new(0, 0)
+							local topRightOffset = Vector2.new(1, 0)
+							local bottomLeftOffset = Vector2.new(0, 1)
+							local bottomRightOffset = Vector2.new(1, 1)
+							local tLTotalH = getFromXY(x + topLeftOffset.X, y + topLeftOffset.Y)
+							local tRTotalH = getFromXY(x + topRightOffset.X, y + topRightOffset.Y)
+							local bLTotalH = getFromXY(x + bottomLeftOffset.X, y + bottomLeftOffset.Y)
+							local bRTotalH = getFromXY(x + bottomRightOffset.X, y + bottomRightOffset.Y)
+							local _exp = multiplyVectorByPartSize(x + topLeftOffset.X, y + topLeftOffset.Y, tLTotalH)
+							local _offsetVector3 = offsetVector3
+							local topLeft = _exp + _offsetVector3 - minSizeVector3
+							local _exp_1 = multiplyVectorByPartSize(x + topRightOffset.X, y + topRightOffset.Y, tRTotalH)
+							local _offsetVector3_1 = offsetVector3
+							local topRight = _exp_1 + _offsetVector3_1 - minSizeVector3
+							local _exp_2 = multiplyVectorByPartSize(x + bottomLeftOffset.X, y + bottomLeftOffset.Y, bLTotalH)
+							local _offsetVector3_2 = offsetVector3
+							local bottomLeft = _exp_2 + _offsetVector3_2 - minSizeVector3
+							local _exp_3 = multiplyVectorByPartSize(x + bottomRightOffset.X, y + bottomRightOffset.Y, bRTotalH)
+							local _offsetVector3_3 = offsetVector3
+							local bottomRight = _exp_3 + _offsetVector3_3 - minSizeVector3
+							if not wedges[x] then
+								wedges[x] = {}
+							end
+							local cell = {
+								triangles = { self:materialiseTriangle(topLeft, topRight, bottomLeft), self:materialiseTriangle(topRight, bottomRight, bottomLeft) },
+								data = {
+									vertices = { topLeft, topRight, bottomLeft, bottomRight },
+									averageHeight = getFromXY(x, y) / maxSize,
+									averageHeightSized = getFromXY(x, y),
+								},
+							}
+							wedges[x][y] = cell
+							if not self.operateOnData then
+								continue
+							end
+							self.operateOnData(cell)
+						end
+					end
+				end
+			end
+			return wedges
 		end
 	end
 	return {
@@ -203,18 +468,103 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 
 end
 
+__modulesFolder["deadlineAdapter"] = function()
+	local script
+	script = newFakeInstance({"deadlineAdapter"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local deadlineAdapter = {}
+	do
+		local function newInstance(className, Parent)
+			return create_instance(className, Parent)
+		end
+		local function setProperty(property, key, value)
+			property[key] = value
+		end
+		local function findFirstChild(target, targetName, recursive)
+			return target:find_first_child(targetName, recursive)
+		end
+		local function destroy(target)
+			return target:destroy()
+		end
+	end
+	return {
+		deadlineAdapter = deadlineAdapter,
+	}
+
+end
+
+__modulesFolder["robloxAdapter"] = function()
+	local script
+	script = newFakeInstance({"robloxAdapter"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local robloxAdapter = {}
+	do
+		local function newInstance(className, Parent)
+			return Instance.new(className, Parent)
+		end
+		local function setProperty(property, key, value)
+			property[key] = value
+		end
+		local function findFirstChild(target, targetName, recursive)
+			return target:FindFirstChild(targetName, recursive)
+		end
+		local function destroy(target)
+			return target:Destroy()
+		end
+	end
+	return {
+		robloxAdapter = robloxAdapter,
+	}
+
+end
+
+__modulesFolder["selfProp"] = function()
+	local script
+	script = newFakeInstance({"selfProp"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function returnFunctionWithIdentity(func, _self)
+		local _func = func
+		assert(_func, "Function is missing")
+		local __self = _self
+		assert(__self ~= 0 and __self == __self and __self ~= "" and __self, "_self is missing")
+		return function(...)
+			local args = { ... }
+			return func(_self, unpack(args))
+		end
+	end
+	return {
+		returnFunctionWithIdentity = returnFunctionWithIdentity,
+	}
+
+end
+
 do
 	local script
 	script = newFakeInstance({"main"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
 	local game = nil
 	local __modulesFolder = nil
-	print(EgoMoose)
 
 end
