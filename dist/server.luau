@@ -641,7 +641,6 @@ do
 		operateOnThisTriangleInstance(thisData, thisData.triangles[2][1])
 		operateOnThisTriangleInstance(thisData, thisData.triangles[2][2])
 	end, EgoMoose, adapterToUse)
-	print(noiseData)
 	local triangles = createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
 
 end
