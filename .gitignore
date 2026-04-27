@@ -2,3 +2,5 @@
 /out
 /include
 *.tsbuildinfo
+.DS_Store
+/src/.DS_Store
