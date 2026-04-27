@@ -6,7 +6,7 @@ export interface EgoMooseFiles {
     getBarycentricHeight: (vertexA: Vector3, vertexB: Vector3, vertexC: Vector3, samplePoint: Vector2) => EgoMooseExportGetBarycentricHeight
 }
 export interface InstanceAdapter {
-    newInstance: (ClassName: keyof CheckableTypes, Parent: Instance | undefined) => Instance
+    newInstance: (ClassName: keyof CreatableInstances, Parent?: Instance | undefined) => AnyInstance
     setProperty: (property: AnyInstance, key: string, value: any) => void
     findFirstChild: (target: AnyInstance) => AnyInstance | undefined
 }

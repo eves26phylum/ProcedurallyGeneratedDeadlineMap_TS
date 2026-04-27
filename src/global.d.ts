@@ -144,7 +144,7 @@ interface WrappedInstance {
 
     // Check if descendant of workspace
     is_in_workspace(): boolean;
-    find_first_child(childName: string, recursive: boolean): WrappedInstance | undefined;
+    find_first_child(childName: string, recursive?: boolean): WrappedInstance | undefined;
     is_a(childName: string): boolean;
     is_descendant_of(instance: WrappedInstance): boolean;
 
