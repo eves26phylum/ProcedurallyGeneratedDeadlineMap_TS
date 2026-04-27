@@ -11,7 +11,8 @@ const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapt
 const workspace: AnyInstance = isDeadline ? get_map_root() : game.GetService("Workspace");
 
 const PART_SIZE = 100;
-const RESOLUTION = new Vector2(math.round(10000 / PART_SIZE), math.round(10000 / PART_SIZE));
+const MAP_SIZE = new Vector2(10000, 10000);
+const RESOLUTION = new Vector2(math.round(MAP_SIZE.X / PART_SIZE), math.round(MAP_SIZE.Y / PART_SIZE));
 const ROUGHNESS = 4;
 const PARAMS = {
     lacunarity: 4,
@@ -21,7 +22,7 @@ const PARAMS = {
     power: 3,
     scale: math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS
 };
-const POSITION_OFFSET = new Vector3(-(RESOLUTION.X / 2), 0, -(RESOLUTION.X / 2));
+const POSITION_OFFSET = new Vector3(-(MAP_SIZE.X / 2), 0, -(MAP_SIZE.Y / 2));
 const offset = new Vector2(math.random(1, 10e6), math.random(1, 10e6));
 const noiseData = new PerlinNoise().generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power);
 const wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges"); // getservice because we're exporting this to deadline and there's no fucking way am I going to import an entire rbxts node module pipeline
@@ -48,5 +49,4 @@ const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
     operateOnThisTriangleInstance(thisData, thisData.triangles[1][0]);
     operateOnThisTriangleInstance(thisData, thisData.triangles[1][1]);
 }, EgoMoose, adapterToUse);
-print(noiseData);
 const triangles = createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);

@@ -597,7 +597,8 @@ do
 	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
 	local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
 	local PART_SIZE = 100
-	local RESOLUTION = Vector2.new(math.round(10000 / PART_SIZE), math.round(10000 / PART_SIZE))
+	local MAP_SIZE = Vector2.new(10000, 10000)
+	local RESOLUTION = Vector2.new(math.round(MAP_SIZE.X / PART_SIZE), math.round(MAP_SIZE.Y / PART_SIZE))
 	local ROUGHNESS = 4
 	local PARAMS = {
 		lacunarity = 4,
@@ -607,7 +608,7 @@ do
 		power = 3,
 		scale = math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS,
 	}
-	local POSITION_OFFSET = Vector3.new(-(RESOLUTION.X / 2), 0, -(RESOLUTION.X / 2))
+	local POSITION_OFFSET = Vector3.new(-(MAP_SIZE.X / 2), 0, -(MAP_SIZE.Y / 2))
 	local offset = Vector2.new(math.random(1, 10e6), math.random(1, 10e6))
 	local noiseData = PerlinNoise.new():generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power)
 	local wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges")
