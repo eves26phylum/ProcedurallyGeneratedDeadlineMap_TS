@@ -20,12 +20,12 @@ export class createTerrain {
     adapter: InstanceAdapter;
 
     constructor(
-        materialiseTriangle: (a: Vector3, b: Vector3, c: Vector3) => [AnyInstance, AnyInstance],
         operateOnData: ((cell: WedgeCell) => void) | undefined,
         EgoMoose: EgoMooseFiles,
-        adapter: InstanceAdapter
+        adapter: InstanceAdapter,
+        materialiseTriangle?: (a: Vector3, b: Vector3, c: Vector3) => [AnyInstance, AnyInstance]
     ) {
-        this.materialiseTriangle = materialiseTriangle;
+        this.materialiseTriangle = materialiseTriangle || this.materialiseTriangle;
         this.adapter = adapter;
         this.operateOnData = operateOnData;
         this.EgoMoose = EgoMoose;
