@@ -142,6 +142,12 @@ interface WrappedInstance {
     apply_angular_impulse_at_position(angular: Vector3, position: Vector3): void;
     set_network_owner(owner: string | null): void;
 
+    // Check if descendant of workspace
+    is_in_workspace(): boolean;
+    find_first_child(childName: string, recursive: boolean): WrappedInstance | undefined;
+    is_a(childName: string): boolean;
+    is_descendant_of(instance: WrappedInstance): boolean;
+
     /** Allows setting arbitrary Roblox instance properties by name. */
     [key: string]: unknown;
 }
