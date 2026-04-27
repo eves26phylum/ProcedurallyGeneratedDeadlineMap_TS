@@ -1,3 +1,4 @@
+-- bundled with deadline-ts (no you cannot use rbxts modules right now)
 function assert(condition, messageIfFalse)
     if not condition then error(messageIfFalse or _VERSION.." assertion error") end
 end
@@ -606,7 +607,7 @@ do
 		power = 3,
 		scale = math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS,
 	}
-	local POSITION_OFFSET = Vector3.new(0, 0, 0)
+	local POSITION_OFFSET = Vector3.new(-(RESOLUTION.X / 2), 0, -(RESOLUTION.X / 2))
 	local offset = Vector2.new(math.random(1, 10e6), math.random(1, 10e6))
 	local noiseData = PerlinNoise.new():generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power)
 	local wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges")

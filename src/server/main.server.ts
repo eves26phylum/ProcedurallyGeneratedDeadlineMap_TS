@@ -21,7 +21,7 @@ const PARAMS = {
     power: 3,
     scale: math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS
 };
-const POSITION_OFFSET = new Vector3(0, 0, 0);
+const POSITION_OFFSET = new Vector3(-(RESOLUTION.X / 2), 0, -(RESOLUTION.X / 2));
 const offset = new Vector2(math.random(1, 10e6), math.random(1, 10e6));
 const noiseData = new PerlinNoise().generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power);
 const wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges"); // getservice because we're exporting this to deadline and there's no fucking way am I going to import an entire rbxts node module pipeline

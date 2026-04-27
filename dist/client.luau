@@ -1,3 +1,4 @@
+-- bundled with deadline-ts (no you cannot use rbxts modules right now)
 function assert(condition, messageIfFalse)
     if not condition then error(messageIfFalse or _VERSION.." assertion error") end
 end
