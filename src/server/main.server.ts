@@ -6,9 +6,9 @@ import { PerlinNoise } from "shared/PerlinNoise";
 import { AnyInstance, InstanceAdapter } from "shared/definition";
 
 // !deadline-ts.customFinishSector_FinishModulesEnd
-const isDeadline = game !== undefined;
-const adapterToUse: InstanceAdapter = isDeadline ? robloxAdapter : deadlineAdapter;
-const workspace: AnyInstance = isDeadline ? game.GetService("Workspace") : get_map_root();
+const isDeadline = get_map_root !== undefined;
+const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
+const workspace: AnyInstance = isDeadline ? get_map_root() : game.GetService("Workspace");
 
 const PART_SIZE = 100;
 const RESOLUTION = new Vector2(math.round(10000 / PART_SIZE), math.round(10000 / PART_SIZE));
