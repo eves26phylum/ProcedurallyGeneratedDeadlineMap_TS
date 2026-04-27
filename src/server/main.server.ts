@@ -4,6 +4,8 @@ import { robloxAdapter } from "shared/robloxAdapter";
 import { deadlineAdapter } from "shared/deadlineAdapter";
 import { PerlinNoise } from "shared/PerlinNoise";
 import { AnyInstance, InstanceAdapter } from "shared/definition";
+import { biomeBox } from "shared/biomeAndStructureRegistrySystem";
+import { assign } from "shared/Util";
 
 // !deadline-ts.customFinishSector_FinishModulesEnd
 const isDeadline = get_map_root !== undefined;
@@ -30,23 +32,50 @@ if (wedgesFolderToDestroy) { adapterToUse.destroy(wedgesFolderToDestroy); }
 const wedgesFolder = adapterToUse.newInstance("Folder");
 adapterToUse.setProperty(wedgesFolder, "Name", "Wedges");
 adapterToUse.setProperty(wedgesFolder, "Parent", workspace);
-function getColourAndMaterialFromHeight(height: number): [Enum.Material, Color3] {
-    if (height < 0.1) return [Enum.Material.Grass, Color3.fromRGB(105, 209, 105)];
-    const secondaryAngs = math.random(-20, 10);
-    return [Enum.Material.Sand, Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs)]
-}
+const standardBox = new biomeBox();
 const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
-    const _self = thisData._self;
-    const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance) => {
-        const height = data.data.averageHeight;
-        const [material, colour] = getColourAndMaterialFromHeight(height);
-        _self.adapter.setProperty(triangle, "Parent", wedgesFolder);
-        _self.adapter.setProperty(triangle, "Color", colour);
-        _self.adapter.setProperty(triangle, "Material", material);
-    }
-    operateOnThisTriangleInstance(thisData, thisData.triangles[0][0]);
-    operateOnThisTriangleInstance(thisData, thisData.triangles[0][1]);
-    operateOnThisTriangleInstance(thisData, thisData.triangles[1][0]);
-    operateOnThisTriangleInstance(thisData, thisData.triangles[1][1]);
+    standardBox.executeAllModifiers(thisData._self, thisData);
 }, EgoMoose, adapterToUse);
 const triangles = createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);
+
+interface NuristanStandardBiomeConfig {
+    desert: () => Partial<InstanceProperties<WedgePart>>
+    grass: () => Partial<InstanceProperties<WedgePart>>
+}
+class NuristanStandardBiome {
+    priority: number
+    config: NuristanStandardBiomeConfig
+    constructor(config: NuristanStandardBiomeConfig) {
+        this.priority = 100;
+        this.config = config;
+    }
+    private getColourAndMaterialFromHeight(height: number): Partial<InstanceProperties<WedgePart>> {
+        if (height < 0.1) return this.config.grass();
+        return this.config.desert();
+    }
+    generate(yourSelf: createTerrain, yourCell: WedgeCell) {
+        const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance) => {
+            const height = data.data.averageHeight;
+            const propMap: Partial<InstanceProperties<WedgePart>> = this.getColourAndMaterialFromHeight(height);
+            yourSelf.adapter.setProperty(triangle, "Parent", wedgesFolder);
+            assign(triangle, propMap, (a, b, c) => {yourSelf.adapter.setProperty(a, b, c);});
+        }
+        operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][0]);
+        operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][1]);
+        operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][0]);
+        operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1]);
+    }
+}
+standardBox.registerModifier(new NuristanStandardBiome(
+    {
+        grass: () => {
+            const secondaryAngs = math.random(-20, 10);
+            return {
+                 Material: Enum.Material.Grass, Color: Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs)
+            }
+        },
+        desert: () => { 
+            return {Material: Enum.Material.Sand, Color: Color3.fromRGB(237, 201, 175)}
+        }
+    }
+))

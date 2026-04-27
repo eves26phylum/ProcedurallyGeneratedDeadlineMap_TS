@@ -11,6 +11,8 @@ export interface WedgeCell {
         vertices: [Vector3, Vector3, Vector3, Vector3];
         averageHeight: number;
         averageHeightSized: number;
+        x: number;
+        y: number;
     };
     _self: createTerrain
 }
@@ -99,14 +101,20 @@ export class createTerrain {
                         vertices: [topLeft, topRight, bottomLeft, bottomRight],
                         averageHeight: getFromXY(x, y) / maxSize,
                         averageHeightSized: getFromXY(x, y),
+                        x: x,
+                        y: y
                     },
                     _self: this
                 };
 
                 wedges[x][y] = cell;
 
+            }
+        }
+        for (let x = 0; x < resolution.X; x++) {
+            for (let y = 0; y < resolution.Y; y++) {
                 if (!this.operateOnData) continue;
-                this.operateOnData(cell);
+                this.operateOnData(wedges[x][y]);
             }
         }
 

@@ -296,6 +296,60 @@ __modulesFolder["Util"] = function()
 
 end
 
+__modulesFolder["biomeAndStructureRegistrySystem"] = function()
+	local script
+	script = newFakeInstance({"biomeAndStructureRegistrySystem"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local biomeBox
+	do
+		biomeBox = setmetatable({}, {
+			__tostring = function()
+				return "biomeBox"
+			end,
+		})
+		biomeBox.__index = biomeBox
+		function biomeBox.new(...)
+			local self = setmetatable({}, biomeBox)
+			return self:constructor(...) or self
+		end
+		function biomeBox:constructor()
+			self.modifiers = {}
+		end
+		function biomeBox:executeAllModifiers(yourSelf, yourCell)
+			local _exp = self.modifiers
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(modifier, index)
+				modifier:generate(yourSelf, yourCell)
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+		end
+		function biomeBox:registerModifier(yourObject)
+			local _modifiers = self.modifiers
+			local _yourObject = yourObject
+			table.insert(_modifiers, _yourObject)
+			local _exp = self.modifiers
+			table.sort(_exp, function(a, b)
+				return a.priority > b.priority
+			end)
+			self.modifiers = _exp
+		end
+	end
+	return {
+		biomeBox = biomeBox,
+	}
+
+end
+
 __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 	local script
 	script = newFakeInstance({"createTerrainFromVerticesUsingAdapter"})
@@ -443,14 +497,44 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 									vertices = { topLeft, topRight, bottomLeft, bottomRight },
 									averageHeight = getFromXY(x, y) / maxSize,
 									averageHeightSized = getFromXY(x, y),
+									x = x,
+									y = y,
 								},
 								_self = self,
 							}
 							wedges[x][y] = cell
+						end
+					end
+				end
+			end
+			do
+				local x = 0
+				local _shouldIncrement = false
+				while true do
+					if _shouldIncrement then
+						x += 1
+					else
+						_shouldIncrement = true
+					end
+					if not (x < resolution.X) then
+						break
+					end
+					do
+						local y = 0
+						local _shouldIncrement_1 = false
+						while true do
+							if _shouldIncrement_1 then
+								y += 1
+							else
+								_shouldIncrement_1 = true
+							end
+							if not (y < resolution.Y) then
+								break
+							end
 							if not self.operateOnData then
 								continue
 							end
-							self.operateOnData(cell)
+							self.operateOnData(wedges[x][y])
 						end
 					end
 				end
@@ -565,7 +649,7 @@ __modulesFolder["selfProp"] = function()
 
 end
 
-do
+task.defer(function()
 	local script
 	script = newFakeInstance({"main"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -575,6 +659,8 @@ do
 	local robloxAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "robloxAdapter").robloxAdapter
 	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
 	local PerlinNoise = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "PerlinNoise").PerlinNoise
+	local biomeBox = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeAndStructureRegistrySystem").biomeBox
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -607,29 +693,62 @@ do
 	local wedgesFolder = adapterToUse.newInstance("Folder")
 	adapterToUse.setProperty(wedgesFolder, "Name", "Wedges")
 	adapterToUse.setProperty(wedgesFolder, "Parent", workspace)
-	local function getColourAndMaterialFromHeight(height)
-		if height < 0.1 then
-			return { Enum.Material.Grass, Color3.fromRGB(105, 209, 105) }
-		end
-		local secondaryAngs = math.random(-20, 10)
-		return { Enum.Material.Sand, Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs) }
-	end
+	local standardBox = biomeBox.new()
 	local createTerrainDefault = createTerrain.new(function(thisData)
-		local _self = thisData._self
-		local operateOnThisTriangleInstance = function(data, triangle)
-			local height = data.data.averageHeight
-			local _binding = getColourAndMaterialFromHeight(height)
-			local material = _binding[1]
-			local colour = _binding[2]
-			_self.adapter.setProperty(triangle, "Parent", wedgesFolder)
-			_self.adapter.setProperty(triangle, "Color", colour)
-			_self.adapter.setProperty(triangle, "Material", material)
-		end
-		operateOnThisTriangleInstance(thisData, thisData.triangles[1][1])
-		operateOnThisTriangleInstance(thisData, thisData.triangles[1][2])
-		operateOnThisTriangleInstance(thisData, thisData.triangles[2][1])
-		operateOnThisTriangleInstance(thisData, thisData.triangles[2][2])
+		standardBox:executeAllModifiers(thisData._self, thisData)
 	end, EgoMoose, adapterToUse)
 	local triangles = createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
+	local NuristanStandardBiome
+	do
+		NuristanStandardBiome = setmetatable({}, {
+			__tostring = function()
+				return "NuristanStandardBiome"
+			end,
+		})
+		NuristanStandardBiome.__index = NuristanStandardBiome
+		function NuristanStandardBiome.new(...)
+			local self = setmetatable({}, NuristanStandardBiome)
+			return self:constructor(...) or self
+		end
+		function NuristanStandardBiome:constructor(config)
+			self.priority = 100
+			self.config = config
+		end
+		function NuristanStandardBiome:getColourAndMaterialFromHeight(height)
+			if height < 0.1 then
+				return self.config.grass()
+			end
+			return self.config.desert()
+		end
+		function NuristanStandardBiome:generate(yourSelf, yourCell)
+			local operateOnThisTriangleInstance = function(data, triangle)
+				local height = data.data.averageHeight
+				local propMap = self:getColourAndMaterialFromHeight(height)
+				yourSelf.adapter.setProperty(triangle, "Parent", wedgesFolder)
+				assign(triangle, propMap, function(a, b, c)
+					yourSelf.adapter.setProperty(a, b, c)
+				end)
+			end
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1])
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][2])
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][1])
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][2])
+		end
+	end
+	standardBox:registerModifier(NuristanStandardBiome.new({
+		grass = function()
+			local secondaryAngs = math.random(-20, 10)
+			return {
+				Material = Enum.Material.Grass,
+				Color = Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs),
+			}
+		end,
+		desert = function()
+			return {
+				Material = Enum.Material.Sand,
+				Color = Color3.fromRGB(237, 201, 175),
+			}
+		end,
+	}))
 
-end
+end)

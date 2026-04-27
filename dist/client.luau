@@ -296,6 +296,60 @@ __modulesFolder["Util"] = function()
 
 end
 
+__modulesFolder["biomeAndStructureRegistrySystem"] = function()
+	local script
+	script = newFakeInstance({"biomeAndStructureRegistrySystem"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local biomeBox
+	do
+		biomeBox = setmetatable({}, {
+			__tostring = function()
+				return "biomeBox"
+			end,
+		})
+		biomeBox.__index = biomeBox
+		function biomeBox.new(...)
+			local self = setmetatable({}, biomeBox)
+			return self:constructor(...) or self
+		end
+		function biomeBox:constructor()
+			self.modifiers = {}
+		end
+		function biomeBox:executeAllModifiers(yourSelf, yourCell)
+			local _exp = self.modifiers
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(modifier, index)
+				modifier:generate(yourSelf, yourCell)
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+		end
+		function biomeBox:registerModifier(yourObject)
+			local _modifiers = self.modifiers
+			local _yourObject = yourObject
+			table.insert(_modifiers, _yourObject)
+			local _exp = self.modifiers
+			table.sort(_exp, function(a, b)
+				return a.priority > b.priority
+			end)
+			self.modifiers = _exp
+		end
+	end
+	return {
+		biomeBox = biomeBox,
+	}
+
+end
+
 __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 	local script
 	script = newFakeInstance({"createTerrainFromVerticesUsingAdapter"})
@@ -443,14 +497,44 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 									vertices = { topLeft, topRight, bottomLeft, bottomRight },
 									averageHeight = getFromXY(x, y) / maxSize,
 									averageHeightSized = getFromXY(x, y),
+									x = x,
+									y = y,
 								},
 								_self = self,
 							}
 							wedges[x][y] = cell
+						end
+					end
+				end
+			end
+			do
+				local x = 0
+				local _shouldIncrement = false
+				while true do
+					if _shouldIncrement then
+						x += 1
+					else
+						_shouldIncrement = true
+					end
+					if not (x < resolution.X) then
+						break
+					end
+					do
+						local y = 0
+						local _shouldIncrement_1 = false
+						while true do
+							if _shouldIncrement_1 then
+								y += 1
+							else
+								_shouldIncrement_1 = true
+							end
+							if not (y < resolution.Y) then
+								break
+							end
 							if not self.operateOnData then
 								continue
 							end
-							self.operateOnData(cell)
+							self.operateOnData(wedges[x][y])
 						end
 					end
 				end
