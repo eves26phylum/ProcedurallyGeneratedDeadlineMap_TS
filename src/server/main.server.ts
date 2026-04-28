@@ -82,9 +82,12 @@ class NuristanBuildings extends Biome {
         const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance<WedgePart>) => {
             // const height = data.data.averageHeight;
             const translatedOrientationForStructurePlacement = translateTerrain.Translate(triangle.Orientation);
+            const degreesTiltedOfSteepness = translateTerrain.GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(translatedOrientationForStructurePlacement.X, translatedOrientationForStructurePlacement.Y, translatedOrientationForStructurePlacement.Z));
+            const isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness;
+            if (!isALivableDegree) return;
+            triangle.Name = "I'm a building!"; // for debug
+            // Later: Influence from surrounding triangles to see if they have a nuristan building set on them, and not this triangle already having some sort of other structure
         }
-        const a = yourCell.triangles[0][1];
-        
         operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][0]);
         operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][1]);
         operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][0]);

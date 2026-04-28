@@ -296,6 +296,72 @@ __modulesFolder["Util"] = function()
 
 end
 
+__modulesFolder["biome"] = function()
+	local script
+	script = newFakeInstance({"biome"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local biomeExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeExtension").biomeExtension
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local Biome
+	do
+		Biome = setmetatable({}, {
+			__tostring = function()
+				return "Biome"
+			end,
+		})
+		Biome.__index = Biome
+		function Biome.new(...)
+			local self = setmetatable({}, Biome)
+			return self:constructor(...) or self
+		end
+		function Biome:constructor()
+			self.priority = -1
+			self.name = "?"
+		end
+	end
+	local function useBiomeData(yourCell)
+		local data = biomeExtension:get(yourCell)
+		if not data then
+			return nil
+		end
+		return data
+	end
+	local defaultValue = {
+		whoClaimedThis = {},
+		claimed = 0,
+	}
+	local function structureClaimLand(thisBiome, yourCell)
+		local data = biomeExtension:get(yourCell)
+		if not data then
+			return nil
+		end
+		data.claimed += 1
+		local _whoClaimedThis = data.whoClaimedThis
+		local _name = thisBiome.name
+		table.insert(_whoClaimedThis, _name)
+	end
+	-- If a cell might not have biome data yet but you want to guarantee it does by the time this function exits, getOrInit handles that without a separate has() check followed by a set()
+	local function ensureBiomeData(yourCell)
+		return biomeExtension:getOrInit(yourCell, function()
+			return defaultValue
+		end)
+	end
+	return {
+		useBiomeData = useBiomeData,
+		structureClaimLand = structureClaimLand,
+		ensureBiomeData = ensureBiomeData,
+		Biome = Biome,
+	}
+
+end
+
 __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 	local script
 	script = newFakeInstance({"biomeAndStructureRegistrySystem"})
@@ -348,6 +414,86 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 
 end
 
+__modulesFolder["biomeExtension"] = function()
+	local script
+	script = newFakeInstance({"biomeExtension"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local createCellExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "cellExtension").createCellExtension
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local biomeExtension = createCellExtension()
+	local structureExtension = createCellExtension()
+	-- idk structure data goes here
+	-- omg typescript is so new to me wtf is a weak map ohh okay i understand oh my gosh im stuck in a pizza traffic
+	-- export const structureExtension = createCellExtension<WedgeCell, StructureData>();
+	return {
+		biomeExtension = biomeExtension,
+		structureExtension = structureExtension,
+	}
+
+end
+
+__modulesFolder["cellExtension"] = function()
+	local script
+	script = newFakeInstance({"cellExtension"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function createCellExtension()
+		local store = setmetatable({}, {
+			__mode = "k",
+		})
+		return {
+			get = function(self, cell)
+				local _cell = cell
+				return store[_cell]
+			end,
+			set = function(self, cell, data)
+				local _cell = cell
+				local _data = data
+				store[_cell] = _data
+			end,
+			has = function(self, cell)
+				local _cell = cell
+				return store[_cell] ~= nil
+			end,
+			delete = function(self, cell)
+				local _cell = cell
+				-- ▼ Map.delete ▼
+				local _valueExisted = store[_cell] ~= nil
+				store[_cell] = nil
+				-- ▲ Map.delete ▲
+				return _valueExisted
+			end,
+			getOrInit = function(self, cell, init)
+				local _cell = cell
+				if not (store[_cell] ~= nil) then
+					local _cell_1 = cell
+					local _arg1 = init()
+					store[_cell_1] = _arg1
+				end
+				local _cell_1 = cell
+				return store[_cell_1]
+			end,
+		}
+	end
+	return {
+		createCellExtension = createCellExtension,
+	}
+
+end
+
 __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 	local script
 	script = newFakeInstance({"createTerrainFromVerticesUsingAdapter"})
@@ -374,11 +520,12 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 			local self = setmetatable({}, createTerrain)
 			return self:constructor(...) or self
 		end
-		function createTerrain:constructor(operateOnData, EgoMoose, adapter, materialiseTriangle)
+		function createTerrain:constructor(operateOnData, EgoMoose, adapter, parent, materialiseTriangle)
 			self.materialiseTriangle = materialiseTriangle or self.materialiseTriangle
 			self.adapter = adapter
 			self.operateOnData = operateOnData
 			self.EgoMoose = EgoMoose
+			self.parent = parent
 		end
 		function createTerrain:materialiseTriangle(a, b, c)
 			local _binding = self.EgoMoose.draw3dTriangle(a, b, c)
@@ -388,6 +535,8 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 			local WedgeB = self.adapter.newInstance("WedgePart")
 			self.adapter.setProperty(WedgeA, "Anchored", true)
 			self.adapter.setProperty(WedgeB, "Anchored", true)
+			self.adapter.setProperty(WedgeA, "Parent", self.parent)
+			self.adapter.setProperty(WedgeB, "Parent", self.parent)
 			assign(WedgeA, AData, function(item, key, value)
 				self.adapter.setProperty(item, key, value)
 			end)
@@ -583,6 +732,27 @@ __modulesFolder["deadlineAdapter"] = function()
 
 end
 
+__modulesFolder["humanConfig"] = function()
+	local script
+	script = newFakeInstance({"humanConfig"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local default = {
+		maxLivableSteepness = 15,
+		grassDeepness = 0.1,
+	}
+	return {
+		default = default,
+	}
+
+end
+
 __modulesFolder["robloxAdapter"] = function()
 	local script
 	script = newFakeInstance({"robloxAdapter"})
@@ -643,6 +813,69 @@ __modulesFolder["selfProp"] = function()
 	end
 	return {
 		returnFunctionWithIdentity = returnFunctionWithIdentity,
+	}
+
+end
+
+__modulesFolder["translateTerrainForStructureBonding"] = function()
+	local script
+	script = newFakeInstance({"translateTerrainForStructureBonding"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	-- local translateTerrainOrientationForStructureBonding = {
+	--     orientationSubtraction = Vector3.new(0, 0, -90)
+	-- }
+	-- -- the maximum degree a person could live in is 15°
+	-- --[[
+	-- NOTES:
+	-- -- Priority order for each structure
+	-- (trees are default structure that generate at last priority)
+	-- Buildings are first, and generate on any incline less than 15°
+	-- So after the building does not generate on that triangle (it can occupy multiple triangles if needed), the tree generates
+	-- A position map of already generated structures on what triangle also exists
+	-- ]]
+	-- function translateTerrainOrientationForStructureBonding:Translate(targetTriangle)
+	--     local orientation = targetTriangle.Orientation
+	-- 	return Vector3.new(orientation.X, orientation.Y, orientation.Z) + self.orientationSubtraction
+	-- end
+	-- function translateTerrainOrientationForStructureBonding:GetSteepnessInDegrees(targetCFrame)
+	--     local angle = math.acos(targetCFrame.UpVector:Dot(Vector3.new(0, 1, 0)))
+	--     return math.deg(angle)
+	-- end
+	-- return translateTerrainOrientationForStructureBonding
+	local translateTerrainOrientationForStructureBonding
+	do
+		translateTerrainOrientationForStructureBonding = setmetatable({}, {
+			__tostring = function()
+				return "translateTerrainOrientationForStructureBonding"
+			end,
+		})
+		translateTerrainOrientationForStructureBonding.__index = translateTerrainOrientationForStructureBonding
+		function translateTerrainOrientationForStructureBonding.new(...)
+			local self = setmetatable({}, translateTerrainOrientationForStructureBonding)
+			return self:constructor(...) or self
+		end
+		function translateTerrainOrientationForStructureBonding:constructor(config)
+			self.config = config
+		end
+		function translateTerrainOrientationForStructureBonding:Translate(targetTriangleOrientation)
+			local _vector3 = Vector3.new(targetTriangleOrientation.X, targetTriangleOrientation.Y, targetTriangleOrientation.Z)
+			local _orientationSubtraction = self.config.orientationSubtraction
+			return _vector3 + _orientationSubtraction
+		end
+		function translateTerrainOrientationForStructureBonding:GetSteepnessInDegrees(targetCFrame)
+			local angle = math.acos(targetCFrame.UpVector:Dot(Vector3.new(0, 1, 0)))
+			return math.deg(angle)
+		end
+	end
+	return {
+		translateTerrainOrientationForStructureBonding = translateTerrainOrientationForStructureBonding,
 	}
 
 end
