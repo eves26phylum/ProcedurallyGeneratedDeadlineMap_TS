@@ -82,9 +82,13 @@ class NuristanBuildings extends Biome {
         const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance<WedgePart>) => {
             // const height = data.data.averageHeight;
             const translatedOrientationForStructurePlacement = translateTerrain.Translate(triangle.Orientation);
-            const degreesTiltedOfSteepness = translateTerrain.GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(translatedOrientationForStructurePlacement.X, translatedOrientationForStructurePlacement.Y, translatedOrientationForStructurePlacement.Z));
+            // note: fromEulerAngles methods all use radian input. .Orientation is a degree angle. So convert.
+            const degreesTiltedOfSteepness = translateTerrain.GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z)));
             const isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness;
             if (!isALivableDegree) return;
+            const part = data._self.adapter.newInstance("Part", wedgesFolder)
+            part.CFrame = triangle.CFrame;
+            part.Orientation = translatedOrientationForStructurePlacement;
             triangle.Name = "I'm a building!"; // for debug
             // Later: Influence from surrounding triangles to see if they have a nuristan building set on them, and not this triangle already having some sort of other structure
         }

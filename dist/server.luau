@@ -995,11 +995,15 @@ task.defer(function()
 			local operateOnThisTriangleInstance = function(data, triangle)
 				-- const height = data.data.averageHeight;
 				local translatedOrientationForStructurePlacement = translateTerrain:Translate(triangle.Orientation)
-				local degreesTiltedOfSteepness = translateTerrain:GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(translatedOrientationForStructurePlacement.X, translatedOrientationForStructurePlacement.Y, translatedOrientationForStructurePlacement.Z))
+				-- note: fromEulerAngles methods all use radian input. .Orientation is a degree angle. So convert.
+				local degreesTiltedOfSteepness = translateTerrain:GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z)))
 				local isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness
 				if not isALivableDegree then
 					return nil
 				end
+				local part = data._self.adapter.newInstance("Part", wedgesFolder)
+				part.CFrame = triangle.CFrame
+				part.Orientation = translatedOrientationForStructurePlacement
 				triangle.Name = "I'm a building!"
 				-- Later: Influence from surrounding triangles to see if they have a nuristan building set on them, and not this triangle already having some sort of other structure
 			end
