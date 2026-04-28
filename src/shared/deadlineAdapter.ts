@@ -1,6 +1,5 @@
 export namespace deadlineAdapter {
-    export function newInstance<T extends keyof CreatableInstances>(className: T, Parent?: WrappedInstance): WrappedInstance<CreatableInstances[T]> {
-        
+    export function newInstance<T extends keyof CreatableInstances>(className: T, Parent?: WrappedInstance) {
         return create_instance<T>(className, Parent);
     }
     export function setProperty(property: Record<any, any>, key: any, value: any) {

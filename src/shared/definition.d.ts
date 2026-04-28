@@ -1,4 +1,4 @@
-export type AnyInstance<T extends Instance = Instance> = WrappedInstance<T> | Instance;
+export type AnyInstance<T extends Instance = Instance> = WrappedInstance<T> | T;
 export type EgoMooseExportDraw3DTriangle = [{Size: Vector3, CFrame: CFrame}, {Size: Vector3, CFrame: CFrame}];
 export type EgoMooseExportGetBarycentricHeight =  [number | undefined, number, number, number];
 export interface EgoMooseFiles {

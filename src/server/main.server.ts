@@ -83,6 +83,8 @@ class NuristanBuildings extends Biome {
             // const height = data.data.averageHeight;
             const translatedOrientationForStructurePlacement = translateTerrain.Translate(triangle.Orientation);
         }
+        const a = yourCell.triangles[0][1];
+        
         operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][0]);
         operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][1]);
         operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][0]);

@@ -1,5 +1,5 @@
 export namespace robloxAdapter {
-    export function newInstance(className: keyof CreatableInstances, Parent?: Instance) {
+    export function newInstance<T extends keyof CreatableInstances>(className: T, Parent?: Instance) {
         return new Instance(className, Parent);
     }
     export function setProperty(property: Record<any, any>, key: any, value: any) {
