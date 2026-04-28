@@ -1,4 +1,4 @@
-export type AnyInstance = WrappedInstance | Instance;
+export type AnyInstance<T extends Instance = Instance> = WrappedInstance<T> | Instance;
 export type EgoMooseExportDraw3DTriangle = [{Size: Vector3, CFrame: CFrame}, {Size: Vector3, CFrame: CFrame}];
 export type EgoMooseExportGetBarycentricHeight =  [number | undefined, number, number, number];
 export interface EgoMooseFiles {
@@ -6,7 +6,7 @@ export interface EgoMooseFiles {
     getBarycentricHeight: (vertexA: Vector3, vertexB: Vector3, vertexC: Vector3, samplePoint: Vector2) => EgoMooseExportGetBarycentricHeight
 }
 export interface InstanceAdapter<T extends AnyInstance = AnyInstance> {
-    newInstance(this: void, ClassName: keyof CreatableInstances, Parent?: T): T;
+    newInstance<C extends keyof CreatableInstances>(this: void, ClassName: C, Parent?: T): AnyInstance<CreatableInstances[C]>;
     setProperty(this: void, property: T, key: string, value: unknown): void;
     findFirstChild(this: void, target: T, name: string, recursive?: boolean): T | undefined;
     destroy(this: void, instance: T): void;

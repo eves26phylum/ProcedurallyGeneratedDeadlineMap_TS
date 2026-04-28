@@ -6,7 +6,7 @@ import { returnFunctionWithIdentity } from "./selfProp";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
 export interface WedgeCell {
-    triangles: [[AnyInstance, AnyInstance], [AnyInstance, AnyInstance]];
+    triangles: [[AnyInstance<WedgePart>, AnyInstance<WedgePart>], [AnyInstance<WedgePart>, AnyInstance<WedgePart>]];
     data: {
         vertices: [Vector3, Vector3, Vector3, Vector3];
         averageHeight: number;
@@ -21,27 +21,32 @@ export class createTerrain {
     operateOnData?: (cell: WedgeCell) => void;
     EgoMoose: EgoMooseFiles;
     adapter: InstanceAdapter;
+    parent: AnyInstance;
 
     constructor(
         operateOnData: ((cell: WedgeCell) => void) | undefined,
         EgoMoose: EgoMooseFiles,
         adapter: InstanceAdapter,
-        materialiseTriangle?: (a: Vector3, b: Vector3, c: Vector3) => [AnyInstance, AnyInstance]
+        parent: AnyInstance,
+        materialiseTriangle?: (a: Vector3, b: Vector3, c: Vector3) => [AnyInstance<WedgePart>, AnyInstance<WedgePart>],
     ) {
         this.materialiseTriangle = materialiseTriangle || this.materialiseTriangle;
         this.adapter = adapter;
         this.operateOnData = operateOnData;
         this.EgoMoose = EgoMoose;
+        this.parent = parent;
     }
 
-    materialiseTriangle(a: Vector3, b: Vector3, c: Vector3): [AnyInstance, AnyInstance] {
+    materialiseTriangle(a: Vector3, b: Vector3, c: Vector3): [AnyInstance<WedgePart>, AnyInstance<WedgePart>] {
         const [AData, BData] = this.EgoMoose.draw3dTriangle(a, b, c);
         const WedgeA = this.adapter.newInstance("WedgePart");
-        const WedgeB = this.adapter.newInstance("WedgePart");
+        const WedgeB = this.adapter.newInstance("WedgePart"); // should evaluate to AnyInstance<WedgePart>, but evaluates to AnyInstance<Instance>
         this.adapter.setProperty(WedgeA, "Anchored", true);
         this.adapter.setProperty(WedgeB, "Anchored", true);
-        assign<AnyInstance>(WedgeA, AData, (item, key, value) => {this.adapter.setProperty(item, key, value);});
-        assign<AnyInstance>(WedgeB, BData, (item, key, value) => {this.adapter.setProperty(item, key, value);});
+        this.adapter.setProperty(WedgeA, "Parent", this.parent);
+        this.adapter.setProperty(WedgeB, "Parent", this.parent);
+        assign<AnyInstance<WedgePart>>(WedgeA, AData, (item, key, value) => {this.adapter.setProperty(item, key, value);});
+        assign<AnyInstance<WedgePart>>(WedgeB, BData, (item, key, value) => {this.adapter.setProperty(item, key, value);});
         return [WedgeA, WedgeB];
     }
 
@@ -94,8 +99,8 @@ export class createTerrain {
 
                 const cell: WedgeCell = {
                     triangles: [
-                        this.materialiseTriangle(topLeft, topRight, bottomLeft) as [AnyInstance, AnyInstance],
-                        this.materialiseTriangle(topRight, bottomRight, bottomLeft) as [AnyInstance, AnyInstance],
+                        this.materialiseTriangle(topLeft, topRight, bottomLeft),
+                        this.materialiseTriangle(topRight, bottomRight, bottomLeft),
                     ],
                     data: {
                         vertices: [topLeft, topRight, bottomLeft, bottomRight],

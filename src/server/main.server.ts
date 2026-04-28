@@ -6,6 +6,9 @@ import { PerlinNoise } from "shared/PerlinNoise";
 import { AnyInstance, InstanceAdapter } from "shared/definition";
 import { biomeBox } from "shared/biomeAndStructureRegistrySystem";
 import { assign } from "shared/Util";
+import { Biome } from "shared/biome";
+import humanConfig from "shared/humanConfig";
+import { translateTerrainOrientationForStructureBonding } from "shared/translateTerrainForStructureBonding";
 
 // !deadline-ts.customFinishSector_FinishModulesEnd
 const isDeadline = get_map_root !== undefined;
@@ -38,15 +41,17 @@ interface NuristanStandardBiomeConfig {
     desert: () => Partial<InstanceProperties<WedgePart>>
     grass: () => Partial<InstanceProperties<WedgePart>>
 }
-class NuristanStandardBiome {
-    priority: number
+class NuristanStandardBiome extends Biome {
     config: NuristanStandardBiomeConfig
     constructor(config: NuristanStandardBiomeConfig) {
+        super();
         this.priority = 100;
         this.config = config;
+        this.name = "nsb";
     }
+    
     private getColourAndMaterialFromHeight(height: number): Partial<InstanceProperties<WedgePart>> {
-        if (height < 0.1) return this.config.grass();
+        if (height < humanConfig.grassDeepness) return this.config.grass();
         return this.config.desert();
     }
     generate(yourSelf: createTerrain, yourCell: WedgeCell) {
@@ -61,26 +66,44 @@ class NuristanStandardBiome {
         operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1]);
     }
 }
-standardBox.registerModifier(new NuristanStandardBiome(
-    {
-        grass: () => {
-            return {
-                Material: Enum.Material.Grass, Color: Color3.fromRGB(43, 219, 84)
-            }
-        },
-        desert: () => { 
-            const secondaryAngs = math.random(-20, 10);
-            return {Material: Enum.Material.Sand, Color: Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs)}
-        }
-    }
-))
 
+const translateTerrain = new translateTerrainOrientationForStructureBonding({
+   orientationSubtraction: new Vector3(0, 0, -90) 
+});
+class NuristanBuildings extends Biome {
+    config: {}
+    constructor(config: {}) {
+        super();
+        this.priority = 100;
+        this.config = config;
+        this.name = "NuristanBuildings";
+    }
+    generate(yourSelf: createTerrain, yourCell: WedgeCell) {
+        const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance<WedgePart>) => {
+            // const height = data.data.averageHeight;
+            const translatedOrientationForStructurePlacement = translateTerrain.Translate(triangle.Orientation);
+        }
+        operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][0]);
+        operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][1]);
+        operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][0]);
+        operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1]);
+    }
+}
+const stdnuristanconfig = {
+    grass: () => {
+        return {
+            Material: Enum.Material.Grass, Color: Color3.fromRGB(43, 219, 84)
+        }
+    },
+    desert: () => { 
+        const secondaryAngs = math.random(-20, 10);
+        return {Material: Enum.Material.Sand, Color: Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs)}
+    }
+}
+standardBox.registerModifier(new NuristanStandardBiome(stdnuristanconfig))
+standardBox.registerModifier(new NuristanBuildings({}));
 const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
     const _self = thisData._self;
-    _self.adapter.setProperty(thisData.triangles[0][0], "Parent", wedgesFolder);
-    _self.adapter.setProperty(thisData.triangles[0][1], "Parent", wedgesFolder);
-    _self.adapter.setProperty(thisData.triangles[1][0], "Parent", wedgesFolder);
-    _self.adapter.setProperty(thisData.triangles[1][1], "Parent", wedgesFolder);
     standardBox.executeAllModifiers(thisData._self, thisData);
-}, EgoMoose, adapterToUse);
+}, EgoMoose, adapterToUse, wedgesFolder);
 const triangles = createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);

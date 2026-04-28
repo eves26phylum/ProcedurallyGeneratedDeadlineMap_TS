@@ -107,9 +107,9 @@ declare const Signal: {
  * The index signature `[key: string]: unknown` allows arbitrary
  * property assignments without type errors.
  */
-interface WrappedInstance {
+type WrappedInstance<T extends Instance = Instance> = {
     /** Set the Roblox Parent. Reading it back is not supported. */
-    Parent: WrappedInstance | null;
+    Parent: WrappedInstance<Instance> | null;
     /** Set the Roblox Name. Reading it back is not supported. */
     Name: string;
 
@@ -117,10 +117,10 @@ interface WrappedInstance {
     play(): void;
     stop(): void;
     /** Creates a new standalone Sound instance. Valid on Sound instances only. */
-    create(): WrappedInstance;
+    create(): WrappedInstance<Instance>;
 
     // ── Lifecycle ────────────────────────────────────────────────
-    clone(): WrappedInstance;
+    clone(): WrappedInstance<Instance>;
     destroy(): void;
 
     // ── CollectionService tags ───────────────────────────────────
@@ -149,8 +149,8 @@ interface WrappedInstance {
     is_descendant_of(instance: WrappedInstance): boolean;
 
     /** Allows setting arbitrary Roblox instance properties by name. */
-    [key: string]: unknown;
-}
+    // [key: keyof InstanceProperties<T>]: unknown;
+} & { [K in keyof InstanceProperties<T>]: InstanceProperties<T>[K] }
 
 /**
  * Result of tags.get_tagged / tags.get_all_tagged.
@@ -926,6 +926,6 @@ declare function clear_console(): void
 // Note: info
 declare function fire_server(...args: RobloxSerializableInstance[]): void
 // Note: output_trace
-declare function create_instance(className: keyof CreatableInstances, parent?: WrappedInstance): WrappedInstance
+declare function create_instance<T extends keyof CreatableInstances>(className: T, parent?: WrappedInstance): WrappedInstance<CreatableInstances[T]>
 declare function info(...args: any[]): void
 declare function skip_tutorial(): void
