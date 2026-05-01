@@ -309,11 +309,12 @@ export class NuristanBuildings extends Biome {
                 const roomPosX = this.config.roomProps.RoomSize.X * x;
                 const roomPosZ = this.config.roomProps.RoomSize.Z * y;
                 const worldPos = baseCFrame.mul(new CFrame(roomPosX, 0, roomPosZ)).Position;
-                const theHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(worldPos.X, worldPos.Z));
-                if (!theHeight[0]) return;
-                this.createStandardRoom(baseCFrame.mul(new CFrame(roomPosX, theHeight[0], roomPosZ)), this.config, ["north"]);
-            })
-        })
+                const roomHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(worldPos.X, worldPos.Z));
+                if (roomHeight[0] === undefined) return;
+                const roomWorldCFrame = baseCFrame.Rotation.add(new Vector3(worldPos.X, roomHeight[0], worldPos.Z));
+                this.createStandardRoom(roomWorldCFrame, this.config, ["north"]);
+            });
+        });
     }
                     // triangles: [
                     //     this.materialiseTriangle(topLeft, topRight, bottomLeft),
