@@ -450,16 +450,26 @@ __modulesFolder["NuristanBuildings"] = function()
 			local _self = self
 			local _vector3_1 = Vector3.new(0, theHeight[1], 0)
 			_self:createStandardRoom(baseCFrame + _vector3_1, self.config, { "north" })
-			for x = 0, #proceduralRoomGrid - 1 do
-				for y = 0, #proceduralRoomGrid[x + 1] - 1 do
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(row, x)
+				-- ▼ ReadonlyArray.forEach ▼
+				local _callback_1 = function(value, y)
 					local roomPosX = self.config.roomProps.RoomSize.X * x
-					local roomPosY = self.config.roomProps.RoomSize.Z * y
-					local theHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(roomPosX, roomPosY))
+					local roomPosZ = self.config.roomProps.RoomSize.Z * y
+					local theHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(roomPosX, roomPosZ))
 					local _self_1 = self
-					local _vector3_2 = Vector3.new(roomPosX, theHeight[1], roomPosY)
+					local _vector3_2 = Vector3.new(roomPosX, theHeight[1], roomPosZ)
 					_self_1:createStandardRoom(baseCFrame + _vector3_2, self.config, { "north" })
 				end
+				for _k, _v in row do
+					_callback_1(_v, _k - 1, row)
+				end
+				-- ▲ ReadonlyArray.forEach ▲
 			end
+			for _k, _v in proceduralRoomGrid do
+				_callback(_v, _k - 1, proceduralRoomGrid)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
 		end
 		function NuristanBuildings:operateOnThisTriangleInstance(data, trianglePair, verticesForTriangles)
 			local orientation = trianglePair[1].Orientation

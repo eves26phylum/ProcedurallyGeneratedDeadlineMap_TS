@@ -304,14 +304,14 @@ export class NuristanBuildings extends Biome {
         const theHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(houseCFrame.X, houseCFrame.Z));
         const baseCFrame = houseCFrame.Rotation.add(new Vector3(houseCFrame.Position.X, 0, houseCFrame.Position.Z));
         this.createStandardRoom(baseCFrame.add(new Vector3(0, theHeight[0], 0)), this.config, ["north"]);
-        for (let x = 0; x < proceduralRoomGrid.size(); x++) {
-            for (let y = 0; y < proceduralRoomGrid[x].size(); y++) {
+        proceduralRoomGrid.forEach((row, x) => {
+            row.forEach((value, y) => {
                 const roomPosX = this.config.roomProps.RoomSize.X * x;
-                const roomPosY = this.config.roomProps.RoomSize.Z * y;
-                const theHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(roomPosX, roomPosY));
-                this.createStandardRoom(baseCFrame.add(new Vector3(roomPosX, theHeight[0], roomPosY)), this.config, ["north"]);
-            }
-        }
+                const roomPosZ = this.config.roomProps.RoomSize.Z * y;
+                const theHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(roomPosX, roomPosZ));
+                this.createStandardRoom(baseCFrame.add(new Vector3(roomPosX, theHeight[0], roomPosZ)), this.config, ["north"]);
+            })
+        })
     }
                     // triangles: [
                     //     this.materialiseTriangle(topLeft, topRight, bottomLeft),
