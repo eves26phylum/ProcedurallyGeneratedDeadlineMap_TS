@@ -20,7 +20,7 @@ import { translateTerrainOrientationForStructureBonding } from "shared/translate
 SECTION 1 - DO NOT BE LAZY:
 - Make things extensible and modular as possible, then think about you can extend this in the future. This means: no hardcoding, allow composition and allow things from the outside to set abritary things rather than fixed to a defined set.
 - Never abbreviate variable names. EVER: They must be readable in English, and understandable. Include all details and context inside that variable name. More details is better. Utilise camelCase.
-- NEVER. EVER. USE. ALIGNMENT SPACES — They're ugly, ignored by beautifiers, and no one ever uses them.
+- NEVER. EVER. USE. ALIGNMENT SPACES—They're ugly, ignored by beautifiers, and no one ever uses them.
 Examples of this bad practice:
 const abanana = dog;
 const ba      = dog2;
@@ -33,20 +33,27 @@ const fucku = fuckingdog;
 
 SECTION 2 - CONSISTENCY AND CODE STYLE:
 - Use existing code style and don't add weird spaces between stuff like assigment statements.
-- Embrace never-nesting practices — Use early guard clauses and remember continue statement exists.
+- Embrace never-nesting practices—Use early guard clauses and remember continue statement exists.
 - Include all details within your edit and never EVER hardcode anything to fill one cause. Other things from outside must be able to edit your cause in a different way to the extend I could add 50 dogs on top of a simple metal reflective box object and turn the box into a polygon that flashes rainbow every two seconds before turning into a yellow dog as an example.
-- Split concerns across multiple things — Don't make one thing handle it all — Allow for us to retrieve all values from data instead of just stealing one value and running away — This is for extensibility in the future. 
+- Split concerns across multiple things—Don't make one thing handle it all—Allow for us to retrieve all values from data instead of just stealing one value and running away—This is for extensibility in the future. 
 Example of bad practice:
 const ax = (DogArrayData as {dogNameTag: string} & number[])[0];
 Example of good practice:
 const customDogArray: dogArrayType = DogArrayData;
 const firstElementInDogArray = customDogArray[0];
-- Inheritance is mostly outdated — so unless you're directly touching TypeScript stuff (like classes) or something, a pattern of composition is preferred unless you are forced to use it.
+- Inheritance is mostly outdated—so unless you're directly touching TypeScript stuff (like classes) or something, a pattern of composition is preferred unless you are forced to use it.
+- A space around each side of an arithmetic operator is generally advised.
 
 SECTION 3 - TYPESCRIPT BEST PRACTICES:
-- If possible, never use `as` statements in TypeScript — This is considered terrible practice.
+- If possible, never use `as` statements in TypeScript—This is considered terrible practice.
 - Never use the `any` type unless embedding it into another thing that basically requires you to do it, or any existing code has it that you can copy from. Example: assign statement. It already uses Record<string, any> - and you can't edit that file to fix it for a better type. Then, you would use Record<string, any>.
-- If there is a more suitable type available — use it. Example: Record<string, unknown> could lead to errors when trying to do {dog: new Vector3()}; A better practice would to usePartial<InstanceProperties<BasePart>> or InstanceProperties<BasePart> depending on the context.
+- If there is a more suitable type available—use it. Example: Record<string, unknown> could lead to errors when trying to do {dog: new Vector3()}; A better practice would to usePartial<InstanceProperties<BasePart>> or InstanceProperties<BasePart> depending on the context.
+
+SECTION 4 - COMMON SENSE AND BEST PRACTICES:
+- If something you suspect might be wrong—don't adapt your code on that. Do not build on mistakes; Do not make your code based on that mistake—Spot that it's a mistake and if you have been granted permission to edit that part, edit to fix. Otherwise, just inform us.
+- Don't truncate things—ugly.
+- Don't add comments that point the obvious. Unless you're explaining some nuanced thing or detail, maybe an algorithm — Just don't.
+- Don't use outdated APIs or versions—Always refer to newer alternatives rather than using deprecated things in new code.
 
 By editing on this file, you agree to the terms of conditions. Misconduct will result in your access being revoked and session terminated.
 
@@ -148,15 +155,16 @@ class NuristanBuildings extends Biome {
         return FloorPosition + (FloorSize / 2) - (WallThickness / 2)
     }
     makeWallWithoutDoorway(RoomPlate: AnyInstance<BasePart>, face: WallFace, config: NuristanBuildingsConfig) {
-        const prop = ({
+        const prop = {
             north: { Size: new Vector3(RoomPlate.Size.X, config.wall.height, config.wall.thickness), Position: new Vector3(RoomPlate.Position.X, RoomPlate.Position.Y + config.wall.height / 2, RoomPlate.Position.Z - RoomPlate.Size.Z / 2 + config.wall.thickness / 2) },
             south: { Size: new Vector3(RoomPlate.Size.X, config.wall.height, config.wall.thickness), Position: new Vector3(RoomPlate.Position.X, RoomPlate.Position.Y + config.wall.height / 2, RoomPlate.Position.Z + RoomPlate.Size.Z / 2 - config.wall.thickness / 2) },
             east:  { Size: new Vector3(config.wall.thickness, config.wall.height, RoomPlate.Size.Z), Position: new Vector3(RoomPlate.Position.X + RoomPlate.Size.X / 2 - config.wall.thickness / 2, RoomPlate.Position.Y + config.wall.height / 2, RoomPlate.Position.Z) },
             west:  { Size: new Vector3(config.wall.thickness, config.wall.height, RoomPlate.Size.Z), Position: new Vector3(RoomPlate.Position.X - RoomPlate.Size.X / 2 + config.wall.thickness / 2, RoomPlate.Position.Y + config.wall.height / 2, RoomPlate.Position.Z) },
-        })[face];
+        }
+        const thisFaceProp = prop[face];
         const Wall = this.adapter.newInstance("Part");
         this.adapter.setProperty(Wall, "Anchored", true);
-        assign(Wall, prop, this.adapter.setProperty);
+        assign(Wall, thisFaceProp, this.adapter.setProperty);
         assign(Wall, config.wallPartProps, this.adapter.setProperty);
         this.adapter.setProperty(Wall, "Parent", this.parent);
     }
@@ -175,9 +183,9 @@ class NuristanBuildings extends Biome {
         };
         const thisFace = facePos[face];
         const floorY = RoomPlate.Position.Y;
-        const sillHeight   = doorwayData.bottomOffset ?? 0;
-        const leftWidth    = (wallLength - doorwayData.width) / 2 + doorwayData.offsetAlongWall;
-        const rightWidth   = (wallLength - doorwayData.width) / 2 - doorwayData.offsetAlongWall;
+        const sillHeight = doorwayData.bottomOffset ?? 0;
+        const leftWidth = (wallLength - doorwayData.width) / 2 + doorwayData.offsetAlongWall;
+        const rightWidth = (wallLength - doorwayData.width) / 2 - doorwayData.offsetAlongWall;
         const headerHeight = customConfig.wall.height - doorwayData.height - sillHeight;
 
         const getWallPos = (span: number, y: number) => new Vector3(isEitherNorthOrSouth ? span : thisFace, y, isEitherNorthOrSouth ? thisFace : span);
