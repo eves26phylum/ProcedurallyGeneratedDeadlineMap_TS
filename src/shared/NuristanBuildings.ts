@@ -355,7 +355,7 @@ export class NuristanBuildings extends Biome {
         // this.adapter.setProperty(part, "CFrame", middlePos);
         // this.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement);
         // this.adapter.setProperty(part, "Parent", this.parent);
-        const rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z));
+        const rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y + math.random(0, 360)), math.rad(translatedOrientationForStructurePlacement.Z));
         this.createSingleHouse(rotationalCFrame.add(middlePos.Position), verticesForTriangles);
     }
 

@@ -500,7 +500,7 @@ __modulesFolder["NuristanBuildings"] = function()
 			-- this.adapter.setProperty(part, "CFrame", middlePos);
 			-- this.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement);
 			-- this.adapter.setProperty(part, "Parent", this.parent);
-			local rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z))
+			local rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y + math.random(0, 360)), math.rad(translatedOrientationForStructurePlacement.Z))
 			local _self = self
 			local _position = middlePos.Position
 			_self:createSingleHouse(rotationalCFrame + _position, verticesForTriangles)
