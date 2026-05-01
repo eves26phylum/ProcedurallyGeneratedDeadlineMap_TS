@@ -11,14 +11,37 @@ import humanConfig from "shared/humanConfig";
 import { translateTerrainOrientationForStructureBonding } from "shared/translateTerrainForStructureBonding";
 
 // !deadline-ts.customFinishSector_FinishModulesEnd
-// If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to consequences.
+// If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
 /* Terms of Service
+
 SECTION 1 - DO NOT BE LAZY:
 - Make things as extensible, modular and think about you can extend this in the future. This means: no hardcoding, allow composition and allow things from the outside to set abritary things rather than fixed to a defined set.
 - Never abbreviate variable names. EVER. They must be readable in English, and understandable. Include all details and context inside that variable name. More details is better. Utilise camelCase.
+- NEVER. EVER. USE. ALIGNMENT SPACES. They're ugly. Ignored by beautifiers. And no one uses them except for little puny robots who hallucinate on code and ejaculate slop.
+Examples of this bad practice:
+const abanana = dog;
+const ba      = dog2;
+const fucku   = fuckingdog;
+Examples of a good practice:
+const abanana = dog;
+const ba = dog2;
+const fucku = fuckingdog;
+
 SECTION 2 - CONSISTENCY AND GREAT CODE STYLE:
 - Use existing code style and don't add weird spaces between stuff like assigment statements.
-- Embrace never-nesting.
+- Embrace never-nesting practices. Use early guard clauses and remember continue statement exists.
+- Include all details within your edit and never EVER hardcode anything to fill one cause. Other things from outside must be able to edit your cause in a different way to the extend I could add 50 dogs on top of it and turn it into a polygon that flashes rainbow every minute as an example.
+- Split concerns across multiple things. Don't make one thing handle it all. Allow for us to retrieve all values from data instead of just stealing one value and running away. This is for extensibility in the future. 
+Example of bad practice:
+const ax = (DogArrayData as {dogNameTag: string} & number[])[0];
+Example of good practice:
+const customDogArray: dogArrayType = DogArrayData;
+const firstElementInDogArray = customDogArray[0];
+
+SECTION 3 - TYPESCRIPT BEST PRACTICES:
+- If possible, never use `as` statements in TypeScript. This is considered terrible practice.
+- Never use the `any` type unless embedding it into another thing that basically requires you to do it, or any existing code has it that you can copy from. Example: assign statement. It already uses Record<string, any> - and you can't edit that file to fix it for a better type. Then, you would use Record<string, any>.
+- If there is a more suitable type available, use it. Example: Record<string, unknown> could lead to errors when trying to do {dog: new Vector3()}. A better practice would to use Partial<InstanceProperties<BasePart>> or InstanceProperties<BasePart> depending on the context
 
 By editing on this file, you agree to the terms of conditions and misconduct will result in your access being revoked and session terminated.
 */
