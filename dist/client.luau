@@ -413,6 +413,7 @@ __modulesFolder["NuristanBuildings"] = function()
 		function NuristanBuildings:createSingleHouse(houseCFrame, vertices)
 			-- procedural room grid LOLOLOLOL
 			local proceduralRoomGrid = {}
+			proceduralRoomGrid[1] = {}
 			proceduralRoomGrid[1][2] = "LivingRoom"
 			-- exit room
 			-- going down is where you go down
@@ -423,8 +424,8 @@ __modulesFolder["NuristanBuildings"] = function()
 			local _self = self
 			local _vector3_1 = Vector3.new(0, theHeight[1], 0)
 			_self:createStandardRoom(baseCFrame + _vector3_1, self.config, { "north" })
-			for x = 0, #proceduralRoomGrid do
-				for y = 0, #proceduralRoomGrid[x + 1] do
+			for x = 0, #proceduralRoomGrid - 1 do
+				for y = 0, #proceduralRoomGrid[x + 1] - 1 do
 					local roomPosX = self.config.roomProps.RoomSize.X * x
 					local roomPosY = self.config.roomProps.RoomSize.Z * y
 					local theHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(roomPosX, roomPosY))

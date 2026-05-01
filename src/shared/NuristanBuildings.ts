@@ -285,14 +285,15 @@ export class NuristanBuildings extends Biome {
     createSingleHouse(houseCFrame: CFrame, vertices: [Vector3, Vector3, Vector3]): void {
         // procedural room grid LOLOLOLOL
         const proceduralRoomGrid: proceduralRoomGrid = [];
+        proceduralRoomGrid[0] = [];
         proceduralRoomGrid[0][1] = "LivingRoom";
         // exit room
         // going down is where you go down
         const theHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(houseCFrame.X, houseCFrame.Z));
         const baseCFrame = houseCFrame.Rotation.add(new Vector3(houseCFrame.Position.X, 0, houseCFrame.Position.Z));
         this.createStandardRoom(baseCFrame.add(new Vector3(0, theHeight[0], 0)), this.config, ["north"]);
-        for (let x = 0; x <= proceduralRoomGrid.size(); x++) {
-            for (let y = 0; y <= proceduralRoomGrid[x].size(); y++) {
+        for (let x = 0; x < proceduralRoomGrid.size(); x++) {
+            for (let y = 0; y < proceduralRoomGrid[x].size(); y++) {
                 const roomPosX = this.config.roomProps.RoomSize.X * x;
                 const roomPosY = this.config.roomProps.RoomSize.Z * y;
                 const theHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(roomPosX, roomPosY));
