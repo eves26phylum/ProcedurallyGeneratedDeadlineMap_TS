@@ -11,13 +11,16 @@ import humanConfig from "shared/humanConfig";
 import { translateTerrainOrientationForStructureBonding } from "shared/translateTerrainForStructureBonding";
 
 // !deadline-ts.customFinishSector_FinishModulesEnd
+// The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
+
 // If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
+// Here is the Gigachad Terms of Service 2000 Iteration 0
 /* Terms of Service
 
 SECTION 1 - DO NOT BE LAZY:
-- Make things as extensible, modular and think about you can extend this in the future. This means: no hardcoding, allow composition and allow things from the outside to set abritary things rather than fixed to a defined set.
-- Never abbreviate variable names. EVER. They must be readable in English, and understandable. Include all details and context inside that variable name. More details is better. Utilise camelCase.
-- NEVER. EVER. USE. ALIGNMENT SPACES. They're ugly. Ignored by beautifiers. And no one uses them except for little puny robots who hallucinate on code and ejaculate slop.
+- Make things extensible and modular as possible, then think about you can extend this in the future. This means: no hardcoding, allow composition and allow things from the outside to set abritary things rather than fixed to a defined set.
+- Never abbreviate variable names. EVER: They must be readable in English, and understandable. Include all details and context inside that variable name. More details is better. Utilise camelCase.
+- NEVER. EVER. USE. ALIGNMENT SPACES — They're ugly, ignored by beautifiers, and no one ever uses them.
 Examples of this bad practice:
 const abanana = dog;
 const ba      = dog2;
@@ -38,6 +41,7 @@ const ax = (DogArrayData as {dogNameTag: string} & number[])[0];
 Example of good practice:
 const customDogArray: dogArrayType = DogArrayData;
 const firstElementInDogArray = customDogArray[0];
+- Inheritance is mostly outdated — so unless you're directly touching TypeScript stuff (like classes) or something, a pattern of composition is preferred unless you are forced to use it.
 
 SECTION 3 - TYPESCRIPT BEST PRACTICES:
 - If possible, never use `as` statements in TypeScript — This is considered terrible practice.
