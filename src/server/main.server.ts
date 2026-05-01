@@ -78,6 +78,12 @@ class NuristanBuildings extends Biome {
         this.config = config;
         this.name = "NuristanBuildings";
     }
+    calculateObjectAxisObjectBasedOnObjectHeightAndFloorAxis(FloorPosition: number, FloorSize: number, WallThickness: number) {
+        return FloorPosition + (FloorSize / 2) - (WallThickness / 2)
+    }
+    createSingleHouse(CFrame: CFrame) {
+        
+    }
     generate(yourSelf: createTerrain, yourCell: WedgeCell) {
         const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance<WedgePart>) => {
             // const height = data.data.averageHeight;
@@ -89,7 +95,6 @@ class NuristanBuildings extends Biome {
             const part = data._self.adapter.newInstance("Part", wedgesFolder)
             part.CFrame = triangle.CFrame;
             part.Orientation = translatedOrientationForStructurePlacement;
-            triangle.Name = "I'm a building!"; // for debug
             // Later: Influence from surrounding triangles to see if they have a nuristan building set on them, and not this triangle already having some sort of other structure
         }
         operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][0]);
