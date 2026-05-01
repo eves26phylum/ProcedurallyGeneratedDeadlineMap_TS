@@ -271,6 +271,12 @@ export class NuristanBuildings extends Biome {
         this.adapter.setProperty(roomPlate, "Anchored", true);
         assign(roomPlate, this.config.wallPartProps, this.adapter.setProperty);
 
+        const roomRoof = this.adapter.newInstance("Part");
+        this.adapter.setProperty(roomRoof, "CFrame", roomCFrame.add(roomCFrame.UpVector.mul(config.wall.height)).add(roomCFrame.UpVector.mul(config.roomProps.RoomSize.Y)));
+        this.adapter.setProperty(roomRoof, "Size", config.roomProps.RoomSize);
+        this.adapter.setProperty(roomRoof, "Anchored", true);
+        assign(roomRoof, this.config.wallPartProps, this.adapter.setProperty);
+
 
         this.adapter.setProperty(roomPlate, "Parent", this.parent);
         const allWallDirections: WallFace[] = ["north", "south", "east", "west"];
