@@ -301,18 +301,29 @@ export class NuristanBuildings extends Biome {
         proceduralRoomGrid[0][1] = "LivingRoom";
         // exit room
         // going down is where you go down
-        const theHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(houseCFrame.X, houseCFrame.Z));
+        const exitRoomHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(houseCFrame.X, houseCFrame.Z));
         const baseCFrame = houseCFrame.Rotation.add(new Vector3(houseCFrame.Position.X, 0, houseCFrame.Position.Z));
-        this.createStandardRoom(baseCFrame.add(new Vector3(0, theHeight[0], 0)), this.config, ["north"]);
+        const exitRoomCFrame = baseCFrame.add(new Vector3(0, exitRoomHeight[0], 0));
+        this.createStandardRoom(exitRoomCFrame, this.config, ["north", "south"]);
+        // proceduralRoomGrid.forEach((row, x) => {
+        //     row.forEach((value, y) => {
+        //         const roomPosX = this.config.roomProps.RoomSize.X * x;
+        //         const roomPosZ = this.config.roomProps.RoomSize.Z * y;
+        //         const worldPos = baseCFrame.mul(new CFrame(roomPosX, 0, roomPosZ)).Position;
+        //         const roomHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(worldPos.X, worldPos.Z));
+        //         // if (roomHeight[0] === undefined) return;
+        //         const roomWorldCFrame = baseCFrame.Rotation.add(new Vector3(worldPos.X, roomHeight[0], worldPos.Z));
+        //         this.createStandardRoom(roomWorldCFrame, this.config, ["north"]);
+        //     });
+        // });
         proceduralRoomGrid.forEach((row, x) => {
             row.forEach((value, y) => {
                 const roomPosX = this.config.roomProps.RoomSize.X * x;
                 const roomPosZ = this.config.roomProps.RoomSize.Z * y;
-                const worldPos = baseCFrame.mul(new CFrame(roomPosX, 0, roomPosZ)).Position;
+                const worldPos = exitRoomCFrame.mul(new CFrame(roomPosX, 0, roomPosZ)).Position;
                 const roomHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(worldPos.X, worldPos.Z));
                 if (roomHeight[0] === undefined) return;
-                const roomWorldCFrame = baseCFrame.Rotation.add(new Vector3(worldPos.X, roomHeight[0], worldPos.Z));
-                this.createStandardRoom(roomWorldCFrame, this.config, ["north"]);
+                this.createStandardRoom(exitRoomCFrame.mul(new CFrame(roomPosX, 0, roomPosZ)), this.config, ["north"]);
             });
         });
     }

@@ -142,7 +142,10 @@ const stdnuristanconfig = {
 }
 standardBox.registerModifier(new NuristanStandardBiome(adapterToUse, stdnuristanconfig, wedgesFolder));
 standardBox.registerModifier(new NuristanBuildings(adapterToUse, translateTerrain, {
-    wallPartProps: {},
+    wallPartProps: {
+        Material: Enum.Material.Sand,
+        Color: Color3.fromRGB(237, 201, 175)
+    },
     doorway: {
         width: 2.5,
         height: 6,
@@ -150,7 +153,7 @@ standardBox.registerModifier(new NuristanBuildings(adapterToUse, translateTerrai
         bottomOffset: 0
     },
     roomProps: {
-        RoomSize: new Vector3(10, 2, 10)
+        RoomSize: new Vector3(20, 2, 20)
     },
     wall: {
         height: 10,

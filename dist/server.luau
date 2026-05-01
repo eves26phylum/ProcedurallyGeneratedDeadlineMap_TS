@@ -443,13 +443,24 @@ __modulesFolder["NuristanBuildings"] = function()
 			proceduralRoomGrid[1][2] = "LivingRoom"
 			-- exit room
 			-- going down is where you go down
-			local theHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(houseCFrame.X, houseCFrame.Z))
+			local exitRoomHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(houseCFrame.X, houseCFrame.Z))
 			local _rotation = houseCFrame.Rotation
 			local _vector3 = Vector3.new(houseCFrame.Position.X, 0, houseCFrame.Position.Z)
 			local baseCFrame = _rotation + _vector3
-			local _self = self
-			local _vector3_1 = Vector3.new(0, theHeight[1], 0)
-			_self:createStandardRoom(baseCFrame + _vector3_1, self.config, { "north" })
+			local _vector3_1 = Vector3.new(0, exitRoomHeight[1], 0)
+			local exitRoomCFrame = baseCFrame + _vector3_1
+			self:createStandardRoom(exitRoomCFrame, self.config, { "north", "south" })
+			-- proceduralRoomGrid.forEach((row, x) => {
+			--     row.forEach((value, y) => {
+			--         const roomPosX = this.config.roomProps.RoomSize.X * x;
+			--         const roomPosZ = this.config.roomProps.RoomSize.Z * y;
+			--         const worldPos = baseCFrame.mul(new CFrame(roomPosX, 0, roomPosZ)).Position;
+			--         const roomHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(worldPos.X, worldPos.Z));
+			--         // if (roomHeight[0] === undefined) return;
+			--         const roomWorldCFrame = baseCFrame.Rotation.add(new Vector3(worldPos.X, roomHeight[0], worldPos.Z));
+			--         this.createStandardRoom(roomWorldCFrame, this.config, ["north"]);
+			--     });
+			-- });
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback = function(row, x)
 				-- ▼ ReadonlyArray.forEach ▼
@@ -457,15 +468,14 @@ __modulesFolder["NuristanBuildings"] = function()
 					local roomPosX = self.config.roomProps.RoomSize.X * x
 					local roomPosZ = self.config.roomProps.RoomSize.Z * y
 					local _cFrame = CFrame.new(roomPosX, 0, roomPosZ)
-					local worldPos = (baseCFrame * _cFrame).Position
+					local worldPos = (exitRoomCFrame * _cFrame).Position
 					local roomHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(worldPos.X, worldPos.Z))
 					if roomHeight[1] == nil then
 						return nil
 					end
-					local _rotation_1 = baseCFrame.Rotation
-					local _vector3_2 = Vector3.new(worldPos.X, roomHeight[1], worldPos.Z)
-					local roomWorldCFrame = _rotation_1 + _vector3_2
-					self:createStandardRoom(roomWorldCFrame, self.config, { "north" })
+					local _self = self
+					local _cFrame_1 = CFrame.new(roomPosX, 0, roomPosZ)
+					_self:createStandardRoom(exitRoomCFrame * _cFrame_1, self.config, { "north" })
 				end
 				for _k, _v in row do
 					_callback_1(_v, _k - 1, row)
@@ -1399,7 +1409,10 @@ task.defer(function()
 	}
 	standardBox:registerModifier(NuristanStandardBiome.new(adapterToUse, stdnuristanconfig, wedgesFolder))
 	standardBox:registerModifier(NuristanBuildings.new(adapterToUse, translateTerrain, {
-		wallPartProps = {},
+		wallPartProps = {
+			Material = Enum.Material.Sand,
+			Color = Color3.fromRGB(237, 201, 175),
+		},
 		doorway = {
 			width = 2.5,
 			height = 6,
@@ -1407,7 +1420,7 @@ task.defer(function()
 			bottomOffset = 0,
 		},
 		roomProps = {
-			RoomSize = Vector3.new(10, 2, 10),
+			RoomSize = Vector3.new(20, 2, 20),
 		},
 		wall = {
 			height = 10,
