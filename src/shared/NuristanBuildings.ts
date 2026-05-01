@@ -277,13 +277,13 @@ export class NuristanBuildings extends Biome {
         wallDirections.forEach((wallface: WallFace, index: number) => {
             this.makeWallWithDoorway(roomCFrame, config.roomProps.RoomSize, wallface);
         })
-        allWallDirections.forEach((wallface: WallFace, index: number) => {
+        allWallDirections.forEach((wallFace: WallFace, index: number) => {
             let hasWallDirection = false;
             wallDirections.forEach((wallface: WallFace, index: number) => {
-                if (wallface === wallface) hasWallDirection = true;
+                if (wallface === wallFace) hasWallDirection = true;
             })
             if (hasWallDirection) return;
-            this.makeWallWithoutDoorway(roomCFrame, config.roomProps.RoomSize, wallface);
+            this.makeWallWithoutDoorway(roomCFrame, config.roomProps.RoomSize, wallFace);
         })
     }
 

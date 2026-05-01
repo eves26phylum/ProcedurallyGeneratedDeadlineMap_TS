@@ -391,22 +391,35 @@ __modulesFolder["NuristanBuildings"] = function()
 			self.adapter.setProperty(roomPlate, "Anchored", true)
 			assign(roomPlate, self.config.wallPartProps, self.adapter.setProperty)
 			self.adapter.setProperty(roomPlate, "Parent", self.parent)
-			-- ▼ ReadonlyArray.map ▼
-			local _newValue = table.create(#wallDirections)
+			local allWallDirections = { "north", "south", "east", "west" }
+			-- ▼ ReadonlyArray.forEach ▼
 			local _callback = function(wallface, index)
 				self:makeWallWithDoorway(roomCFrame, config.roomProps.RoomSize, wallface)
-				return nil
 			end
 			for _k, _v in wallDirections do
-				_newValue[_k] = _callback(_v, _k - 1, wallDirections)
+				_callback(_v, _k - 1, wallDirections)
 			end
-			-- ▲ ReadonlyArray.map ▲
+			-- ▲ ReadonlyArray.forEach ▲
 			-- ▼ ReadonlyArray.forEach ▼
-			local _callback_1 = function(wallface, index)
-				self:makeWallWithoutDoorway(roomCFrame, config.roomProps.RoomSize, wallface)
+			local _callback_1 = function(wallFace, index)
+				local hasWallDirection = false
+				-- ▼ ReadonlyArray.forEach ▼
+				local _callback_2 = function(wallface, index)
+					if wallface == wallFace then
+						hasWallDirection = true
+					end
+				end
+				for _k, _v in wallDirections do
+					_callback_2(_v, _k - 1, wallDirections)
+				end
+				-- ▲ ReadonlyArray.forEach ▲
+				if hasWallDirection then
+					return nil
+				end
+				self:makeWallWithoutDoorway(roomCFrame, config.roomProps.RoomSize, wallFace)
 			end
-			for _k, _v in wallDirections do
-				_callback_1(_v, _k - 1, wallDirections)
+			for _k, _v in allWallDirections do
+				_callback_1(_v, _k - 1, allWallDirections)
 			end
 			-- ▲ ReadonlyArray.forEach ▲
 		end
