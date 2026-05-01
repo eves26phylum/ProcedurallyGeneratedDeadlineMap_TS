@@ -456,10 +456,16 @@ __modulesFolder["NuristanBuildings"] = function()
 				local _callback_1 = function(value, y)
 					local roomPosX = self.config.roomProps.RoomSize.X * x
 					local roomPosZ = self.config.roomProps.RoomSize.Z * y
-					local theHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(roomPosX, roomPosZ))
+					local _cFrame = CFrame.new(roomPosX, 0, roomPosZ)
+					local worldPos = (baseCFrame * _cFrame).Position
+					local theHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(worldPos.X, worldPos.Z))
+					local _value = theHeight[1]
+					if not (_value ~= 0 and _value == _value and _value) then
+						return nil
+					end
 					local _self_1 = self
-					local _vector3_2 = Vector3.new(roomPosX, theHeight[1], roomPosZ)
-					_self_1:createStandardRoom(baseCFrame + _vector3_2, self.config, { "north" })
+					local _cFrame_1 = CFrame.new(roomPosX, theHeight[1], roomPosZ)
+					_self_1:createStandardRoom(baseCFrame * _cFrame_1, self.config, { "north" })
 				end
 				for _k, _v in row do
 					_callback_1(_v, _k - 1, row)
