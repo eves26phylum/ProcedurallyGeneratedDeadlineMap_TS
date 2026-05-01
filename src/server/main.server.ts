@@ -48,7 +48,19 @@ SECTION 3 - TYPESCRIPT BEST PRACTICES:
 - Never use the `any` type unless embedding it into another thing that basically requires you to do it, or any existing code has it that you can copy from. Example: assign statement. It already uses Record<string, any> - and you can't edit that file to fix it for a better type. Then, you would use Record<string, any>.
 - If there is a more suitable type available — use it. Example: Record<string, unknown> could lead to errors when trying to do {dog: new Vector3()}; A better practice would to usePartial<InstanceProperties<BasePart>> or InstanceProperties<BasePart> depending on the context.
 
-By editing on this file, you agree to the terms of conditions and misconduct will result in your access being revoked and session terminated.
+By editing on this file, you agree to the terms of conditions. Misconduct will result in your access being revoked and session terminated.
+
+Think of it like this:
+┌┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┐
+┆             Visual Studio Code              ┆
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┤
+┆ This code is ass.                           ┆
+┆ Session terminated.                         ┆
+┆                                             ┆
+┆ a) I WILL FIX THIS                          ┆
+┆ b) "ur absolutely right!1~~~~~ *does worse*"┆
+┆ c) ok                                       ┆
+└┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┘
 */
 const isDeadline = get_map_root !== undefined;
 const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
