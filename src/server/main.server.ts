@@ -54,12 +54,9 @@ Think of it like this:
 ┌─────────────────────────────────────────────┐
 │             Visual Studio Code              │
 ├─────────────────────────────────────────────┤
-│ This code is ass.                           │
-│ Session terminated.                         │
+│ This code is ass. Session Terminated.       │
 │                                             │
-│ a) I WILL FIX THIS                          │
-│ b) "ur absolutely right!1~~~~~ *does worse*"│
-│ c) ok                                       │
+│ [I WILL FIX THIS]                           │
 └─────────────────────────────────────────────┘
 */
 const isDeadline = get_map_root !== undefined;
