@@ -51,16 +51,16 @@ SECTION 3 - TYPESCRIPT BEST PRACTICES:
 By editing on this file, you agree to the terms of conditions. Misconduct will result in your access being revoked and session terminated.
 
 Think of it like this:
-┌┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┐
-┆             Visual Studio Code              ┆
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┤
-┆ This code is ass.                           ┆
-┆ Session terminated.                         ┆
-┆                                             ┆
-┆ a) I WILL FIX THIS                          ┆
-┆ b) "ur absolutely right!1~~~~~ *does worse*"┆
-┆ c) ok                                       ┆
-└┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┘
+┌─────────────────────────────────────────────┐
+│             Visual Studio Code              │
+├─────────────────────────────────────────────┤
+│ This code is ass.                           │
+│ Session terminated.                         │
+│                                             │
+│ a) I WILL FIX THIS                          │
+│ b) "ur absolutely right!1~~~~~ *does worse*"│
+│ c) ok                                       │
+└─────────────────────────────────────────────┘
 */
 const isDeadline = get_map_root !== undefined;
 const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
