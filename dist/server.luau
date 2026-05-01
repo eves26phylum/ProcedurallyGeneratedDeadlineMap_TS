@@ -157,6 +157,312 @@ __modulesFolder["EgoMoose"] = function()
 
 end
 
+__modulesFolder["NuristanBuildings"] = function()
+	local script
+	script = newFakeInstance({"NuristanBuildings"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local Biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome").Biome
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	local humanConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "humanConfig").default
+	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
+	-- If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
+	-- Here is the Gigachad Terms of Service 2000 Iteration 0
+	--[[
+		 Terms of Service
+	
+		SECTION 1 - DO NOT BE LAZY:
+		- Make things extensible and modular as possible, then think about you can extend this in the future. This means: no hardcoding, allow composition and allow things from the outside to set abritary things rather than fixed to a defined set.
+		- Never abbreviate variable names. EVER: They must be readable in English, and understandable. Include all details and context inside that variable name. More details is better. Utilise camelCase.
+		- NEVER. EVER. USE. ALIGNMENT SPACES—They're ugly, ignored by beautifiers, and no one ever uses them.
+		Examples of this bad practice:
+		const abanana = dog;
+		const ba      = dog2;
+		const fucku   = fuckingdog;
+		Examples of a good practice:
+		const abanana = dog;
+		const ba = dog2;
+		const fucku = fuckingdog;
+		- Always do the best implementation you can. Never skip out on things or do simpler versions. This is very important. If you do become lazy and do a worse implementation, problems in the future can happen because of that.
+	
+		SECTION 2 - CONSISTENCY AND CODE STYLE:
+		- Use existing code style and don't add weird spaces between stuff like assigment statements.
+		- Embrace never-nesting practices—Use early guard clauses and remember continue statement exists.
+		- Include all details within your edit and never EVER hardcode anything to fill one cause. Other things from outside must be able to edit your cause in a different way to the extend I could add 50 dogs on top of a simple metal reflective box object and turn the box into a polygon that flashes rainbow every two seconds before turning into a yellow dog as an example.
+		- Split concerns across multiple things—Don't make one thing handle it all—Allow for us to retrieve all values from data instead of just stealing one value and running away—This is for extensibility in the future. 
+		Example of bad practice:
+		const ax = (DogArrayData as {dogNameTag: string} & number[])[0];
+		Example of good practice:
+		const customDogArray: dogArrayType = DogArrayData;
+		const firstElementInDogArray = customDogArray[0];
+		- Inheritance is mostly outdated—so unless you're directly touching TypeScript stuff (like classes) or something, a pattern of composition is preferred unless you are forced to use it.
+		- A space around each side of an arithmetic operator is generally advised.
+	
+		SECTION 3 - TYPESCRIPT BEST PRACTICES:
+		- If possible, never use `as` statements in TypeScript—This is considered terrible practice.
+		- Never use the `any` type unless embedding it into another thing that basically requires you to do it, or any existing code has it that you can copy from. Example: assign statement. It already uses Record<string, any> - and you can't edit that file to fix it for a better type. Then, you would use Record<string, any>.
+		- If there is a more suitable type available—use it. Example: Record<string, unknown> could lead to errors when trying to do {dog: new Vector3()}; A better practice would to usePartial<InstanceProperties<BasePart>> or InstanceProperties<BasePart> depending on the context.
+	
+		SECTION 4 - COMMON SENSE AND BEST PRACTICES:
+		- If something you suspect might be wrong—don't adapt your code on that. Do not build on mistakes; Do not make your code based on that mistake—Spot that it's a mistake and if you have been granted permission to edit that part, edit to fix. Otherwise, just inform us.
+		- Don't truncate things—ugly.
+		- Don't add comments that point the obvious. Unless you're explaining some nuanced thing or detail, maybe an algorithm — Just don't.
+		- Don't use outdated APIs or versions—Always refer to newer alternatives rather than using deprecated things in new code.
+		- If you can avoid an else statement using stuff like lookup tables or continue statement, do it.
+	
+		By editing on this file, you agree to the terms of conditions. Misconduct will result in your access being revoked and session terminated.
+	
+		Think of it like this:
+		┌─────────────────────────────────────────────┐
+		│             Visual Studio Code              │
+		├─────────────────────────────────────────────┤
+		│ This code is ass. Session Terminated.       │
+		│                                             │
+		│ [I WILL FIX THIS]                           │
+		└─────────────────────────────────────────────┘
+	
+	]]
+	local faceAxisConfigMap = {
+		north = {
+			faceLocalOffset = function(plateSize, thickness)
+				return -(plateSize.Z / 2 - thickness / 2)
+			end,
+			wallLength = function(plateSize)
+				return plateSize.X
+			end,
+			buildLocalCFrame = function(lengthAxisLocalPos, localHeightCenter, faceLocalOffset)
+				return CFrame.new(lengthAxisLocalPos, localHeightCenter, faceLocalOffset)
+			end,
+			buildSegmentSize = function(segmentLength, segmentHeight, thickness)
+				return Vector3.new(segmentLength, segmentHeight, thickness)
+			end,
+		},
+		south = {
+			faceLocalOffset = function(plateSize, thickness)
+				return plateSize.Z / 2 - thickness / 2
+			end,
+			wallLength = function(plateSize)
+				return plateSize.X
+			end,
+			buildLocalCFrame = function(lengthAxisLocalPos, localHeightCenter, faceLocalOffset)
+				return CFrame.new(lengthAxisLocalPos, localHeightCenter, faceLocalOffset)
+			end,
+			buildSegmentSize = function(segmentLength, segmentHeight, thickness)
+				return Vector3.new(segmentLength, segmentHeight, thickness)
+			end,
+		},
+		east = {
+			faceLocalOffset = function(plateSize, thickness)
+				return plateSize.X / 2 - thickness / 2
+			end,
+			wallLength = function(plateSize)
+				return plateSize.Z
+			end,
+			buildLocalCFrame = function(lengthAxisLocalPos, localHeightCenter, faceLocalOffset)
+				return CFrame.new(faceLocalOffset, localHeightCenter, lengthAxisLocalPos)
+			end,
+			buildSegmentSize = function(segmentLength, segmentHeight, thickness)
+				return Vector3.new(thickness, segmentHeight, segmentLength)
+			end,
+		},
+		west = {
+			faceLocalOffset = function(plateSize, thickness)
+				return -(plateSize.X / 2 - thickness / 2)
+			end,
+			wallLength = function(plateSize)
+				return plateSize.Z
+			end,
+			buildLocalCFrame = function(lengthAxisLocalPos, localHeightCenter, faceLocalOffset)
+				return CFrame.new(faceLocalOffset, localHeightCenter, lengthAxisLocalPos)
+			end,
+			buildSegmentSize = function(segmentLength, segmentHeight, thickness)
+				return Vector3.new(thickness, segmentHeight, segmentLength)
+			end,
+		},
+	}
+	local function computeSolidWallFaceGeometry(plateSize, wallConfig, face)
+		local faceConfig = faceAxisConfigMap[face]
+		local faceOffset = faceConfig.faceLocalOffset(plateSize, wallConfig.thickness)
+		local wallLength = faceConfig.wallLength(plateSize)
+		local localHeightCenter = wallConfig.height / 2
+		return { {
+			localCFrame = faceConfig.buildLocalCFrame(0, localHeightCenter, faceOffset),
+			size = faceConfig.buildSegmentSize(wallLength, wallConfig.height, wallConfig.thickness),
+		} }
+	end
+	local function computeDoorwayWallFaceGeometry(plateSize, wallConfig, doorwayData, face)
+		local faceConfig = faceAxisConfigMap[face]
+		local faceOffset = faceConfig.faceLocalOffset(plateSize, wallConfig.thickness)
+		local wallLength = faceConfig.wallLength(plateSize)
+		local sillHeight = doorwayData.bottomOffset
+		local leftSegmentWidth = (wallLength - doorwayData.width) / 2 + doorwayData.offsetAlongWall
+		local rightSegmentWidth = (wallLength - doorwayData.width) / 2 - doorwayData.offsetAlongWall
+		local headerHeight = wallConfig.height - doorwayData.height - sillHeight
+		local leftSegmentLengthCenter = -(wallLength / 2) + leftSegmentWidth / 2
+		local rightSegmentLengthCenter = wallLength / 2 - rightSegmentWidth / 2
+		local segments = { {
+			localCFrame = faceConfig.buildLocalCFrame(leftSegmentLengthCenter, wallConfig.height / 2, faceOffset),
+			size = faceConfig.buildSegmentSize(leftSegmentWidth, wallConfig.height, wallConfig.thickness),
+		}, {
+			localCFrame = faceConfig.buildLocalCFrame(rightSegmentLengthCenter, wallConfig.height / 2, faceOffset),
+			size = faceConfig.buildSegmentSize(rightSegmentWidth, wallConfig.height, wallConfig.thickness),
+		} }
+		if headerHeight > 0 then
+			local headerLocalHeightCenter = sillHeight + doorwayData.height + headerHeight / 2
+			local _arg0 = {
+				localCFrame = faceConfig.buildLocalCFrame(doorwayData.offsetAlongWall, headerLocalHeightCenter, faceOffset),
+				size = faceConfig.buildSegmentSize(doorwayData.width, headerHeight, wallConfig.thickness),
+			}
+			table.insert(segments, _arg0)
+		end
+		if sillHeight > 0 then
+			local _arg0 = {
+				localCFrame = faceConfig.buildLocalCFrame(doorwayData.offsetAlongWall, sillHeight / 2, faceOffset),
+				size = faceConfig.buildSegmentSize(doorwayData.width, sillHeight, wallConfig.thickness),
+			}
+			table.insert(segments, _arg0)
+		end
+		return segments
+	end
+	local function instantiateWallSegments(plateCFrame, segments, partProps, parent, adapter)
+		for _, segment in segments do
+			local _plateCFrame = plateCFrame
+			local _localCFrame = segment.localCFrame
+			local worldCFrame = _plateCFrame * _localCFrame
+			local wallPart = adapter.newInstance("Part")
+			adapter.setProperty(wallPart, "CFrame", worldCFrame)
+			adapter.setProperty(wallPart, "Size", segment.size)
+			adapter.setProperty(wallPart, "Anchored", true)
+			assign(wallPart, partProps, adapter.setProperty)
+			adapter.setProperty(wallPart, "Parent", parent)
+		end
+	end
+	local NuristanBuildings
+	do
+		local super = Biome
+		NuristanBuildings = setmetatable({}, {
+			__tostring = function()
+				return "NuristanBuildings"
+			end,
+			__index = super,
+		})
+		NuristanBuildings.__index = NuristanBuildings
+		function NuristanBuildings.new(...)
+			local self = setmetatable({}, NuristanBuildings)
+			return self:constructor(...) or self
+		end
+		function NuristanBuildings:constructor(adapterToUse, translateTerrain, config, parent)
+			super.constructor(self, adapterToUse)
+			self.priority = 100
+			self.config = config
+			self.translateTerrain = translateTerrain
+			self.parent = parent
+			self.name = "NuristanBuildings"
+		end
+		function NuristanBuildings:mergeConfig(overrides)
+			local _object = table.clone(self.config)
+			setmetatable(_object, nil)
+			local merged = _object
+			assign(merged, overrides)
+			return merged
+		end
+		function NuristanBuildings:makeWallWithoutDoorway(roomPlateCFrame, roomPlateSize, face, configOverrides)
+			local resolvedConfig = if configOverrides ~= nil then self:mergeConfig(configOverrides) else self.config
+			local segments = computeSolidWallFaceGeometry(roomPlateSize, resolvedConfig.wall, face)
+			instantiateWallSegments(roomPlateCFrame, segments, resolvedConfig.wallPartProps, self.parent, self.adapter)
+		end
+		function NuristanBuildings:makeWallWithDoorway(roomPlateCFrame, roomPlateSize, face, configOverrides)
+			local resolvedConfig = if configOverrides ~= nil then self:mergeConfig(configOverrides) else self.config
+			local segments = computeDoorwayWallFaceGeometry(roomPlateSize, resolvedConfig.wall, resolvedConfig.doorway, face)
+			instantiateWallSegments(roomPlateCFrame, segments, resolvedConfig.wallPartProps, self.parent, self.adapter)
+		end
+		function NuristanBuildings:createStandardRoom(roomCFrame, config, wallDirections)
+			local roomPlate = self.adapter.newInstance("Part")
+			self.adapter.setProperty(roomPlate, "CFrame", roomCFrame)
+			self.adapter.setProperty(roomPlate, "Size", config.roomProps.RoomSize)
+			self.adapter.setProperty(roomPlate, "Anchored", true)
+			assign(roomPlate, self.config.wallPartProps, self.adapter.setProperty)
+			self.adapter.setProperty(roomPlate, "Parent", self.parent)
+			-- ▼ ReadonlyArray.map ▼
+			local _newValue = table.create(#wallDirections)
+			local _callback = function(wallface, index)
+				self:makeWallWithDoorway(roomCFrame, config.roomProps.RoomSize, wallface)
+				return nil
+			end
+			for _k, _v in wallDirections do
+				_newValue[_k] = _callback(_v, _k - 1, wallDirections)
+			end
+			-- ▲ ReadonlyArray.map ▲
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback_1 = function(wallface, index)
+				self:makeWallWithoutDoorway(roomCFrame, config.roomProps.RoomSize, wallface)
+			end
+			for _k, _v in wallDirections do
+				_callback_1(_v, _k - 1, wallDirections)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+		end
+		function NuristanBuildings:createSingleHouse(houseCFrame, vertices)
+			-- procedural room grid LOLOLOLOL
+			local proceduralRoomGrid = {}
+			proceduralRoomGrid[1][2] = "LivingRoom"
+			-- exit room
+			-- going down is where you go down
+			local theHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(houseCFrame.X, houseCFrame.Z))
+			local _rotation = houseCFrame.Rotation
+			local _vector3 = Vector3.new(houseCFrame.Position.X, 0, houseCFrame.Position.Z)
+			local baseCFrame = _rotation + _vector3
+			local _self = self
+			local _vector3_1 = Vector3.new(0, theHeight[1], 0)
+			_self:createStandardRoom(baseCFrame + _vector3_1, self.config, { "north" })
+			for x = 0, #proceduralRoomGrid do
+				for y = 0, #proceduralRoomGrid[x + 1] do
+					local roomPosX = self.config.roomProps.RoomSize.X * x
+					local roomPosY = self.config.roomProps.RoomSize.Z * y
+					local theHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(roomPosX, roomPosY))
+					local _self_1 = self
+					local _vector3_2 = Vector3.new(roomPosX, theHeight[1], roomPosY)
+					_self_1:createStandardRoom(baseCFrame + _vector3_2, self.config, { "north" })
+				end
+			end
+		end
+		function NuristanBuildings:operateOnThisTriangleInstance(data, trianglePair, verticesForTriangles)
+			local orientation = trianglePair[1].Orientation
+			local middlePos = trianglePair[1].CFrame:Lerp(trianglePair[2].CFrame, 0.5)
+			local translatedOrientationForStructurePlacement = self.translateTerrain:Translate(orientation)
+			local degreesTiltedOfSteepness = self.translateTerrain:GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z)))
+			local isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness
+			if not isALivableDegree then
+				return nil
+			end
+			local part = self.adapter.newInstance("Part")
+			self.adapter.setProperty(part, "CFrame", middlePos)
+			self.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement)
+			self.adapter.setProperty(part, "Parent", self.parent)
+			local rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z))
+			local _self = self
+			local _position = middlePos.Position
+			_self:createSingleHouse(rotationalCFrame + _position, verticesForTriangles)
+		end
+		function NuristanBuildings:generate(yourSelf, yourCell)
+			self:operateOnThisTriangleInstance(yourCell, yourCell.triangles[1], yourCell.verticesForTriangles[1])
+			self:operateOnThisTriangleInstance(yourCell, yourCell.triangles[2], yourCell.verticesForTriangles[2])
+		end
+	end
+	return {
+		NuristanBuildings = NuristanBuildings,
+	}
+
+end
+
 __modulesFolder["PerlinNoise"] = function()
 	local script
 	script = newFakeInstance({"PerlinNoise"})
@@ -289,6 +595,7 @@ __modulesFolder["Util"] = function()
 		for index, value in pairs(b) do
 			optionalFunc(a, index, value)
 		end
+		return a
 	end
 	return {
 		assign = assign,
@@ -321,9 +628,10 @@ __modulesFolder["biome"] = function()
 			local self = setmetatable({}, Biome)
 			return self:constructor(...) or self
 		end
-		function Biome:constructor()
+		function Biome:constructor(adapter)
 			self.priority = -1
 			self.name = "?"
+			self.adapter = adapter
 		end
 	end
 	local function useBiomeData(yourCell)
@@ -647,6 +955,7 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 									x = x,
 									y = y,
 								},
+								verticesForTriangles = { { topLeft, topRight, bottomLeft }, { topRight, bottomRight, bottomLeft } },
 								_self = self,
 							}
 							wedges[x][y] = cell
@@ -895,6 +1204,7 @@ task.defer(function()
 	local Biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome").Biome
 	local humanConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "humanConfig").default
 	local translateTerrainOrientationForStructureBonding = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "translateTerrainForStructureBonding").translateTerrainOrientationForStructureBonding
+	local NuristanBuildings = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "NuristanBuildings").NuristanBuildings
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -902,6 +1212,63 @@ task.defer(function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
+	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
+	-- If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
+	-- Here is the Gigachad Terms of Service 2000 Iteration 0
+	--[[
+		 Terms of Service
+	
+		SECTION 1 - DO NOT BE LAZY:
+		- Make things extensible and modular as possible, then think about you can extend this in the future. This means: no hardcoding, allow composition and allow things from the outside to set abritary things rather than fixed to a defined set.
+		- Never abbreviate variable names. EVER: They must be readable in English, and understandable. Include all details and context inside that variable name. More details is better. Utilise camelCase.
+		- NEVER. EVER. USE. ALIGNMENT SPACES—They're ugly, ignored by beautifiers, and no one ever uses them.
+		Examples of this bad practice:
+		const abanana = dog;
+		const ba      = dog2;
+		const fucku   = fuckingdog;
+		Examples of a good practice:
+		const abanana = dog;
+		const ba = dog2;
+		const fucku = fuckingdog;
+		- Always do the best implementation you can. Never skip out on things or do simpler versions. This is very important. If you do become lazy and do a worse implementation, problems in the future can happen because of that.
+	
+		SECTION 2 - CONSISTENCY AND CODE STYLE:
+		- Use existing code style and don't add weird spaces between stuff like assigment statements.
+		- Embrace never-nesting practices—Use early guard clauses and remember continue statement exists.
+		- Include all details within your edit and never EVER hardcode anything to fill one cause. Other things from outside must be able to edit your cause in a different way to the extend I could add 50 dogs on top of a simple metal reflective box object and turn the box into a polygon that flashes rainbow every two seconds before turning into a yellow dog as an example.
+		- Split concerns across multiple things—Don't make one thing handle it all—Allow for us to retrieve all values from data instead of just stealing one value and running away—This is for extensibility in the future. 
+		Example of bad practice:
+		const ax = (DogArrayData as {dogNameTag: string} & number[])[0];
+		Example of good practice:
+		const customDogArray: dogArrayType = DogArrayData;
+		const firstElementInDogArray = customDogArray[0];
+		- Inheritance is mostly outdated—so unless you're directly touching TypeScript stuff (like classes) or something, a pattern of composition is preferred unless you are forced to use it.
+		- A space around each side of an arithmetic operator is generally advised.
+	
+		SECTION 3 - TYPESCRIPT BEST PRACTICES:
+		- If possible, never use `as` statements in TypeScript—This is considered terrible practice.
+		- Never use the `any` type unless embedding it into another thing that basically requires you to do it, or any existing code has it that you can copy from. Example: assign statement. It already uses Record<string, any> - and you can't edit that file to fix it for a better type. Then, you would use Record<string, any>.
+		- If there is a more suitable type available—use it. Example: Record<string, unknown> could lead to errors when trying to do {dog: new Vector3()}; A better practice would to usePartial<InstanceProperties<BasePart>> or InstanceProperties<BasePart> depending on the context.
+	
+		SECTION 4 - COMMON SENSE AND BEST PRACTICES:
+		- If something you suspect might be wrong—don't adapt your code on that. Do not build on mistakes; Do not make your code based on that mistake—Spot that it's a mistake and if you have been granted permission to edit that part, edit to fix. Otherwise, just inform us.
+		- Don't truncate things—ugly.
+		- Don't add comments that point the obvious. Unless you're explaining some nuanced thing or detail, maybe an algorithm — Just don't.
+		- Don't use outdated APIs or versions—Always refer to newer alternatives rather than using deprecated things in new code.
+		- If you can avoid an else statement using stuff like lookup tables or continue statement, do it.
+	
+		By editing on this file, you agree to the terms of conditions. Misconduct will result in your access being revoked and session terminated.
+	
+		Think of it like this:
+		┌─────────────────────────────────────────────┐
+		│             Visual Studio Code              │
+		├─────────────────────────────────────────────┤
+		│ This code is ass. Session Terminated.       │
+		│                                             │
+		│ [I WILL FIX THIS]                           │
+		└─────────────────────────────────────────────┘
+	
+	]]
 	local isDeadline = get_map_root ~= nil
 	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
 	local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
@@ -942,10 +1309,11 @@ task.defer(function()
 			local self = setmetatable({}, NuristanStandardBiome)
 			return self:constructor(...) or self
 		end
-		function NuristanStandardBiome:constructor(config)
-			super.constructor(self)
+		function NuristanStandardBiome:constructor(adapterToUse, config, parent)
+			super.constructor(self, adapterToUse)
 			self.priority = 100
 			self.config = config
+			self.parent = parent
 			self.name = "nsb"
 		end
 		function NuristanStandardBiome:getColourAndMaterialFromHeight(height)
@@ -971,48 +1339,6 @@ task.defer(function()
 	local translateTerrain = translateTerrainOrientationForStructureBonding.new({
 		orientationSubtraction = Vector3.new(0, 0, -90),
 	})
-	local NuristanBuildings
-	do
-		local super = Biome
-		NuristanBuildings = setmetatable({}, {
-			__tostring = function()
-				return "NuristanBuildings"
-			end,
-			__index = super,
-		})
-		NuristanBuildings.__index = NuristanBuildings
-		function NuristanBuildings.new(...)
-			local self = setmetatable({}, NuristanBuildings)
-			return self:constructor(...) or self
-		end
-		function NuristanBuildings:constructor(config)
-			super.constructor(self)
-			self.priority = 100
-			self.config = config
-			self.name = "NuristanBuildings"
-		end
-		function NuristanBuildings:generate(yourSelf, yourCell)
-			local operateOnThisTriangleInstance = function(data, triangle)
-				-- const height = data.data.averageHeight;
-				local translatedOrientationForStructurePlacement = translateTerrain:Translate(triangle.Orientation)
-				-- note: fromEulerAngles methods all use radian input. .Orientation is a degree angle. So convert.
-				local degreesTiltedOfSteepness = translateTerrain:GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z)))
-				local isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness
-				if not isALivableDegree then
-					return nil
-				end
-				local part = data._self.adapter.newInstance("Part", wedgesFolder)
-				part.CFrame = triangle.CFrame
-				part.Orientation = translatedOrientationForStructurePlacement
-				triangle.Name = "I'm a building!"
-				-- Later: Influence from surrounding triangles to see if they have a nuristan building set on them, and not this triangle already having some sort of other structure
-			end
-			operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1])
-			operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][2])
-			operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][1])
-			operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][2])
-		end
-	end
 	local stdnuristanconfig = {
 		grass = function()
 			return {
@@ -1028,8 +1354,23 @@ task.defer(function()
 			}
 		end,
 	}
-	standardBox:registerModifier(NuristanStandardBiome.new(stdnuristanconfig))
-	standardBox:registerModifier(NuristanBuildings.new({}))
+	standardBox:registerModifier(NuristanStandardBiome.new(adapterToUse, stdnuristanconfig, wedgesFolder))
+	standardBox:registerModifier(NuristanBuildings.new(adapterToUse, translateTerrain, {
+		wallPartProps = {},
+		doorway = {
+			width = 2.5,
+			height = 6,
+			offsetAlongWall = 0,
+			bottomOffset = 0,
+		},
+		roomProps = {
+			RoomSize = Vector3.new(10, 2, 10),
+		},
+		wall = {
+			height = 10,
+			thickness = 2,
+		},
+	}, wedgesFolder))
 	local createTerrainDefault = createTerrain.new(function(thisData)
 		local _self = thisData._self
 		standardBox:executeAllModifiers(thisData._self, thisData)

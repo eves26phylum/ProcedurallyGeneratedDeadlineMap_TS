@@ -2,7 +2,7 @@ import { Biome } from "./biome";
 import { AnyInstance, InstanceAdapter } from "./definition";
 import { assign } from "./Util";
 import humanConfig from "./humanConfig";
-import { WedgeCell } from "./createTerrainFromVerticesUsingAdapter";
+import { triangleVerticesTrio, WedgeCell } from "./createTerrainFromVerticesUsingAdapter";
 import { createTerrain } from "./createTerrainFromVerticesUsingAdapter";
 import { translateTerrainOrientationForStructureBonding } from "./translateTerrainForStructureBonding";
 import { EgoMoose } from "./EgoMoose";
@@ -311,7 +311,7 @@ export class NuristanBuildings extends Biome {
                     //     x: x,
                     //     y: y
                     // },
-    private operateOnThisTriangleInstance(data: WedgeCell, trianglePair: [AnyInstance<WedgePart>, AnyInstance<WedgePart>]): void {
+    private operateOnThisTriangleInstance(data: WedgeCell, trianglePair: [AnyInstance<WedgePart>, AnyInstance<WedgePart>], verticesForTriangles: triangleVerticesTrio): void {
         const orientation = trianglePair[0].Orientation;
         const middlePos = trianglePair[0].CFrame.Lerp(trianglePair[1].CFrame, 0.5);
         const translatedOrientationForStructurePlacement = this.translateTerrain.Translate(orientation);
@@ -328,10 +328,12 @@ export class NuristanBuildings extends Biome {
         this.adapter.setProperty(part, "CFrame", middlePos);
         this.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement);
         this.adapter.setProperty(part, "Parent", this.parent);
+        const rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z));
+        this.createSingleHouse(rotationalCFrame.add(middlePos.Position), verticesForTriangles);
     }
 
     generate(yourSelf: createTerrain, yourCell: WedgeCell): void {
-        this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[0]);
-        this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[1]);
+        this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[0], yourCell.verticesForTriangles[0]);
+        this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[1], yourCell.verticesForTriangles[1]);
     }
 }
