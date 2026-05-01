@@ -1,13 +1,16 @@
 import { WedgeCell } from "./createTerrainFromVerticesUsingAdapter";
 import { BiomeData, biomeExtension } from "./biomeExtension";
+import { InstanceAdapter } from "./definition";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
 export class Biome {
     priority: number
     name: string
-    constructor() {
+    adapter: InstanceAdapter
+    constructor(adapter: InstanceAdapter) {
         this.priority = -1;
         this.name = "?";
+        this.adapter = adapter;
     }
 }
 

@@ -11,4 +11,5 @@ export function assign<T extends object>(
     for (const [index, value] of pairs(b)) {
         optionalFunc(a, index, value);
     }
+    return a;
 }

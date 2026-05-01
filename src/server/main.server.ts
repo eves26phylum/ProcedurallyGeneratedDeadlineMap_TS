@@ -11,6 +11,17 @@ import humanConfig from "shared/humanConfig";
 import { translateTerrainOrientationForStructureBonding } from "shared/translateTerrainForStructureBonding";
 
 // !deadline-ts.customFinishSector_FinishModulesEnd
+// If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to consequences.
+/* Terms of Service
+SECTION 1 - DO NOT BE LAZY:
+- Make things as extensible, modular and think about you can extend this in the future. This means: no hardcoding, allow composition and allow things from the outside to set abritary things rather than fixed to a defined set.
+- Never abbreviate variable names. EVER. They must be readable in English, and understandable. Include all details and context inside that variable name. More details is better. Utilise camelCase.
+SECTION 2 - CONSISTENCY AND GREAT CODE STYLE:
+- Use existing code style and don't add weird spaces between stuff like assigment statements.
+- Embrace never-nesting.
+
+By editing on this file, you agree to the terms of conditions and misconduct will result in your access being revoked and session terminated.
+*/
 const isDeadline = get_map_root !== undefined;
 const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
 const workspace: AnyInstance = isDeadline ? get_map_root() : game.GetService("Workspace");
@@ -36,17 +47,18 @@ const wedgesFolder = adapterToUse.newInstance("Folder");
 adapterToUse.setProperty(wedgesFolder, "Name", "Wedges");
 adapterToUse.setProperty(wedgesFolder, "Parent", workspace);
 const standardBox = new biomeBox();
-
 interface NuristanStandardBiomeConfig {
     desert: () => Partial<InstanceProperties<WedgePart>>
     grass: () => Partial<InstanceProperties<WedgePart>>
 }
 class NuristanStandardBiome extends Biome {
     config: NuristanStandardBiomeConfig
-    constructor(config: NuristanStandardBiomeConfig) {
-        super();
+    parent: AnyInstance
+    constructor(adapterToUse: InstanceAdapter, config: NuristanStandardBiomeConfig, parent: AnyInstance) {
+        super(adapterToUse);
         this.priority = 100;
         this.config = config;
+        this.parent = parent;
         this.name = "nsb";
     }
     
@@ -70,37 +82,124 @@ class NuristanStandardBiome extends Biome {
 const translateTerrain = new translateTerrainOrientationForStructureBonding({
    orientationSubtraction: new Vector3(0, 0, -90) 
 });
+interface DoorwayDataType {
+    width: number,
+    height: number,
+    offsetAlongWall: number,
+    bottomOffset: 0
+}
+interface NuristanBuildingsConfig {
+    wallPartProps: Partial<InstanceProperties<Part>>
+    doorway: DoorwayDataType
+    wall: {
+        thickness: number,
+        height: number
+    }
+}
+type WallFace = "north" | "south" | "east" | "west";
 class NuristanBuildings extends Biome {
-    config: {}
-    constructor(config: {}) {
-        super();
+    config: NuristanBuildingsConfig
+    parent: AnyInstance
+    constructor(adapterToUse: InstanceAdapter, config: NuristanBuildingsConfig, parent: AnyInstance) {
+        super(adapterToUse);
         this.priority = 100;
         this.config = config;
+        this.parent = parent;
         this.name = "NuristanBuildings";
     }
     calculateObjectAxisObjectBasedOnObjectHeightAndFloorAxis(FloorPosition: number, FloorSize: number, WallThickness: number) {
         return FloorPosition + (FloorSize / 2) - (WallThickness / 2)
     }
-    createSingleHouse(CFrame: CFrame) {
+    makeWallWithoutDoorway(RoomPlate: AnyInstance<BasePart>, face: WallFace, config: NuristanBuildingsConfig) {
+        const prop = ({
+            north: { Size: new Vector3(RoomPlate.Size.X, config.wall.height, config.wall.thickness), Position: new Vector3(RoomPlate.Position.X, RoomPlate.Position.Y + config.wall.height / 2, RoomPlate.Position.Z - RoomPlate.Size.Z / 2 + config.wall.thickness / 2) },
+            south: { Size: new Vector3(RoomPlate.Size.X, config.wall.height, config.wall.thickness), Position: new Vector3(RoomPlate.Position.X, RoomPlate.Position.Y + config.wall.height / 2, RoomPlate.Position.Z + RoomPlate.Size.Z / 2 - config.wall.thickness / 2) },
+            east:  { Size: new Vector3(config.wall.thickness, config.wall.height, RoomPlate.Size.Z), Position: new Vector3(RoomPlate.Position.X + RoomPlate.Size.X / 2 - config.wall.thickness / 2, RoomPlate.Position.Y + config.wall.height / 2, RoomPlate.Position.Z) },
+            west:  { Size: new Vector3(config.wall.thickness, config.wall.height, RoomPlate.Size.Z), Position: new Vector3(RoomPlate.Position.X - RoomPlate.Size.X / 2 + config.wall.thickness / 2, RoomPlate.Position.Y + config.wall.height / 2, RoomPlate.Position.Z) },
+        })[face];
+        const Wall = this.adapter.newInstance("Part");
+        this.adapter.setProperty(Wall, "Anchored", true);
+        assign(Wall, prop, this.adapter.setProperty);
+        assign(Wall, config.wallPartProps, this.adapter.setProperty);
+        this.adapter.setProperty(Wall, "Parent", this.parent);
+    }
+
+    makeWallWithDoorway(RoomPlate: AnyInstance<BasePart>, face: WallFace, wallConfig?: Partial<NuristanBuildingsConfig>) {
+        const customConfig: NuristanBuildingsConfig = assign<NuristanBuildingsConfig>({...this.config}, wallConfig as Record<string, any>);
+        const doorwayData: DoorwayDataType = customConfig.doorway;
+        const isEitherNorthOrSouth = face === 'north' || face === 'south';
+        const wallLength = isEitherNorthOrSouth ? RoomPlate.Size.X : RoomPlate.Size.Z;
+        const centerAxis = isEitherNorthOrSouth ? RoomPlate.Position.X : RoomPlate.Position.Z;
+        const facePos = {
+            north: RoomPlate.Position.Z - RoomPlate.Size.Z / 2 + customConfig.wall.thickness / 2,
+            south: RoomPlate.Position.Z + RoomPlate.Size.Z / 2 - customConfig.wall.thickness / 2,
+            east:  RoomPlate.Position.X + RoomPlate.Size.X / 2 - customConfig.wall.thickness / 2,
+            west:  RoomPlate.Position.X - RoomPlate.Size.X / 2 + customConfig.wall.thickness / 2,
+        };
+        const thisFace = facePos[face];
+        const floorY = RoomPlate.Position.Y;
+        const sillHeight   = doorwayData.bottomOffset ?? 0;
+        const leftWidth    = (wallLength - doorwayData.width) / 2 + doorwayData.offsetAlongWall;
+        const rightWidth   = (wallLength - doorwayData.width) / 2 - doorwayData.offsetAlongWall;
+        const headerHeight = customConfig.wall.height - doorwayData.height - sillHeight;
+
+        const getWallPos = (span: number, y: number) => new Vector3(isEitherNorthOrSouth ? span : thisFace, y, isEitherNorthOrSouth ? thisFace : span);
+        const getWallSize  = (span: number, h: number) => isEitherNorthOrSouth ? new Vector3(span, h, customConfig.wall.thickness) : new Vector3(customConfig.wall.thickness, h, span);
+
+        const LeftDoorWallPart = this.adapter.newInstance("Part");
+        this.adapter.setProperty(LeftDoorWallPart, "Size", getWallSize(leftWidth, customConfig.wall.height));
+        this.adapter.setProperty(LeftDoorWallPart, "Position", getWallPos(centerAxis - wallLength / 2 + leftWidth / 2,  floorY + customConfig.wall.height / 2));
+        this.adapter.setProperty(LeftDoorWallPart, "Anchored", true);
+        assign(LeftDoorWallPart, customConfig.wallPartProps, this.adapter.setProperty);
+        this.adapter.setProperty(LeftDoorWallPart, "Parent", this.parent);
+
+        const RightDoorWallPart = this.adapter.newInstance("Part");
+        this.adapter.setProperty(RightDoorWallPart, "Size", getWallSize(rightWidth, customConfig.wall.height));
+        this.adapter.setProperty(RightDoorWallPart, "Position", getWallPos(centerAxis + wallLength / 2 - rightWidth / 2, floorY + customConfig.wall.height / 2));
+        this.adapter.setProperty(RightDoorWallPart, "Anchored", true);
+        assign(RightDoorWallPart, customConfig.wallPartProps, this.adapter.setProperty);
+        this.adapter.setProperty(RightDoorWallPart, "Parent", this.parent);
+        if (headerHeight > 0) {
+            const DoorHeader = this.adapter.newInstance("Part");
+            this.adapter.setProperty(DoorHeader, "Size", getWallSize(doorwayData.width, headerHeight));
+            this.adapter.setProperty(DoorHeader, "Position", getWallPos(centerAxis + doorwayData.offsetAlongWall, floorY + customConfig.wall.height / 2 + doorwayData.height / 2 + sillHeight / 2));
+            this.adapter.setProperty(DoorHeader, "Anchored", true);
+            assign(DoorHeader, customConfig.wallPartProps, this.adapter.setProperty);
+            this.adapter.setProperty(DoorHeader, "Parent", this.parent);
+        }
+        if (sillHeight > 0) {
+            const WindowSill = this.adapter.newInstance("Part");
+            this.adapter.setProperty(WindowSill, "Size", getWallSize(doorwayData.width, sillHeight));
+            this.adapter.setProperty(WindowSill, "Position", getWallPos(centerAxis + doorwayData.offsetAlongWall, floorY + sillHeight / 2));
+            this.adapter.setProperty(WindowSill, "Anchored", true);
+            assign(WindowSill, customConfig.wallPartProps, this.adapter.setProperty);
+            this.adapter.setProperty(WindowSill, "Parent", this.parent);
+        }
+    }
+    createStandardRoom(bullshitCFrame: CFrame, Size: Vector3) {
+        const RoomPlate = new Instance("Part")
+        return this.makeWallWithDoorway(RoomPlate, "north", this.config);
+    }
+    createSingleHouse(bullshitCFrame: CFrame) {
         
     }
+    operateOnThisTriangleInstance(data: WedgeCell, triangle: AnyInstance<WedgePart>) {
+        // const height = data.data.averageHeight;
+        const translatedOrientationForStructurePlacement = translateTerrain.Translate(triangle.Orientation);
+        // note: fromEulerAngles methods all use radian input. .Orientation is a degree angle. So convert.
+        const degreesTiltedOfSteepness = translateTerrain.GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z)));
+        const isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness;
+        if (!isALivableDegree) return;
+        const part = this.adapter.newInstance("Part", this.parent)
+        part.CFrame = triangle.CFrame;
+        part.Orientation = translatedOrientationForStructurePlacement;
+        // Later: Influence from surrounding triangles to see if they have a nuristan building set on them, and not this triangle already having some sort of other structure
+    }
     generate(yourSelf: createTerrain, yourCell: WedgeCell) {
-        const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance<WedgePart>) => {
-            // const height = data.data.averageHeight;
-            const translatedOrientationForStructurePlacement = translateTerrain.Translate(triangle.Orientation);
-            // note: fromEulerAngles methods all use radian input. .Orientation is a degree angle. So convert.
-            const degreesTiltedOfSteepness = translateTerrain.GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z)));
-            const isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness;
-            if (!isALivableDegree) return;
-            const part = data._self.adapter.newInstance("Part", wedgesFolder)
-            part.CFrame = triangle.CFrame;
-            part.Orientation = translatedOrientationForStructurePlacement;
-            // Later: Influence from surrounding triangles to see if they have a nuristan building set on them, and not this triangle already having some sort of other structure
-        }
-        operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][0]);
-        operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][1]);
-        operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][0]);
-        operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1]);
+        this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][0]);
+        this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][1]);
+        this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][0]);
+        this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1]);
     }
 }
 const stdnuristanconfig = {
@@ -114,8 +213,20 @@ const stdnuristanconfig = {
         return {Material: Enum.Material.Sand, Color: Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs)}
     }
 }
-standardBox.registerModifier(new NuristanStandardBiome(stdnuristanconfig))
-standardBox.registerModifier(new NuristanBuildings({}));
+standardBox.registerModifier(new NuristanStandardBiome(adapterToUse, stdnuristanconfig, wedgesFolder));
+standardBox.registerModifier(new NuristanBuildings(adapterToUse, {
+    wallPartProps: {},
+    doorway: {
+        width: 2.5,
+        height: 6,
+        offsetAlongWall: 0,
+        bottomOffset: 0
+    },
+    wall: {
+        height: 10,
+        thickness: 2
+    }
+}, wedgesFolder));
 const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
     const _self = thisData._self;
     standardBox.executeAllModifiers(thisData._self, thisData);
