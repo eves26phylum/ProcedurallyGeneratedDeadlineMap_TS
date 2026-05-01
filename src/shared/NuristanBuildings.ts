@@ -270,15 +270,16 @@ export class NuristanBuildings extends Biome {
         this.adapter.setProperty(roomPlate, "Size", config.roomProps.RoomSize);
         this.adapter.setProperty(roomPlate, "Anchored", true);
         assign(roomPlate, this.config.wallPartProps, this.adapter.setProperty);
+        this.adapter.setProperty(roomPlate, "Parent", this.parent);
 
         const roomRoof = this.adapter.newInstance("Part");
-        this.adapter.setProperty(roomRoof, "CFrame", roomCFrame.add(roomCFrame.UpVector.mul(config.wall.height)).add(roomCFrame.UpVector.mul(config.roomProps.RoomSize.Y)));
+        this.adapter.setProperty(roomRoof, "CFrame", roomCFrame.add(roomCFrame.UpVector.mul(config.wall.height).add(roomCFrame.UpVector.mul(config.roomProps.RoomSize.Y / 2))));
         this.adapter.setProperty(roomRoof, "Size", config.roomProps.RoomSize);
+        this.adapter.setProperty(roomRoof, "Name", "RoomRoof");
         this.adapter.setProperty(roomRoof, "Anchored", true);
         assign(roomRoof, this.config.wallPartProps, this.adapter.setProperty);
+        this.adapter.setProperty(roomRoof, "Parent", this.parent);
 
-
-        this.adapter.setProperty(roomPlate, "Parent", this.parent);
         const allWallDirections: WallFace[] = ["north", "south", "east", "west"];
         wallDirections.forEach((wallface: WallFace, index: number) => {
             this.makeWallWithDoorway(roomCFrame, config.roomProps.RoomSize, wallface);
@@ -336,10 +337,10 @@ export class NuristanBuildings extends Biome {
         );
         const isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness;
         if (!isALivableDegree) return;
-        const part = this.adapter.newInstance("Part");
-        this.adapter.setProperty(part, "CFrame", middlePos);
-        this.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement);
-        this.adapter.setProperty(part, "Parent", this.parent);
+        // const part = this.adapter.newInstance("Part");
+        // this.adapter.setProperty(part, "CFrame", middlePos);
+        // this.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement);
+        // this.adapter.setProperty(part, "Parent", this.parent);
         const rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z));
         this.createSingleHouse(rotationalCFrame.add(middlePos.Position), verticesForTriangles);
     }

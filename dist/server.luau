@@ -391,6 +391,19 @@ __modulesFolder["NuristanBuildings"] = function()
 			self.adapter.setProperty(roomPlate, "Anchored", true)
 			assign(roomPlate, self.config.wallPartProps, self.adapter.setProperty)
 			self.adapter.setProperty(roomPlate, "Parent", self.parent)
+			local roomRoof = self.adapter.newInstance("Part")
+			local _adapter = self.adapter
+			local _roomCFrame = roomCFrame
+			local _upVector = roomCFrame.UpVector
+			local _height = config.wall.height
+			local _upVector_1 = roomCFrame.UpVector
+			local _arg0 = config.roomProps.RoomSize.Y / 2
+			_adapter.setProperty(roomRoof, "CFrame", _roomCFrame + (_upVector * _height + (_upVector_1 * _arg0)))
+			self.adapter.setProperty(roomRoof, "Size", config.roomProps.RoomSize)
+			self.adapter.setProperty(roomRoof, "Name", "RoomRoof")
+			self.adapter.setProperty(roomRoof, "Anchored", true)
+			assign(roomRoof, self.config.wallPartProps, self.adapter.setProperty)
+			self.adapter.setProperty(roomRoof, "Parent", self.parent)
 			local allWallDirections = { "north", "south", "east", "west" }
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback = function(wallface, index)
@@ -457,10 +470,10 @@ __modulesFolder["NuristanBuildings"] = function()
 			if not isALivableDegree then
 				return nil
 			end
-			local part = self.adapter.newInstance("Part")
-			self.adapter.setProperty(part, "CFrame", middlePos)
-			self.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement)
-			self.adapter.setProperty(part, "Parent", self.parent)
+			-- const part = this.adapter.newInstance("Part");
+			-- this.adapter.setProperty(part, "CFrame", middlePos);
+			-- this.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement);
+			-- this.adapter.setProperty(part, "Parent", this.parent);
 			local rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z))
 			local _self = self
 			local _position = middlePos.Position
