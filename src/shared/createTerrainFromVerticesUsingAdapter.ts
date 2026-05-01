@@ -5,6 +5,9 @@ import { returnFunctionWithIdentity } from "./selfProp";
 // modules go above
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
+export type triangleVerticesTrio = [
+    Vector3, Vector3, Vector3
+]
 export interface WedgeCell {
     triangles: [[AnyInstance<WedgePart>, AnyInstance<WedgePart>], [AnyInstance<WedgePart>, AnyInstance<WedgePart>]];
     data: {
@@ -14,6 +17,9 @@ export interface WedgeCell {
         x: number;
         y: number;
     };
+    verticesForTriangles: [
+        triangleVerticesTrio, triangleVerticesTrio
+    ]
     _self: createTerrain
 }
 
@@ -109,6 +115,10 @@ export class createTerrain {
                         x: x,
                         y: y
                     },
+                    verticesForTriangles: [
+                        [topLeft, topRight, bottomLeft],
+                        [topRight, bottomRight, bottomLeft]
+                    ],
                     _self: this
                 };
 
