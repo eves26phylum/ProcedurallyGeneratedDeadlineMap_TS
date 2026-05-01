@@ -26,12 +26,13 @@ Examples of a good practice:
 const abanana = dog;
 const ba = dog2;
 const fucku = fuckingdog;
+- Always do the best implementation you can. Never skip out on things or do simpler versions. This is very important. If you do become lazy and do a worse implementation, problems in the future can happen because of that.
 
-SECTION 2 - CONSISTENCY AND GREAT CODE STYLE:
+SECTION 2 - CONSISTENCY AND CODE STYLE:
 - Use existing code style and don't add weird spaces between stuff like assigment statements.
-- Embrace never-nesting practices. Use early guard clauses and remember continue statement exists.
-- Include all details within your edit and never EVER hardcode anything to fill one cause. Other things from outside must be able to edit your cause in a different way to the extend I could add 50 dogs on top of it and turn it into a polygon that flashes rainbow every minute as an example.
-- Split concerns across multiple things. Don't make one thing handle it all. Allow for us to retrieve all values from data instead of just stealing one value and running away. This is for extensibility in the future. 
+- Embrace never-nesting practices — Use early guard clauses and remember continue statement exists.
+- Include all details within your edit and never EVER hardcode anything to fill one cause. Other things from outside must be able to edit your cause in a different way to the extend I could add 50 dogs on top of a simple metal reflective box object and turn the box into a polygon that flashes rainbow every two seconds before turning into a yellow dog as an example.
+- Split concerns across multiple things — Don't make one thing handle it all — Allow for us to retrieve all values from data instead of just stealing one value and running away — This is for extensibility in the future. 
 Example of bad practice:
 const ax = (DogArrayData as {dogNameTag: string} & number[])[0];
 Example of good practice:
@@ -39,9 +40,9 @@ const customDogArray: dogArrayType = DogArrayData;
 const firstElementInDogArray = customDogArray[0];
 
 SECTION 3 - TYPESCRIPT BEST PRACTICES:
-- If possible, never use `as` statements in TypeScript. This is considered terrible practice.
+- If possible, never use `as` statements in TypeScript — This is considered terrible practice.
 - Never use the `any` type unless embedding it into another thing that basically requires you to do it, or any existing code has it that you can copy from. Example: assign statement. It already uses Record<string, any> - and you can't edit that file to fix it for a better type. Then, you would use Record<string, any>.
-- If there is a more suitable type available, use it. Example: Record<string, unknown> could lead to errors when trying to do {dog: new Vector3()}. A better practice would to use Partial<InstanceProperties<BasePart>> or InstanceProperties<BasePart> depending on the context
+- If there is a more suitable type available — use it. Example: Record<string, unknown> could lead to errors when trying to do {dog: new Vector3()}; A better practice would to usePartial<InstanceProperties<BasePart>> or InstanceProperties<BasePart> depending on the context.
 
 By editing on this file, you agree to the terms of conditions and misconduct will result in your access being revoked and session terminated.
 */
