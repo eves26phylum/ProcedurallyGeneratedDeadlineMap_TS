@@ -11,6 +11,22 @@ type SnakifyKeys<T> = {
 
 type SnakeRaycastParams = SnakifyKeys<RaycastParams>;
 type SnakeRaycastResult = SnakifyKeys<RaycastResult>;
+
+/**
+ * Filters out any property whose VALUE type is `symbol` (including `unique symbol`).
+ *
+ * @rbxts/types uses nominal brand properties of the form
+ * `readonly _nominal_Instance: unique symbol` on every class in the Roblox
+ * hierarchy. roblox-ts inspects these brands to decide whether to emit
+ * `self:method()` (Roblox instance) or `self.method()` (plain object).
+ *
+ * By stripping all symbol-valued properties before intersecting with
+ * InstanceProperties<T>, WrappedInstance becomes a plain anonymous object type
+ * that roblox-ts cannot identify as a Roblox class, so dot-call emission
+ * applies to every callable member — for any T, including the default T=Instance.
+ */
+type StripRobloxBrands<T> = { [K in keyof T as T[K] extends symbol ? never : K]: T[K] }
+
 // ================================================================
 // Deadline Modding – TypeScript Ambient Declarations
 // Source: https://recoil-group.github.io/deadline-modding/making-mods/scripting/api/
@@ -46,8 +62,10 @@ type SnakeRaycastResult = SnakifyKeys<RaycastResult>;
 
 interface TimerInstance {
     /** Returns true once the configured interval has elapsed since the last reset(). */
+    // docs: timer:expired() — colon, keep as method
     expired(): boolean;
     /** Restarts the countdown from zero. */
+    // docs: timer:reset() — colon, keep as method
     reset(): void;
 }
 
@@ -66,8 +84,10 @@ declare const Timer: {
 
 interface SpringInstance {
     /** Applies an instantaneous velocity impulse to the spring. */
+    // docs: spring:shove() — colon, keep as method
     shove(vector: Vector3): void;
     /** Advances the spring simulation by deltaTime seconds. */
+    // docs: spring:update() — colon, keep as method
     update(deltaTime: number): void;
 }
 
@@ -83,6 +103,7 @@ declare const Spring: {
 };
 
 interface SignalInstance<T extends (...args: any[]) => void = (...args: any[]) => void> extends RBXScriptSignal {
+    // docs: signal:Fire() — colon, keep as method
     Fire(...args: Parameters<T>): void;
 }
 
@@ -99,13 +120,22 @@ declare const Signal: {
 /**
  * A sandboxed proxy wrapping a Roblox engine instance.
  *
+ * All callable members use dot notation in the Deadline modding API
+ * (e.g. `instance.play()`, `instance.get_tags()`), so every method
+ * is declared as a property function so roblox-ts emits `self.method()`
+ * rather than `self:method()`.
+ *
+ * The intersection with StripRobloxBrands<InstanceProperties<T>> provides
+ * full property autocomplete and type safety for direct property assignments
+ * (e.g. `instance.Size = new Vector3(...)`) while stripping the @rbxts/types
+ * nominal brand properties (readonly _nominal_*: unique symbol) that would
+ * otherwise cause roblox-ts to identify this type as a Roblox Instance and
+ * force colon-call emission.
+ *
  * Properties may be **set** freely (e.g. `instance.Volume = 0.5`,
  * `instance.Parent = get_map_root()`). Reading back Roblox-native
  * properties like `.Parent` is **not** supported by the proxy — only
- * the explicitly typed methods below return meaningful values.
- *
- * The index signature `[key: string]: unknown` allows arbitrary
- * property assignments without type errors.
+ * the explicitly typed members below return meaningful values.
  */
 type WrappedInstance<T extends Instance = Instance> = {
     /** Set the Roblox Parent. Reading it back is not supported. */
@@ -114,43 +144,48 @@ type WrappedInstance<T extends Instance = Instance> = {
     Name: string;
 
     // ── Sound (valid on Sound instances only) ────────────────────
-    play(): void;
-    stop(): void;
+    // docs: sound.play(), sound.stop(), sound.create() — dot notation
+    play: () => void;
+    stop: () => void;
     /** Creates a new standalone Sound instance. Valid on Sound instances only. */
-    create(): WrappedInstance<Instance>;
+    create: () => WrappedInstance<Instance>;
 
     // ── Lifecycle ────────────────────────────────────────────────
-    clone(): WrappedInstance<Instance>;
-    destroy(): void;
+    // docs: sound.clone(), clone.destroy() — dot notation
+    clone: () => WrappedInstance<Instance>;
+    destroy: () => void;
 
     // ── CollectionService tags ───────────────────────────────────
-    get_tags(): string[];
-    add_tag(tag: string): void;
-    remove_tag(tag: string): void;
+    // docs: sound.get_tags(), sound.add_tag(), sound.remove_tag() — dot notation
+    get_tags: () => string[];
+    add_tag: (tag: string) => void;
+    remove_tag: (tag: string) => void;
 
     // ── Attributes ───────────────────────────────────────────────
-    set_attribute(name: string, value: unknown): void;
-    get_attribute(name: string): unknown;
+    // docs: sound.set_attribute(), sound.get_attribute() — dot notation
+    set_attribute: (name: string, value: unknown) => void;
+    get_attribute: (name: string) => unknown;
 
     // ── Model (valid on Model instances only) ────────────────────
-    pivot_to(cframe: CFrame): void;
-    get_pivot(): CFrame;
+    // docs: model.pivot_to(), model.get_pivot() — dot notation
+    pivot_to: (cframe: CFrame) => void;
+    get_pivot: () => CFrame;
 
     // ── Physics (valid on BasePart / physics-enabled instances) ──
-    apply_impulse(impulse: Vector3): void;
-    apply_impulse_at_position(impulse: Vector3, position: Vector3): void;
-    apply_angular_impulse_at_position(angular: Vector3, position: Vector3): void;
-    set_network_owner(owner: string | null): void;
+    // docs: instance.apply_impulse(), instance.apply_impulse_at_position(), etc. — dot notation
+    apply_impulse: (impulse: Vector3) => void;
+    apply_impulse_at_position: (impulse: Vector3, position: Vector3) => void;
+    apply_angular_impulse_at_position: (angular: Vector3, position: Vector3) => void;
+    set_network_owner: (owner: string | null) => void;
 
-    // Check if descendant of workspace
-    is_in_workspace(): boolean;
-    find_first_child(childName: string, recursive?: boolean): WrappedInstance | undefined;
-    is_a(childName: string): boolean;
-    is_descendant_of(instance: WrappedInstance): boolean;
+    // ── Hierarchy / util ─────────────────────────────────────────
+    // docs: dot notation throughout instance examples
+    is_in_workspace: () => boolean;
+    find_first_child: (childName: string, recursive?: boolean) => WrappedInstance | undefined;
+    is_a: (childName: string) => boolean;
+    is_descendant_of: (instance: WrappedInstance) => boolean;
 
-    /** Allows setting arbitrary Roblox instance properties by name. */
-    // [key: keyof InstanceProperties<T>]: unknown;
-} & { [K in keyof InstanceProperties<T>]: InstanceProperties<T>[K] }
+} & StripRobloxBrands<InstanceProperties<T>>
 
 /**
  * Result of tags.get_tagged / tags.get_all_tagged.
@@ -182,10 +217,11 @@ declare function get_chars_root(): WrappedInstance;
 // ================================================================
 
 interface RaycastParams {
+    // docs: raycast_params.filter_descendants_instances(), raycast_params.filter_type() — dot notation
     /** Adds instances and all their descendants to the filter list. */
-    filter_descendants_instances(instances: WrappedInstance[]): void;
+    filter_descendants_instances: (instances: WrappedInstance[]) => void;
     /** Sets the filter behaviour (Enum.RaycastFilterType.Exclude or Include). */
-    filter_type(filterType: EnumItem): void;
+    filter_type: (filterType: EnumItem) => void;
 }
 
 interface RaycastResult {
@@ -462,6 +498,11 @@ declare namespace players {
 /**
  * Per-player API. Instances are obtained through players.get / players.get_all
  * and the on_player_* event callbacks.
+ *
+ * All members use dot notation in the Deadline modding API
+ * (e.g. `player.kill()`, `player.get_team()`), so every callable
+ * is declared as a property function so roblox-ts emits `self.method()`
+ * rather than `self:method()`.
  */
 interface Player {
     /** Display name / Roblox username. */
@@ -472,77 +513,86 @@ interface Player {
     readonly player_id: number;
 
     // ── Lifecycle ───────────────────────────────────────────────
-    is_alive(): boolean;
-    kill(): void;
-    explode(): void;
-    kick(): void;
-    ban_from_server(): void;
+    // docs: player.is_alive(), player.kill(), player.explode(), etc. — dot notation
+    is_alive: () => boolean;
+    kill: () => void;
+    explode: () => void;
+    kick: () => void;
+    ban_from_server: () => void;
     /** Spawns the player if they are not already in the world. */
-    spawn(): void;
+    spawn: () => void;
     /** Force-respawns the player even if they are currently alive. */
-    respawn(): void;
+    respawn: () => void;
 
     // ── Team ────────────────────────────────────────────────────
-    set_team(team: PlayerTeam): void;
-    get_team(): PlayerTeam;
+    // docs: player.set_team(), player.get_team() — dot notation
+    set_team: (team: PlayerTeam) => void;
+    get_team: () => PlayerTeam;
 
     // ── Classification ──────────────────────────────────────────
-    is_bot(): boolean;
+    // docs: player.is_bot() — dot notation
+    is_bot: () => boolean;
 
     // ── Position & Camera ───────────────────────────────────────
-    set_position(position: Vector3): void;
+    // docs: player.set_position(), player.get_position(), player.set_camera_mode() — dot notation
+    set_position: (position: Vector3) => void;
     /** Returns null when the player is dead and has no character. */
-    get_position(): Vector3 | null;
-    set_camera_mode(mode: string): void;
+    get_position: () => Vector3 | null;
+    set_camera_mode: (mode: string) => void;
     /**
      * Activates a registered custom camera controller for this player.
      * @see register_camera_mode
      */
-    set_custom_camera_mode(mode: string): void;
+    set_custom_camera_mode: (mode: string) => void;
 
     // ── Movement & Stats ────────────────────────────────────────
-    set_animation_speed(speed: number): void;
-    get_animation_speed(): number;
-    set_speed(speed: number): void;
-    set_jump_multiplier(multiplier: number): void;
-    set_health(health: number): void;
-    get_health(): number;
-    deal_damage(amount: number): void;
+    // docs: player.set_animation_speed(), player.set_speed(), etc. — dot notation
+    set_animation_speed: (speed: number) => void;
+    get_animation_speed: () => number;
+    set_speed: (speed: number) => void;
+    set_jump_multiplier: (multiplier: number) => void;
+    set_health: (health: number) => void;
+    get_health: () => number;
+    deal_damage: (amount: number) => void;
     /** Sets the health value applied on the next spawn — not immediate. */
-    set_initial_health(health: number): void;
+    set_initial_health: (health: number) => void;
 
     // ── Appearance ──────────────────────────────────────────────
-    set_model(model: string): void;
+    // docs: player.set_model() — dot notation
+    set_model: (model: string) => void;
 
     // ── Weapons ─────────────────────────────────────────────────
-    refill_ammo(): void;
-    get_active_slot(): WeaponSlot;
+    // docs: player.refill_ammo(), player.get_active_slot(), etc. — dot notation
+    refill_ammo: () => void;
+    get_active_slot: () => WeaponSlot;
     /**
      * Forces the player to equip the weapon in the given slot.
      * @param immediate When true the switch happens instantly with no animation.
      */
-    equip_weapon(slot: WeaponSlot, immediate?: boolean): void;
+    equip_weapon: (slot: WeaponSlot, immediate?: boolean) => void;
     /**
      * Assigns a weapon and its attachment setup to a slot.
      * Pass `"nothing"` as the weapon name to clear the slot.
      * Pass `"[]"` as data when you have no attachment setup.
      */
-    set_weapon(slot: WeaponSlot, weapon: string, data?: string): void;
+    set_weapon: (slot: WeaponSlot, weapon: string, data?: string) => void;
     /**
      * Returns weapon data from the player's saved loadout.
      * @param loadoutIndex Zero-based index (0 = first loadout, 1 = second, …).
      */
-    get_weapon_from_loadout(loadoutIndex: number, slot: WeaponSlot): LoadoutWeaponData;
+    get_weapon_from_loadout: (loadoutIndex: number, slot: WeaponSlot) => LoadoutWeaponData;
     /** Returns live weapon data from the character currently present in the world. */
-    get_weapon_data_from_character(slot: WeaponSlot): CharacterWeaponData;
+    get_weapon_data_from_character: (slot: WeaponSlot) => CharacterWeaponData;
 
     // ── Profile & Leaderboard ───────────────────────────────────
-    get_profile_stats(): unknown;
-    get_leaderboard_stats(): unknown;
+    // docs: player.get_profile_stats(), player.get_leaderboard_stats() — dot notation
+    get_profile_stats: () => unknown;
+    get_leaderboard_stats: () => unknown;
 
     // ── Networking ──────────────────────────────────────────────
+    // docs: players.get("me").fire_client(123) — dot notation
     /** Sends a remote event payload to this specific player's client. */
-    fire_client(...args: unknown[]): void;
+    fire_client: (...args: unknown[]) => void;
 }
 
 /** Weapon attachment setup code utilities. [SERVER] */
@@ -759,15 +809,11 @@ declare const InputType: {
 type InputTypeValue = "Began" | "Ended";
 
 interface InputGroupDefault {
-    /** Removes all active bindings registered on this group. */
+    // docs: group:disconnect_all_binds() — colon, keep as method
     disconnect_all_binds(): void;
 }
 interface InputGroupInstance extends InputGroupDefault {
-    /**
-     * Binds directly to a raw Roblox KeyCode.
-     * @param ignoreGameProcessed Pass true to fire even when the game consumed the input.
-     * @param keyCode             A value from Enum.KeyCode.
-     */
+    // docs: input_group:bind_key(...) — colon, keep as method
     bind_key(
         callback: () => void,
         type: InputTypeValue,
@@ -776,11 +822,7 @@ interface InputGroupInstance extends InputGroupDefault {
     ): void;
 }
 interface ClientInputGroupInstance extends InputGroupDefault {
-    /**
-     * Binds to a user-remappable action from config.keybinds.
-     * @param type   InputType.Began or InputType.Ended
-     * @param action A key from config.keybinds (e.g. "move_forward", "crouch")
-     */
+    // docs: client_input_group:bind_user_setting(...) — colon, keep as method
     bind_user_setting(callback: () => void, type: InputTypeValue, action: string): void;
 }
 
@@ -789,7 +831,7 @@ interface ClientInputGroupInstance extends InputGroupDefault {
  * Prefer ClientInputGroup when bindings should respect the player's settings. [CLIENT]
  */
 declare const InputGroup: {
-    new(): InputGroupInstance; // fuckass the AI used one single class for two distinct types of input group
+    new(): InputGroupInstance;
 };
 
 /**
@@ -809,7 +851,7 @@ declare const ClientInputGroup: {
  */
 interface CameraControllerFrameState {
     input: Vector3
-    camera_cframe?: CFrame // added this myself
+    camera_cframe?: CFrame
     cam_position?: CFrame
     rot_x?: number
     rot_y?: number
@@ -831,7 +873,7 @@ interface CameraControllerFrameState {
  *   }
  * }
  * register_camera_mode("MyFreecam", MyFreecam);
- * players.get("me")?.set_custom_camera_mode("MyFreecam");
+ * players.get("me")?.set_custom_camera_mode("CustomFreecam");
  */
 interface CameraController extends CameraControllerFrameState {
     update(deltaTime: number): void;
@@ -853,18 +895,23 @@ declare function register_camera_mode(name: string, controller: CameraController
 /**
  * Handle returned by any Iris widget-creating call.
  * Poll the event methods inside your iris.Connect callback to react to input.
+ *
+ * All members use dot notation in the docs:
+ * `if (iris.Button({"Click me"}).clicked()) { ... }`
+ * so every callable is a property function.
  */
 interface IrisWidget {
+    // docs: widget.clicked(), widget.hovered(), etc. — dot notation
     /** True on the frame the widget was clicked. */
-    clicked(): boolean;
+    clicked: () => boolean;
     /** True while the pointer is over the widget. */
-    hovered(): boolean;
+    hovered: () => boolean;
     /** True while the widget is being held / interacted with. */
-    active(): boolean;
+    active: () => boolean;
     /** True for toggle-style widgets (Checkbox etc.) when currently checked. */
-    checked(): boolean;
+    checked: () => boolean;
     /** True on the frame the widget's value changed. */
-    changed(): boolean;
+    changed: () => boolean;
     [key: string]: unknown;
 }
 
@@ -872,8 +919,10 @@ interface IrisWidget {
  * Iris immediate-mode UI library.
  * Full docs: https://sirmallard.github.io/Iris/
  *
- * The callback registered with iris.Connect() runs every frame.
- * Call widget functions sequentially inside it to build the UI tree.
+ * The callback registered with iris.Connect() runs every frame (colon — inherited
+ * from RBXScriptSignal). All widget-creating calls use dot notation in the docs
+ * (e.g. `iris.Window(...)`, `iris.Button(...)`), so those are property functions.
+ *
  * Every opened container (Window, Tree, CollapsingHeader) requires a
  * matching iris.End() call. [CLIENT]
  *
@@ -886,30 +935,31 @@ interface IrisWidget {
  * });
  */
 interface IrisInstance extends RBXScriptSignal {
+    // docs: iris.Window(), iris.Text(), iris.Button(), iris.End() etc. — dot notation
 
     // ── Containers ───────────────────────────────────────────────
-    Window(args: [title: string, ...rest: unknown[]]): IrisWidget;
-    Tree(args?: [label: string, ...rest: unknown[]]): IrisWidget;
-    CollapsingHeader(args?: [label: string, ...rest: unknown[]]): IrisWidget;
+    Window: (args: [title: string, ...rest: unknown[]]) => IrisWidget;
+    Tree: (args?: [label: string, ...rest: unknown[]]) => IrisWidget;
+    CollapsingHeader: (args?: [label: string, ...rest: unknown[]]) => IrisWidget;
     /** Closes the most recently opened container. */
-    End(): void;
+    End: () => void;
 
     // ── Display ──────────────────────────────────────────────────
-    Text(args: [text: string, ...rest: unknown[]]): IrisWidget;
-    Separator(): void;
-    SameLine(): void;
+    Text: (args: [text: string, ...rest: unknown[]]) => IrisWidget;
+    Separator: () => void;
+    SameLine: () => void;
 
     // ── Inputs ───────────────────────────────────────────────────
-    Button(args: [label: string, ...rest: unknown[]]): IrisWidget;
-    Checkbox(args?: unknown[]): IrisWidget;
-    InputText(args: [label: string, ...rest: unknown[]]): IrisWidget;
-    InputNum(args?: unknown[]): IrisWidget;
-    InputVector2(args?: unknown[]): IrisWidget;
-    InputVector3(args?: unknown[]): IrisWidget;
-    InputColor3(args?: unknown[]): IrisWidget;
-    InputColor4(args?: unknown[]): IrisWidget;
-    SliderNum(args?: unknown[]): IrisWidget;
-    DragNum(args?: unknown[]): IrisWidget;
+    Button: (args: [label: string, ...rest: unknown[]]) => IrisWidget;
+    Checkbox: (args?: unknown[]) => IrisWidget;
+    InputText: (args: [label: string, ...rest: unknown[]]) => IrisWidget;
+    InputNum: (args?: unknown[]) => IrisWidget;
+    InputVector2: (args?: unknown[]) => IrisWidget;
+    InputVector3: (args?: unknown[]) => IrisWidget;
+    InputColor3: (args?: unknown[]) => IrisWidget;
+    InputColor4: (args?: unknown[]) => IrisWidget;
+    SliderNum: (args?: unknown[]) => IrisWidget;
+    DragNum: (args?: unknown[]) => IrisWidget;
 
     /** Catch-all for any Iris widget not listed above. */
     [key: string]: unknown;

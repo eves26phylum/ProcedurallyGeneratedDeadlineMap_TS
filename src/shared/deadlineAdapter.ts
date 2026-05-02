@@ -1,6 +1,11 @@
+let wagesCounter = 0;
 export namespace deadlineAdapter {
     export function newInstance<T extends keyof CreatableInstances>(className: T, Parent?: WrappedInstance) {
-        task.wait();
+        if (wagesCounter > 1000) {
+            wagesCounter = 0;
+            task.wait(0.05);
+        }
+        wagesCounter++;
         return create_instance<T>(className, Parent);
     }
     export function setProperty(property: Record<any, any>, key: any, value: any) {

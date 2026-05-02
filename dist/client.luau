@@ -2,79 +2,6 @@
 function assert(condition, messageIfFalse)
     if not condition then error(messageIfFalse or _VERSION.." assertion error") end
 end
-local WRAPPED_INSTANCE_SENTINEL_METHODS = { "find_first_child", "destroy", "clone", "get_tags", "is_a", "is_in_workspace" }
-
-local function is_wrapped_instance(obj)
-    if type(obj) ~= "table" then return false end
-    for _, method in ipairs(WRAPPED_INSTANCE_SENTINEL_METHODS) do
-        if type(obj[method]) == "function" then return true end
-    end
-    return false
-end
-
-local deep_wrap_result
-
-local function dot_wrap(obj)
-    if obj == nil then return nil end
-    local proxy = {}
-    for k, v in pairs(obj) do
-        if type(v) == "function" then
-            proxy[k] = function(_, ...) return deep_wrap_result(v(...)) end
-        else
-            proxy[k] = v
-        end
-    end
-    return proxy
-end
-
-deep_wrap_result = function(result)
-    if is_wrapped_instance(result) then return dot_wrap(result) end
-    if type(result) ~= "table" then return result end
-    local wrappedResult = {}
-    for k, v in pairs(result) do
-        wrappedResult[k] = is_wrapped_instance(v) and dot_wrap(v) or v
-    end
-    return wrappedResult
-end
-
-local function dot_wrap_array(arr)
-	if arr == nil then return nil end
-	local result = {}
-	for i, v in ipairs(arr) do
-		result[i] = dot_wrap(v)
-	end
-	return result
-end
-
-local _players = players
-players = {
-	get = function(name) return dot_wrap(_players.get(name)) end,
-	get_all = function() return dot_wrap_array(_players.get_all()) end,
-	get_alive = function() return dot_wrap_array(_players.get_alive()) end,
-	get_by_userid = function(id) return dot_wrap(_players.get_by_userid(id)) end,
-	reset_ragdolls = function() return _players.reset_ragdolls() end,
-}
-
-local _tags = tags
-tags = {
-	get_tags = function() return _tags.get_tags() end,
-	get_tagged = function(tag) return dot_wrap_array(_tags.get_tagged(tag)) end,
-	get_all_tagged = function(tag) return dot_wrap_array(_tags.get_all_tagged(tag)) end,
-}
-
-local _query = query
-query = {
-	create_raycast_params = function() return dot_wrap(_query.create_raycast_params()) end,
-	raycast = function(origin, direction, params) return _query.raycast(origin, direction, params) end,
-}
-local _get_map_root = get_map_root
-get_map_root = function() return dot_wrap(_get_map_root()) end
-
-local _get_chars_root = get_chars_root
-get_chars_root = function() return dot_wrap(_get_chars_root()) end
-
-local _create_instance = create_instance
-create_instance = function(className, parent) return dot_wrap(_create_instance(className, parent)) end
 local old_require = require
 local __modulesFolder = {}
 local __modulesCachedValues = {}
@@ -1466,11 +1393,16 @@ __modulesFolder["deadlineAdapter"] = function()
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local wagesCounter = 0
 	local deadlineAdapter = {}
 	do
 		local _container = deadlineAdapter
 		local function newInstance(className, Parent)
-			task.wait()
+			if wagesCounter > 1000 then
+				wagesCounter = 0
+				task.wait(0.05)
+			end
+			wagesCounter += 1
 			return create_instance(className, Parent)
 		end
 		_container.newInstance = newInstance
@@ -1479,11 +1411,11 @@ __modulesFolder["deadlineAdapter"] = function()
 		end
 		_container.setProperty = setProperty
 		local function findFirstChild(target, targetName, recursive)
-			return target:find_first_child(targetName, recursive)
+			return target.find_first_child(targetName, recursive)
 		end
 		_container.findFirstChild = findFirstChild
 		local function destroy(target)
-			return target:destroy()
+			return target.destroy()
 		end
 		_container.destroy = destroy
 	end

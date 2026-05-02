@@ -83,7 +83,6 @@ export class createTerrain {
 
         const minSizeVector3 = new Vector3(0, minSize * partSize, 0);
         const wedges: Record<number, Record<number, WedgeCell>> = {};
-
         for (let x = 0; x < resolution.X; x++) {
             for (let y = 0; y < resolution.Y; y++) {
                 const topLeftOffset = new Vector2(0, 0);
@@ -123,7 +122,6 @@ export class createTerrain {
                 };
 
                 wedges[x][y] = cell;
-
             }
         }
         for (let x = 0; x < resolution.X; x++) {

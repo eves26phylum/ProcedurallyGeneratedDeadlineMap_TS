@@ -77,7 +77,11 @@ function generate() {
     const workspace: AnyInstance = isDeadline ? get_map_root() : game.GetService("Workspace");
     const PART_SIZE = 100;
     const MAP_SIZE = new Vector2(10000, 10000);
-    const RESOLUTION = new Vector2(math.round(MAP_SIZE.X / PART_SIZE), math.round(MAP_SIZE.Y / PART_SIZE));
+    const RESOLUTION = new Vector2(
+        math.round(MAP_SIZE.X / PART_SIZE), 
+        math.round(MAP_SIZE.Y / PART_SIZE)
+    );
+    // const RESOLUTION = new Vector2(5, 5);
     const ROUGHNESS = 4;
     const PARAMS = {
         lacunarity: 4,
@@ -188,9 +192,9 @@ if (isDeadline) {
     sharedvars.plr_ping_warning_threshold_ms = math.huge
     sharedvars.ac_airtime_kill = false
     sharedvars.sv_gravity = 20
-
+    warn("Generating for Deadline environment.");
     generate();
-
+    info("Done.");
     map.set_time(10)
     const lastSpawns = {
         defender: 0,
@@ -219,5 +223,14 @@ if (isDeadline) {
         player.set_health(100)
     })
 } else {
+    warn("Generating for ROBLOX environment.");
     generate();
+    info("Done.");
 }
+// const [success, result] = pcall(generate);
+// warn(success, result);
+// function a(b: WrappedInstance){
+//     b.find_first_child("")
+// }
+// a(create_instance("Part"));
+// time.wait(5);
