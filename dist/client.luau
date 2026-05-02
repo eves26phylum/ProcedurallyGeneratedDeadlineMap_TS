@@ -595,15 +595,18 @@ __modulesFolder["NuristanBuildings"] = function()
 			local entranceCFrame = baseCFrame + _vector3_1
 			local roomSize = self.config.roomProps.RoomSize
 			proceduralGrid:forEachRoom(function(gridColumn, gridRow, faceData)
+				-- const roomWorldPosition = entranceCFrame.mul(new CFrame(roomSize.X * gridColumn, 0, roomSize.Z * gridRow)).Position;
+				-- const roomHeightResult = EgoMoose.getBarycentricHeight(
+				--     vertices[0], vertices[1], vertices[2],
+				--     new Vector2(roomWorldPosition.X, roomWorldPosition.Z)
+				-- );
+				-- if (roomHeightResult[0] === undefined) return;
+				-- const roomPosX = this.config.roomProps.RoomSize.X * gridColumn;
+				-- const roomPosZ = this.config.roomProps.RoomSize.Z * gridRow;
+				-- const worldPos = exitRoomCFrame.mul(new CFrame(roomPosX, 0, roomPosZ)).Position;
+				-- const roomCFrame = baseCFrame.Rotation.add(new Vector3(roomWorldPosition.X, roomHeightResult[0], roomWorldPosition.Z));
 				local _cFrame = CFrame.new(roomSize.X * gridColumn, 0, roomSize.Z * gridRow)
-				local roomWorldPosition = (entranceCFrame * _cFrame).Position
-				local roomHeightResult = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(roomWorldPosition.X, roomWorldPosition.Z))
-				if roomHeightResult[1] == nil then
-					return nil
-				end
-				local _rotation_1 = baseCFrame.Rotation
-				local _vector3_2 = Vector3.new(roomWorldPosition.X, roomHeightResult[1], roomWorldPosition.Z)
-				local roomCFrame = _rotation_1 + _vector3_2
+				local roomCFrame = entranceCFrame * _cFrame
 				for _, handler in roomHandlers do
 					if handler:tryGenerate(roomCFrame, faceData) then
 						break

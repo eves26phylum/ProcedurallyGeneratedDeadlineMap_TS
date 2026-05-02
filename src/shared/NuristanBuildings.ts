@@ -383,13 +383,17 @@ export class NuristanBuildings extends Biome {
         const roomSize = this.config.roomProps.RoomSize;
 
         proceduralGrid.forEachRoom((gridColumn, gridRow, faceData) => {
-            const roomWorldPosition = entranceCFrame.mul(new CFrame(roomSize.X * gridColumn, 0, roomSize.Z * gridRow)).Position;
-            const roomHeightResult = EgoMoose.getBarycentricHeight(
-                vertices[0], vertices[1], vertices[2],
-                new Vector2(roomWorldPosition.X, roomWorldPosition.Z)
-            );
-            if (roomHeightResult[0] === undefined) return;
-            const roomCFrame = baseCFrame.Rotation.add(new Vector3(roomWorldPosition.X, roomHeightResult[0], roomWorldPosition.Z));
+            // const roomWorldPosition = entranceCFrame.mul(new CFrame(roomSize.X * gridColumn, 0, roomSize.Z * gridRow)).Position;
+            // const roomHeightResult = EgoMoose.getBarycentricHeight(
+            //     vertices[0], vertices[1], vertices[2],
+            //     new Vector2(roomWorldPosition.X, roomWorldPosition.Z)
+            // );
+            // if (roomHeightResult[0] === undefined) return;
+            // const roomPosX = this.config.roomProps.RoomSize.X * gridColumn;
+            // const roomPosZ = this.config.roomProps.RoomSize.Z * gridRow;
+            // const worldPos = exitRoomCFrame.mul(new CFrame(roomPosX, 0, roomPosZ)).Position;
+            // const roomCFrame = baseCFrame.Rotation.add(new Vector3(roomWorldPosition.X, roomHeightResult[0], roomWorldPosition.Z));
+            const roomCFrame = entranceCFrame.mul(new CFrame(roomSize.X * gridColumn, 0, roomSize.Z * gridRow));
             for (const handler of roomHandlers) {
                 if (handler.tryGenerate(roomCFrame, faceData)) break;
             }
