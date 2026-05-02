@@ -1397,6 +1397,7 @@ __modulesFolder["deadlineAdapter"] = function()
 	do
 		local _container = deadlineAdapter
 		local function newInstance(className, Parent)
+			task.wait()
 			return create_instance(className, Parent)
 		end
 		_container.newInstance = newInstance
@@ -1436,6 +1437,24 @@ __modulesFolder["humanConfig"] = function()
 	}
 	return {
 		default = default,
+	}
+
+end
+
+__modulesFolder["isDeadline"] = function()
+	local script
+	script = newFakeInstance({"isDeadline"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local isDeadline = get_map_root ~= nil
+	return {
+		isDeadline = isDeadline,
 	}
 
 end

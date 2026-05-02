@@ -10,6 +10,7 @@ import { Biome } from "shared/biome";
 import humanConfig from "shared/humanConfig";
 import { translateTerrainOrientationForStructureBonding } from "shared/translateTerrainForStructureBonding";
 import { NuristanBuildings } from "shared/NuristanBuildings";
+import { isDeadline } from "shared/isDeadline";
 
 // !deadline-ts.customFinishSector_FinishModulesEnd
 // The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
@@ -68,7 +69,6 @@ Think of it like this:
 │ [I WILL FIX THIS]                           │
 └─────────────────────────────────────────────┘
 */
-const isDeadline = get_map_root !== undefined;
 const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
 const workspace: AnyInstance = isDeadline ? get_map_root() : game.GetService("Workspace");
 if (isDeadline) {

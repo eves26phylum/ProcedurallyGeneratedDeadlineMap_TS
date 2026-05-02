@@ -1,0 +1,1 @@
+export const isDeadline = get_map_root !== undefined;
