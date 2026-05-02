@@ -181,7 +181,6 @@ const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
 }, EgoMoose, adapterToUse, wedgesFolder);
 const triangles = createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);
 
-
 if (isDeadline) {
     sharedvars.plr_ping_limit_sec = math.huge
     sharedvars.plr_ping_timeout_sec = math.huge
@@ -205,7 +204,7 @@ if (isDeadline) {
         if ((lastSpawns[team] > lastSpawns.coordination) || (!lastSpawnedPos[team])) {
             lastSpawns[team] = 0
 
-            const raycast_params = query.create_raycast_params()
+            const raycast_params = query.create_raycast_params();
             const hit = query.raycast(new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z)), new Vector3(0, -4000, 0), raycast_params)
             if (!hit) return warn("Hit was not found when doing spawn logic");
 

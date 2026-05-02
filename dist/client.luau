@@ -2,6 +2,52 @@
 function assert(condition, messageIfFalse)
     if not condition then error(messageIfFalse or _VERSION.." assertion error") end
 end
+local function dot_wrap(obj)
+    if obj == nil then return nil end
+    local proxy = {}
+    for k, v in pairs(obj) do
+        if type(v) == "function" then
+            proxy[k] = function(_, ...) return v(...) end
+        else
+            proxy[k] = v
+        end
+    end
+    return proxy
+end
+
+local function dot_wrap_array(arr)
+	if arr == nil then return nil end
+	local result = {}
+	for i, v in ipairs(arr) do
+		result[i] = dot_wrap(v)
+	end
+	return result
+end
+
+local _players = players
+players = {
+	get = function(name) return dot_wrap(_players.get(name)) end,
+	get_all = function() return dot_wrap_array(_players.get_all()) end,
+	get_alive = function() return dot_wrap_array(_players.get_alive()) end,
+	get_by_userid = function(id) return dot_wrap(_players.get_by_userid(id)) end,
+	reset_ragdolls = function() return _players.reset_ragdolls() end,
+}
+
+local _tags = tags
+tags = {
+	get_tags = function() return _tags.get_tags() end,
+	get_tagged = function(tag) return dot_wrap_array(_tags.get_tagged(tag)) end,
+	get_all_tagged = function(tag) return dot_wrap_array(_tags.get_all_tagged(tag)) end,
+}
+
+local _query = query
+query = {
+	create_raycast_params = function() return dot_wrap(_query.create_raycast_params()) end,
+	raycast = function(origin, direction, params) return _query.raycast(origin, direction, params) end,
+}
+
+local _create_instance = create_instance
+create_instance = function(className, parent) return dot_wrap(_create_instance(className, parent)) end
 local old_require = require
 local __modulesFolder = {}
 local __modulesCachedValues = {}
@@ -1585,3 +1631,22 @@ __modulesFolder["translateTerrainForStructureBonding"] = function()
 	}
 
 end
+
+task.defer(function()
+	local script
+	script = newFakeInstance({"main"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local player = players.get("flanker2000Y2K")
+	if not player then
+		error("NO PLAYER")
+	end
+	print(player:get_team())
+
+end)
