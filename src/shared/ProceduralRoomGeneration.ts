@@ -44,17 +44,17 @@ export class ProceduralRoomGrid {
     }
 
     hasRoom(gridColumn: number, gridRow: number): boolean {
-        return this.roomGrid[gridColumn] !== undefined && this.roomGrid[gridColumn][gridRow] !== undefined;
+        return !!this.roomGrid[gridColumn]?.[gridRow];
     }
 
     forEachRoom(callback: (gridColumn: number, gridRow: number, faceData: RoomFaceData, roomType: string) => void): void {
         for (let gridColumn = 0; gridColumn < this.roomGrid.size(); gridColumn++) {
             const roomRow = this.roomGrid[gridColumn];
-            if (roomRow === undefined) continue;
+            if (!roomRow) continue;
             for (let gridRow = 0; gridRow < roomRow.size(); gridRow++) {
                 if (!this.hasRoom(gridColumn, gridRow)) continue;
                 const faceData = this.roomFaceDataMap.get(`${gridColumn},${gridRow}`);
-                if (faceData === undefined) continue;
+                if (!faceData) continue;
                 callback(gridColumn, gridRow, faceData, this.roomGrid[gridColumn][gridRow]);
             }
         }
@@ -111,7 +111,7 @@ export class ProceduralRoomGrid {
         const mergedWalls = new Set<string>();
         for (let gridColumn = 0; gridColumn < this.roomGrid.size(); gridColumn++) {
             const roomRow = this.roomGrid[gridColumn];
-            if (roomRow === undefined) continue;
+            if (!roomRow) continue;
             for (let gridRow = 0; gridRow < roomRow.size(); gridRow++) {
                 if (!this.hasRoom(gridColumn, gridRow)) continue;
                 this.collectMergedWallsForCell(passages, mergedWalls, mergeWallChance, gridColumn, gridRow);
