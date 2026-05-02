@@ -6,12 +6,13 @@ import { PerlinNoise } from "shared/PerlinNoise";
 import { AnyInstance, InstanceAdapter } from "shared/definition";
 import { biomeBox } from "shared/biomeAndStructureRegistrySystem";
 import { assign } from "shared/Util";
-import { Biome } from "shared/biome";
+import { Biome, biomeClaimLand, ensureBiomeData, useBiomeData } from "shared/biome";
 import humanConfig from "shared/humanConfig";
 import { translateTerrainOrientationForStructureBonding } from "shared/translateTerrainForStructureBonding";
 import { NuristanBuildings } from "shared/NuristanBuildings";
 import { isDeadline } from "shared/isDeadline";
-
+import { RoomTypeHandler, DoorwayDataType, ALL_WALL_FACES } from "shared/NuristanBuildings";
+import { RoomFaceData } from "shared/ProceduralRoomGeneration";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 // The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 
@@ -69,11 +70,59 @@ Think of it like this:
 │ [I WILL FIX THIS]                           │
 └─────────────────────────────────────────────┘
 */
-function generate() {
-    print("Me is generating :3"); // huh this prints but it's not generating
-    // work on this later
-    // prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
-    const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
+
+class SniperWindowRoomHandler implements RoomTypeHandler {
+    readonly priority = 10;
+    private readonly buildings: NuristanBuildings;
+    private readonly sniperWindowDoorway: DoorwayDataType;
+
+    constructor(buildings: NuristanBuildings, sniperWindowDoorway: DoorwayDataType) {
+        this.buildings = buildings;
+        this.sniperWindowDoorway = sniperWindowDoorway;
+    }
+
+    private static hasExteriorFace(faceData: RoomFaceData): boolean {
+        for (const face of ALL_WALL_FACES) {
+            if (faceData[face].state === "exteriorWall") return true;
+        }
+        return false;
+    }
+
+    tryGenerate(roomCFrame: CFrame, faceData: RoomFaceData): boolean {
+        if (!SniperWindowRoomHandler.hasExteriorFace(faceData)) return false;
+        const roomSize = this.buildings.config.roomProps.RoomSize;
+        this.buildings.instantiateRoomShell(roomCFrame);
+        for (const face of ALL_WALL_FACES) {
+            const faceDatum = faceData[face];
+            if (faceDatum.state === "empty") continue;
+            if (faceDatum.state === "exteriorWall") {
+                this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face, { doorway: this.sniperWindowDoorway });
+                continue;
+            }
+            if (faceDatum.state === "doorway") {
+                this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face);
+                continue;
+            }
+            this.buildings.makeWallWithoutDoorway(roomCFrame, roomSize, face);
+        }
+        return true;
+    }
+}
+
+class LivingRoomHandler implements RoomTypeHandler {
+    readonly priority = 0;
+    private readonly buildings: NuristanBuildings;
+
+    constructor(buildings: NuristanBuildings) {
+        this.buildings = buildings;
+    }
+
+    tryGenerate(roomCFrame: CFrame, faceData: RoomFaceData): boolean {
+        this.buildings.createStandardRoom(roomCFrame, faceData);
+        return true;
+    }
+}
+const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
     const workspace: AnyInstance = isDeadline ? get_map_root() : game.GetService("Workspace");
     const PART_SIZE = 100;
     const MAP_SIZE = new Vector2(10000, 10000);
@@ -104,15 +153,18 @@ function generate() {
         desert: () => Partial<InstanceProperties<WedgePart>>
         grass: () => Partial<InstanceProperties<WedgePart>>
     }
-    class NuristanStandardBiome extends Biome {
+    class NuristanStandardBiome implements Biome {
         config: NuristanStandardBiomeConfig
         parent: AnyInstance
+        priority: number
+        name: string
+        adapter: InstanceAdapter
         constructor(adapterToUse: InstanceAdapter, config: NuristanStandardBiomeConfig, parent: AnyInstance) {
-            super(adapterToUse);
             this.priority = 100;
             this.config = config;
             this.parent = parent;
             this.name = "nsb";
+            this.adapter = adapterToUse;
         }
         
         private getColourAndMaterialFromHeight(height: number): Partial<InstanceProperties<WedgePart>> {
@@ -120,15 +172,18 @@ function generate() {
             return this.config.desert();
         }
         generate(yourSelf: createTerrain, yourCell: WedgeCell) {
+            if (useBiomeData(yourCell)) return;
             const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance) => {
                 const height = data.data.averageHeight;
                 const propMap: Partial<InstanceProperties<WedgePart>> = this.getColourAndMaterialFromHeight(height);
-                assign(triangle, propMap, (a, b, c) => {yourSelf.adapter.setProperty(a, b, c);});
+                assign(triangle, propMap, (a, b, c) => {this.adapter.setProperty(a, b, c);});
             }
             operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][0]);
             operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][1]);
             operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][0]);
             operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1]);
+            ensureBiomeData(yourCell);
+            biomeClaimLand(this, yourCell);
         }
     }
 
@@ -177,7 +232,19 @@ function generate() {
             bottomOffset: 3,
             offsetAlongWall: 0
         }
-    }, wedgesFolder));
+    }, wedgesFolder,
+    (thisThing: NuristanBuildings) => {
+        return [
+            new SniperWindowRoomHandler(thisThing, thisThing.config.sniperWindowDoorway),
+            new LivingRoomHandler(thisThing),
+        ]
+    }
+));
+
+function generate() {
+    print("Me is generating :3"); // huh this prints but it's not generating
+    // work on this later
+    // prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
     const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
         const _self = thisData._self;
         standardBox.executeAllModifiers(thisData._self, thisData);

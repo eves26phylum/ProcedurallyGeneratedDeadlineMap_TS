@@ -68,7 +68,7 @@ Think of it like this:
 └─────────────────────────────────────────────┘
 */
 
-interface WallConfig {
+export interface WallConfig {
     thickness: number;
     height: number;
 }
@@ -80,11 +80,11 @@ export interface DoorwayDataType {
     bottomOffset: number;
 }
 
-interface RoomProps extends Partial<InstanceProperties<BasePart>> {
+export interface RoomProps extends Partial<InstanceProperties<BasePart>> {
     RoomSize: Vector3;
 }
 
-interface NuristanBuildingsConfig {
+export interface NuristanBuildingsConfig {
     wallPartProps: Partial<InstanceProperties<Part>>;
     doorway: DoorwayDataType;
     wall: WallConfig;
@@ -93,7 +93,7 @@ interface NuristanBuildingsConfig {
     sniperWindowDoorway: DoorwayDataType;
 }
 
-interface WallSegmentGeometry {
+export interface WallSegmentGeometry {
     localCFrame: CFrame;
     size: Vector3;
 }
@@ -103,14 +103,14 @@ export interface RoomTypeHandler {
     tryGenerate(roomCFrame: CFrame, faceData: RoomFaceData): boolean;
 }
 
-interface FaceAxisConfig {
+export interface FaceAxisConfig {
     faceLocalOffset: (plateSize: Vector3, thickness: number) => number;
     wallLength: (plateSize: Vector3) => number;
     buildLocalCFrame: (lengthAxisLocalPos: number, localHeightCenter: number, faceLocalOffset: number) => CFrame;
     buildSegmentSize: (segmentLength: number, segmentHeight: number, thickness: number) => Vector3;
 }
 
-const ALL_WALL_FACES: ReadonlyArray<WallFace> = ["north", "south", "east", "west"];
+export const ALL_WALL_FACES: ReadonlyArray<WallFace> = ["north", "south", "east", "west"];
 
 const faceAxisConfigMap: Record<WallFace, FaceAxisConfig> = {
     north: {
@@ -228,69 +228,22 @@ function instantiateWallSegments(
     }
 }
 
-class SniperWindowRoomHandler implements RoomTypeHandler {
-    readonly priority = 10;
-    private readonly buildings: NuristanBuildings;
-    private readonly sniperWindowDoorway: DoorwayDataType;
-
-    constructor(buildings: NuristanBuildings, sniperWindowDoorway: DoorwayDataType) {
-        this.buildings = buildings;
-        this.sniperWindowDoorway = sniperWindowDoorway;
-    }
-
-    private static hasExteriorFace(faceData: RoomFaceData): boolean {
-        for (const face of ALL_WALL_FACES) {
-            if (faceData[face].state === "exteriorWall") return true;
-        }
-        return false;
-    }
-
-    tryGenerate(roomCFrame: CFrame, faceData: RoomFaceData): boolean {
-        if (!SniperWindowRoomHandler.hasExteriorFace(faceData)) return false;
-        const roomSize = this.buildings.config.roomProps.RoomSize;
-        this.buildings.instantiateRoomShell(roomCFrame);
-        for (const face of ALL_WALL_FACES) {
-            const faceDatum = faceData[face];
-            if (faceDatum.state === "empty") continue;
-            if (faceDatum.state === "exteriorWall") {
-                this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face, { doorway: this.sniperWindowDoorway });
-                continue;
-            }
-            if (faceDatum.state === "doorway") {
-                this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face);
-                continue;
-            }
-            this.buildings.makeWallWithoutDoorway(roomCFrame, roomSize, face);
-        }
-        return true;
-    }
-}
-
-class LivingRoomHandler implements RoomTypeHandler {
-    readonly priority = 0;
-    private readonly buildings: NuristanBuildings;
-
-    constructor(buildings: NuristanBuildings) {
-        this.buildings = buildings;
-    }
-
-    tryGenerate(roomCFrame: CFrame, faceData: RoomFaceData): boolean {
-        this.buildings.createStandardRoom(roomCFrame, faceData);
-        return true;
-    }
-}
-
-export class NuristanBuildings extends Biome {
+export class NuristanBuildings implements Biome {
     config: NuristanBuildingsConfig;
     parent: AnyInstance;
     translateTerrain: translateTerrainOrientationForStructureBonding;
-    constructor(adapterToUse: InstanceAdapter, translateTerrain: translateTerrainOrientationForStructureBonding, config: NuristanBuildingsConfig, parent: AnyInstance) {
-        super(adapterToUse);
+    roomHandlers: RoomTypeHandler[]
+    priority: number
+    name: string
+    adapter: InstanceAdapter
+    constructor(adapterToUse: InstanceAdapter, translateTerrain: translateTerrainOrientationForStructureBonding, config: NuristanBuildingsConfig, parent: AnyInstance, roomHandlers: (thisThing: NuristanBuildings) => RoomTypeHandler[]) {
         this.priority = 100;
         this.config = config;
         this.translateTerrain = translateTerrain;
         this.parent = parent;
         this.name = "NuristanBuildings";
+        this.roomHandlers = roomHandlers(this);
+        this.adapter = adapterToUse;
     }
 
     private mergeConfig(overrides: Partial<NuristanBuildingsConfig>): NuristanBuildingsConfig {
@@ -365,11 +318,6 @@ export class NuristanBuildings extends Biome {
             fisherYatesShuffle
         );
 
-        const roomHandlers: ReadonlyArray<RoomTypeHandler> = [
-            new SniperWindowRoomHandler(this, this.config.sniperWindowDoorway),
-            new LivingRoomHandler(this),
-        ];
-
         const entranceHeightResult = EgoMoose.getBarycentricHeight(
             vertices[0], vertices[1], vertices[2],
             new Vector2(houseCFrame.X, houseCFrame.Z)
@@ -382,7 +330,7 @@ export class NuristanBuildings extends Biome {
 
         proceduralGrid.forEachRoom((gridColumn, gridRow, faceData) => {
             const roomCFrame = entranceCFrame.mul(new CFrame(roomSize.X * gridColumn, 0, roomSize.Z * gridRow));
-            for (const handler of roomHandlers) {
+            for (const handler of this.roomHandlers) {
                 if (handler.tryGenerate(roomCFrame, faceData)) break;
             }
         });

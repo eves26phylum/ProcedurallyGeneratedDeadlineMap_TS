@@ -3,15 +3,10 @@ import { BiomeData, biomeExtension } from "./biomeExtension";
 import { InstanceAdapter } from "./definition";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
-export class Biome {
+export interface Biome {
     priority: number
     name: string
     adapter: InstanceAdapter
-    constructor(adapter: InstanceAdapter) {
-        this.priority = -1;
-        this.name = "?";
-        this.adapter = adapter;
-    }
 }
 
 export function useBiomeData(yourCell: WedgeCell): BiomeData | undefined {
@@ -21,14 +16,12 @@ export function useBiomeData(yourCell: WedgeCell): BiomeData | undefined {
 }
 
 const defaultValue = {
-    whoClaimedThis: [],
-    claimed: 0
+    whoClaimedThis: []
 };
 
-export function structureClaimLand(thisBiome: Biome, yourCell: WedgeCell): void {
+export function biomeClaimLand(thisBiome: Biome, yourCell: WedgeCell): void {
   const data = biomeExtension.get(yourCell);
   if (!data) return;
-  data.claimed += 1;
   data.whoClaimedThis.push(thisBiome.name);
 }
 

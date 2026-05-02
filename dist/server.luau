@@ -241,7 +241,6 @@ __modulesFolder["NuristanBuildings"] = function()
 	script = newFakeInstance({"NuristanBuildings"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local Biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome").Biome
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	local humanConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "humanConfig").default
 	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
@@ -428,99 +427,26 @@ __modulesFolder["NuristanBuildings"] = function()
 			adapter.setProperty(wallPart, "Parent", parent)
 		end
 	end
-	local SniperWindowRoomHandler
-	do
-		SniperWindowRoomHandler = setmetatable({}, {
-			__tostring = function()
-				return "SniperWindowRoomHandler"
-			end,
-		})
-		SniperWindowRoomHandler.__index = SniperWindowRoomHandler
-		function SniperWindowRoomHandler.new(...)
-			local self = setmetatable({}, SniperWindowRoomHandler)
-			return self:constructor(...) or self
-		end
-		function SniperWindowRoomHandler:constructor(buildings, sniperWindowDoorway)
-			self.priority = 10
-			self.buildings = buildings
-			self.sniperWindowDoorway = sniperWindowDoorway
-		end
-		function SniperWindowRoomHandler:hasExteriorFace(faceData)
-			for _, face in ALL_WALL_FACES do
-				if faceData[face].state == "exteriorWall" then
-					return true
-				end
-			end
-			return false
-		end
-		function SniperWindowRoomHandler:tryGenerate(roomCFrame, faceData)
-			if not SniperWindowRoomHandler:hasExteriorFace(faceData) then
-				return false
-			end
-			local roomSize = self.buildings.config.roomProps.RoomSize
-			self.buildings:instantiateRoomShell(roomCFrame)
-			for _, face in ALL_WALL_FACES do
-				local faceDatum = faceData[face]
-				if faceDatum.state == "empty" then
-					continue
-				end
-				if faceDatum.state == "exteriorWall" then
-					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face, {
-						doorway = self.sniperWindowDoorway,
-					})
-					continue
-				end
-				if faceDatum.state == "doorway" then
-					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face)
-					continue
-				end
-				self.buildings:makeWallWithoutDoorway(roomCFrame, roomSize, face)
-			end
-			return true
-		end
-	end
-	local LivingRoomHandler
-	do
-		LivingRoomHandler = setmetatable({}, {
-			__tostring = function()
-				return "LivingRoomHandler"
-			end,
-		})
-		LivingRoomHandler.__index = LivingRoomHandler
-		function LivingRoomHandler.new(...)
-			local self = setmetatable({}, LivingRoomHandler)
-			return self:constructor(...) or self
-		end
-		function LivingRoomHandler:constructor(buildings)
-			self.priority = 0
-			self.buildings = buildings
-		end
-		function LivingRoomHandler:tryGenerate(roomCFrame, faceData)
-			self.buildings:createStandardRoom(roomCFrame, faceData)
-			return true
-		end
-	end
 	local NuristanBuildings
 	do
-		local super = Biome
 		NuristanBuildings = setmetatable({}, {
 			__tostring = function()
 				return "NuristanBuildings"
 			end,
-			__index = super,
 		})
 		NuristanBuildings.__index = NuristanBuildings
 		function NuristanBuildings.new(...)
 			local self = setmetatable({}, NuristanBuildings)
 			return self:constructor(...) or self
 		end
-		function NuristanBuildings:constructor(adapterToUse, translateTerrain, config, parent)
-			super.constructor(self, adapterToUse)
+		function NuristanBuildings:constructor(adapterToUse, translateTerrain, config, parent, roomHandlers)
 			self.priority = 100
 			self.config = config
 			self.translateTerrain = translateTerrain
 			self.parent = parent
 			self.name = "NuristanBuildings"
+			self.roomHandlers = roomHandlers(self)
+			self.adapter = adapterToUse
 		end
 		function NuristanBuildings:mergeConfig(overrides)
 			local _object = table.clone(self.config)
@@ -581,7 +507,6 @@ __modulesFolder["NuristanBuildings"] = function()
 		function NuristanBuildings:createSingleHouse(houseCFrame, vertices)
 			local registeredRoomTypeNames = { "LivingRoom" }
 			local proceduralGrid = ProceduralRoomGrid.new(self.config.roomGeneration, registeredRoomTypeNames, DepthFirstMazeSearch.new(fisherYatesShuffle), fisherYatesShuffle)
-			local roomHandlers = { SniperWindowRoomHandler.new(self, self.config.sniperWindowDoorway), LivingRoomHandler.new(self) }
 			local entranceHeightResult = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(houseCFrame.X, houseCFrame.Z))
 			if entranceHeightResult[1] == nil then
 				return nil
@@ -595,7 +520,7 @@ __modulesFolder["NuristanBuildings"] = function()
 			proceduralGrid:forEachRoom(function(gridColumn, gridRow, faceData)
 				local _cFrame = CFrame.new(roomSize.X * gridColumn, 0, roomSize.Z * gridRow)
 				local roomCFrame = entranceCFrame * _cFrame
-				for _, handler in roomHandlers do
+				for _, handler in self.roomHandlers do
 					if handler:tryGenerate(roomCFrame, faceData) then
 						break
 					end
@@ -626,6 +551,7 @@ __modulesFolder["NuristanBuildings"] = function()
 		end
 	end
 	return {
+		ALL_WALL_FACES = ALL_WALL_FACES,
 		NuristanBuildings = NuristanBuildings,
 	}
 
@@ -994,24 +920,6 @@ __modulesFolder["biome"] = function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	local Biome
-	do
-		Biome = setmetatable({}, {
-			__tostring = function()
-				return "Biome"
-			end,
-		})
-		Biome.__index = Biome
-		function Biome.new(...)
-			local self = setmetatable({}, Biome)
-			return self:constructor(...) or self
-		end
-		function Biome:constructor(adapter)
-			self.priority = -1
-			self.name = "?"
-			self.adapter = adapter
-		end
-	end
 	local function useBiomeData(yourCell)
 		local data = biomeExtension:get(yourCell)
 		if not data then
@@ -1021,14 +929,12 @@ __modulesFolder["biome"] = function()
 	end
 	local defaultValue = {
 		whoClaimedThis = {},
-		claimed = 0,
 	}
-	local function structureClaimLand(thisBiome, yourCell)
+	local function biomeClaimLand(thisBiome, yourCell)
 		local data = biomeExtension:get(yourCell)
 		if not data then
 			return nil
 		end
-		data.claimed += 1
 		local _whoClaimedThis = data.whoClaimedThis
 		local _name = thisBiome.name
 		table.insert(_whoClaimedThis, _name)
@@ -1041,9 +947,8 @@ __modulesFolder["biome"] = function()
 	end
 	return {
 		useBiomeData = useBiomeData,
-		structureClaimLand = structureClaimLand,
+		biomeClaimLand = biomeClaimLand,
 		ensureBiomeData = ensureBiomeData,
-		Biome = Biome,
 	}
 
 end
@@ -1528,6 +1433,52 @@ __modulesFolder["selfProp"] = function()
 
 end
 
+__modulesFolder["structure"] = function()
+	local script
+	script = newFakeInstance({"structure"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local structureExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeExtension").structureExtension
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local function useStructureData(yourCell)
+		local data = structureExtension:get(yourCell)
+		if not data then
+			return nil
+		end
+		return data
+	end
+	local defaultValue = {
+		whoClaimedThis = {},
+	}
+	local function structureClaimLand(thisBiome, yourCell)
+		local data = structureExtension:get(yourCell)
+		if not data then
+			return nil
+		end
+		local _whoClaimedThis = data.whoClaimedThis
+		local _name = thisBiome.name
+		table.insert(_whoClaimedThis, _name)
+	end
+	-- If a cell might not have biome data yet but you want to guarantee it does by the time this function exits, getOrInit handles that without a separate has() check followed by a set()
+	local function ensureStructureData(yourCell)
+		return structureExtension:getOrInit(yourCell, function()
+			return defaultValue
+		end)
+	end
+	return {
+		useStructureData = useStructureData,
+		structureClaimLand = structureClaimLand,
+		ensureStructureData = ensureStructureData,
+	}
+
+end
+
 __modulesFolder["translateTerrainForStructureBonding"] = function()
 	local script
 	script = newFakeInstance({"translateTerrainForStructureBonding"})
@@ -1603,11 +1554,15 @@ task.defer(function()
 	local PerlinNoise = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "PerlinNoise").PerlinNoise
 	local biomeBox = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeAndStructureRegistrySystem").biomeBox
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
-	local Biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome").Biome
+	local _biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome")
+	local biomeClaimLand = _biome.biomeClaimLand
+	local ensureBiomeData = _biome.ensureBiomeData
+	local useBiomeData = _biome.useBiomeData
 	local humanConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "humanConfig").default
 	local translateTerrainOrientationForStructureBonding = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "translateTerrainForStructureBonding").translateTerrainOrientationForStructureBonding
 	local NuristanBuildings = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "NuristanBuildings").NuristanBuildings
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	local ALL_WALL_FACES = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "NuristanBuildings").ALL_WALL_FACES
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -1672,126 +1627,203 @@ task.defer(function()
 		└─────────────────────────────────────────────┘
 	
 	]]
+	local SniperWindowRoomHandler
+	do
+		SniperWindowRoomHandler = setmetatable({}, {
+			__tostring = function()
+				return "SniperWindowRoomHandler"
+			end,
+		})
+		SniperWindowRoomHandler.__index = SniperWindowRoomHandler
+		function SniperWindowRoomHandler.new(...)
+			local self = setmetatable({}, SniperWindowRoomHandler)
+			return self:constructor(...) or self
+		end
+		function SniperWindowRoomHandler:constructor(buildings, sniperWindowDoorway)
+			self.priority = 10
+			self.buildings = buildings
+			self.sniperWindowDoorway = sniperWindowDoorway
+		end
+		function SniperWindowRoomHandler:hasExteriorFace(faceData)
+			for _, face in ALL_WALL_FACES do
+				if faceData[face].state == "exteriorWall" then
+					return true
+				end
+			end
+			return false
+		end
+		function SniperWindowRoomHandler:tryGenerate(roomCFrame, faceData)
+			if not SniperWindowRoomHandler:hasExteriorFace(faceData) then
+				return false
+			end
+			local roomSize = self.buildings.config.roomProps.RoomSize
+			self.buildings:instantiateRoomShell(roomCFrame)
+			for _, face in ALL_WALL_FACES do
+				local faceDatum = faceData[face]
+				if faceDatum.state == "empty" then
+					continue
+				end
+				if faceDatum.state == "exteriorWall" then
+					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face, {
+						doorway = self.sniperWindowDoorway,
+					})
+					continue
+				end
+				if faceDatum.state == "doorway" then
+					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face)
+					continue
+				end
+				self.buildings:makeWallWithoutDoorway(roomCFrame, roomSize, face)
+			end
+			return true
+		end
+	end
+	local LivingRoomHandler
+	do
+		LivingRoomHandler = setmetatable({}, {
+			__tostring = function()
+				return "LivingRoomHandler"
+			end,
+		})
+		LivingRoomHandler.__index = LivingRoomHandler
+		function LivingRoomHandler.new(...)
+			local self = setmetatable({}, LivingRoomHandler)
+			return self:constructor(...) or self
+		end
+		function LivingRoomHandler:constructor(buildings)
+			self.priority = 0
+			self.buildings = buildings
+		end
+		function LivingRoomHandler:tryGenerate(roomCFrame, faceData)
+			self.buildings:createStandardRoom(roomCFrame, faceData)
+			return true
+		end
+	end
+	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
+	local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
+	local PART_SIZE = 100
+	local MAP_SIZE = Vector2.new(10000, 10000)
+	local RESOLUTION = Vector2.new(math.round(MAP_SIZE.X / PART_SIZE), math.round(MAP_SIZE.Y / PART_SIZE))
+	-- const RESOLUTION = new Vector2(5, 5);
+	local ROUGHNESS = 4
+	local PARAMS = {
+		lacunarity = 4,
+		persistence = 0.25,
+		octaves = 2,
+		exaggeratedness = 20,
+		power = 3,
+		scale = math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS,
+	}
+	local POSITION_OFFSET = Vector3.new(-(MAP_SIZE.X / 2), 0, -(MAP_SIZE.Y / 2))
+	local offset = Vector2.new(math.random(1, 10e6), math.random(1, 10e6))
+	local noiseData = PerlinNoise.new():generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power)
+	local wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges")
+	if wedgesFolderToDestroy then
+		adapterToUse.destroy(wedgesFolderToDestroy)
+	end
+	local wedgesFolder = adapterToUse.newInstance("Folder")
+	adapterToUse.setProperty(wedgesFolder, "Name", "Wedges")
+	adapterToUse.setProperty(wedgesFolder, "Parent", workspace)
+	local standardBox = biomeBox.new()
+	local NuristanStandardBiome
+	do
+		NuristanStandardBiome = setmetatable({}, {
+			__tostring = function()
+				return "NuristanStandardBiome"
+			end,
+		})
+		NuristanStandardBiome.__index = NuristanStandardBiome
+		function NuristanStandardBiome.new(...)
+			local self = setmetatable({}, NuristanStandardBiome)
+			return self:constructor(...) or self
+		end
+		function NuristanStandardBiome:constructor(adapterToUse, config, parent)
+			self.priority = 100
+			self.config = config
+			self.parent = parent
+			self.name = "nsb"
+			self.adapter = adapterToUse
+		end
+		function NuristanStandardBiome:getColourAndMaterialFromHeight(height)
+			if height < humanConfig.grassDeepness then
+				return self.config.grass()
+			end
+			return self.config.desert()
+		end
+		function NuristanStandardBiome:generate(yourSelf, yourCell)
+			if useBiomeData(yourCell) then
+				return nil
+			end
+			local operateOnThisTriangleInstance = function(data, triangle)
+				local height = data.data.averageHeight
+				local propMap = self:getColourAndMaterialFromHeight(height)
+				assign(triangle, propMap, function(a, b, c)
+					self.adapter.setProperty(a, b, c)
+				end)
+			end
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1])
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][2])
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][1])
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][2])
+			ensureBiomeData(yourCell)
+			biomeClaimLand(self, yourCell)
+		end
+	end
+	local translateTerrain = translateTerrainOrientationForStructureBonding.new({
+		orientationSubtraction = Vector3.new(0, 0, -90),
+	})
+	local stdnuristanconfig = {
+		grass = function()
+			return {
+				Material = Enum.Material.Grass,
+				Color = Color3.fromRGB(43, 219, 84),
+			}
+		end,
+		desert = function()
+			local secondaryAngs = math.random(-20, 10)
+			return {
+				Material = Enum.Material.Sand,
+				Color = Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs),
+			}
+		end,
+	}
+	standardBox:registerModifier(NuristanStandardBiome.new(adapterToUse, stdnuristanconfig, wedgesFolder))
+	standardBox:registerModifier(NuristanBuildings.new(adapterToUse, translateTerrain, {
+		wallPartProps = {
+			Material = Enum.Material.Sand,
+			Color = Color3.fromRGB(237, 201, 175),
+		},
+		doorway = {
+			width = 2.5,
+			height = 6,
+			offsetAlongWall = 0,
+			bottomOffset = 0,
+		},
+		roomProps = {
+			RoomSize = Vector3.new(20, 2, 20),
+		},
+		wall = {
+			height = 10,
+			thickness = 2,
+		},
+		roomGeneration = {
+			minRooms = 2,
+			maxRooms = 10,
+			mergeWallChance = 0.3,
+		},
+		sniperWindowDoorway = {
+			width = 5,
+			height = 2,
+			bottomOffset = 3,
+			offsetAlongWall = 0,
+		},
+	}, wedgesFolder, function(thisThing)
+		return { SniperWindowRoomHandler.new(thisThing, thisThing.config.sniperWindowDoorway), LivingRoomHandler.new(thisThing) }
+	end))
 	local function generate()
 		print("Me is generating :3")
 		-- work on this later
 		-- prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
-		local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
-		local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
-		local PART_SIZE = 100
-		local MAP_SIZE = Vector2.new(10000, 10000)
-		local RESOLUTION = Vector2.new(math.round(MAP_SIZE.X / PART_SIZE), math.round(MAP_SIZE.Y / PART_SIZE))
-		-- const RESOLUTION = new Vector2(5, 5);
-		local ROUGHNESS = 4
-		local PARAMS = {
-			lacunarity = 4,
-			persistence = 0.25,
-			octaves = 2,
-			exaggeratedness = 20,
-			power = 3,
-			scale = math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS,
-		}
-		local POSITION_OFFSET = Vector3.new(-(MAP_SIZE.X / 2), 0, -(MAP_SIZE.Y / 2))
-		local offset = Vector2.new(math.random(1, 10e6), math.random(1, 10e6))
-		local noiseData = PerlinNoise.new():generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power)
-		local wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges")
-		if wedgesFolderToDestroy then
-			adapterToUse.destroy(wedgesFolderToDestroy)
-		end
-		local wedgesFolder = adapterToUse.newInstance("Folder")
-		adapterToUse.setProperty(wedgesFolder, "Name", "Wedges")
-		adapterToUse.setProperty(wedgesFolder, "Parent", workspace)
-		local standardBox = biomeBox.new()
-		local NuristanStandardBiome
-		do
-			local super = Biome
-			NuristanStandardBiome = setmetatable({}, {
-				__tostring = function()
-					return "NuristanStandardBiome"
-				end,
-				__index = super,
-			})
-			NuristanStandardBiome.__index = NuristanStandardBiome
-			function NuristanStandardBiome.new(...)
-				local self = setmetatable({}, NuristanStandardBiome)
-				return self:constructor(...) or self
-			end
-			function NuristanStandardBiome:constructor(adapterToUse, config, parent)
-				super.constructor(self, adapterToUse)
-				self.priority = 100
-				self.config = config
-				self.parent = parent
-				self.name = "nsb"
-			end
-			function NuristanStandardBiome:getColourAndMaterialFromHeight(height)
-				if height < humanConfig.grassDeepness then
-					return self.config.grass()
-				end
-				return self.config.desert()
-			end
-			function NuristanStandardBiome:generate(yourSelf, yourCell)
-				local operateOnThisTriangleInstance = function(data, triangle)
-					local height = data.data.averageHeight
-					local propMap = self:getColourAndMaterialFromHeight(height)
-					assign(triangle, propMap, function(a, b, c)
-						yourSelf.adapter.setProperty(a, b, c)
-					end)
-				end
-				operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1])
-				operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][2])
-				operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][1])
-				operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][2])
-			end
-		end
-		local translateTerrain = translateTerrainOrientationForStructureBonding.new({
-			orientationSubtraction = Vector3.new(0, 0, -90),
-		})
-		local stdnuristanconfig = {
-			grass = function()
-				return {
-					Material = Enum.Material.Grass,
-					Color = Color3.fromRGB(43, 219, 84),
-				}
-			end,
-			desert = function()
-				local secondaryAngs = math.random(-20, 10)
-				return {
-					Material = Enum.Material.Sand,
-					Color = Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs),
-				}
-			end,
-		}
-		standardBox:registerModifier(NuristanStandardBiome.new(adapterToUse, stdnuristanconfig, wedgesFolder))
-		standardBox:registerModifier(NuristanBuildings.new(adapterToUse, translateTerrain, {
-			wallPartProps = {
-				Material = Enum.Material.Sand,
-				Color = Color3.fromRGB(237, 201, 175),
-			},
-			doorway = {
-				width = 2.5,
-				height = 6,
-				offsetAlongWall = 0,
-				bottomOffset = 0,
-			},
-			roomProps = {
-				RoomSize = Vector3.new(20, 2, 20),
-			},
-			wall = {
-				height = 10,
-				thickness = 2,
-			},
-			roomGeneration = {
-				minRooms = 2,
-				maxRooms = 10,
-				mergeWallChance = 0.3,
-			},
-			sniperWindowDoorway = {
-				width = 5,
-				height = 2,
-				bottomOffset = 3,
-				offsetAlongWall = 0,
-			},
-		}, wedgesFolder))
 		local createTerrainDefault = createTerrain.new(function(thisData)
 			local _self = thisData._self
 			standardBox:executeAllModifiers(thisData._self, thisData)

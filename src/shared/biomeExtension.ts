@@ -3,7 +3,6 @@ import { CellExtension, createCellExtension } from "./cellExtension";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 export interface BiomeData {
   whoClaimedThis: string[];
-  claimed: number;
 }
 
 export const biomeExtension: CellExtension<WedgeCell, BiomeData> = createCellExtension<WedgeCell, BiomeData>();

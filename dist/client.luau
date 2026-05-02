@@ -241,7 +241,6 @@ __modulesFolder["NuristanBuildings"] = function()
 	script = newFakeInstance({"NuristanBuildings"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local Biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome").Biome
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	local humanConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "humanConfig").default
 	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
@@ -428,99 +427,26 @@ __modulesFolder["NuristanBuildings"] = function()
 			adapter.setProperty(wallPart, "Parent", parent)
 		end
 	end
-	local SniperWindowRoomHandler
-	do
-		SniperWindowRoomHandler = setmetatable({}, {
-			__tostring = function()
-				return "SniperWindowRoomHandler"
-			end,
-		})
-		SniperWindowRoomHandler.__index = SniperWindowRoomHandler
-		function SniperWindowRoomHandler.new(...)
-			local self = setmetatable({}, SniperWindowRoomHandler)
-			return self:constructor(...) or self
-		end
-		function SniperWindowRoomHandler:constructor(buildings, sniperWindowDoorway)
-			self.priority = 10
-			self.buildings = buildings
-			self.sniperWindowDoorway = sniperWindowDoorway
-		end
-		function SniperWindowRoomHandler:hasExteriorFace(faceData)
-			for _, face in ALL_WALL_FACES do
-				if faceData[face].state == "exteriorWall" then
-					return true
-				end
-			end
-			return false
-		end
-		function SniperWindowRoomHandler:tryGenerate(roomCFrame, faceData)
-			if not SniperWindowRoomHandler:hasExteriorFace(faceData) then
-				return false
-			end
-			local roomSize = self.buildings.config.roomProps.RoomSize
-			self.buildings:instantiateRoomShell(roomCFrame)
-			for _, face in ALL_WALL_FACES do
-				local faceDatum = faceData[face]
-				if faceDatum.state == "empty" then
-					continue
-				end
-				if faceDatum.state == "exteriorWall" then
-					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face, {
-						doorway = self.sniperWindowDoorway,
-					})
-					continue
-				end
-				if faceDatum.state == "doorway" then
-					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face)
-					continue
-				end
-				self.buildings:makeWallWithoutDoorway(roomCFrame, roomSize, face)
-			end
-			return true
-		end
-	end
-	local LivingRoomHandler
-	do
-		LivingRoomHandler = setmetatable({}, {
-			__tostring = function()
-				return "LivingRoomHandler"
-			end,
-		})
-		LivingRoomHandler.__index = LivingRoomHandler
-		function LivingRoomHandler.new(...)
-			local self = setmetatable({}, LivingRoomHandler)
-			return self:constructor(...) or self
-		end
-		function LivingRoomHandler:constructor(buildings)
-			self.priority = 0
-			self.buildings = buildings
-		end
-		function LivingRoomHandler:tryGenerate(roomCFrame, faceData)
-			self.buildings:createStandardRoom(roomCFrame, faceData)
-			return true
-		end
-	end
 	local NuristanBuildings
 	do
-		local super = Biome
 		NuristanBuildings = setmetatable({}, {
 			__tostring = function()
 				return "NuristanBuildings"
 			end,
-			__index = super,
 		})
 		NuristanBuildings.__index = NuristanBuildings
 		function NuristanBuildings.new(...)
 			local self = setmetatable({}, NuristanBuildings)
 			return self:constructor(...) or self
 		end
-		function NuristanBuildings:constructor(adapterToUse, translateTerrain, config, parent)
-			super.constructor(self, adapterToUse)
+		function NuristanBuildings:constructor(adapterToUse, translateTerrain, config, parent, roomHandlers)
 			self.priority = 100
 			self.config = config
 			self.translateTerrain = translateTerrain
 			self.parent = parent
 			self.name = "NuristanBuildings"
+			self.roomHandlers = roomHandlers(self)
+			self.adapter = adapterToUse
 		end
 		function NuristanBuildings:mergeConfig(overrides)
 			local _object = table.clone(self.config)
@@ -581,7 +507,6 @@ __modulesFolder["NuristanBuildings"] = function()
 		function NuristanBuildings:createSingleHouse(houseCFrame, vertices)
 			local registeredRoomTypeNames = { "LivingRoom" }
 			local proceduralGrid = ProceduralRoomGrid.new(self.config.roomGeneration, registeredRoomTypeNames, DepthFirstMazeSearch.new(fisherYatesShuffle), fisherYatesShuffle)
-			local roomHandlers = { SniperWindowRoomHandler.new(self, self.config.sniperWindowDoorway), LivingRoomHandler.new(self) }
 			local entranceHeightResult = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(houseCFrame.X, houseCFrame.Z))
 			if entranceHeightResult[1] == nil then
 				return nil
@@ -595,7 +520,7 @@ __modulesFolder["NuristanBuildings"] = function()
 			proceduralGrid:forEachRoom(function(gridColumn, gridRow, faceData)
 				local _cFrame = CFrame.new(roomSize.X * gridColumn, 0, roomSize.Z * gridRow)
 				local roomCFrame = entranceCFrame * _cFrame
-				for _, handler in roomHandlers do
+				for _, handler in self.roomHandlers do
 					if handler:tryGenerate(roomCFrame, faceData) then
 						break
 					end
@@ -626,6 +551,7 @@ __modulesFolder["NuristanBuildings"] = function()
 		end
 	end
 	return {
+		ALL_WALL_FACES = ALL_WALL_FACES,
 		NuristanBuildings = NuristanBuildings,
 	}
 
@@ -994,24 +920,6 @@ __modulesFolder["biome"] = function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	local Biome
-	do
-		Biome = setmetatable({}, {
-			__tostring = function()
-				return "Biome"
-			end,
-		})
-		Biome.__index = Biome
-		function Biome.new(...)
-			local self = setmetatable({}, Biome)
-			return self:constructor(...) or self
-		end
-		function Biome:constructor(adapter)
-			self.priority = -1
-			self.name = "?"
-			self.adapter = adapter
-		end
-	end
 	local function useBiomeData(yourCell)
 		local data = biomeExtension:get(yourCell)
 		if not data then
@@ -1021,14 +929,12 @@ __modulesFolder["biome"] = function()
 	end
 	local defaultValue = {
 		whoClaimedThis = {},
-		claimed = 0,
 	}
-	local function structureClaimLand(thisBiome, yourCell)
+	local function biomeClaimLand(thisBiome, yourCell)
 		local data = biomeExtension:get(yourCell)
 		if not data then
 			return nil
 		end
-		data.claimed += 1
 		local _whoClaimedThis = data.whoClaimedThis
 		local _name = thisBiome.name
 		table.insert(_whoClaimedThis, _name)
@@ -1041,9 +947,8 @@ __modulesFolder["biome"] = function()
 	end
 	return {
 		useBiomeData = useBiomeData,
-		structureClaimLand = structureClaimLand,
+		biomeClaimLand = biomeClaimLand,
 		ensureBiomeData = ensureBiomeData,
-		Biome = Biome,
 	}
 
 end
@@ -1524,6 +1429,52 @@ __modulesFolder["selfProp"] = function()
 	end
 	return {
 		returnFunctionWithIdentity = returnFunctionWithIdentity,
+	}
+
+end
+
+__modulesFolder["structure"] = function()
+	local script
+	script = newFakeInstance({"structure"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local structureExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeExtension").structureExtension
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local function useStructureData(yourCell)
+		local data = structureExtension:get(yourCell)
+		if not data then
+			return nil
+		end
+		return data
+	end
+	local defaultValue = {
+		whoClaimedThis = {},
+	}
+	local function structureClaimLand(thisBiome, yourCell)
+		local data = structureExtension:get(yourCell)
+		if not data then
+			return nil
+		end
+		local _whoClaimedThis = data.whoClaimedThis
+		local _name = thisBiome.name
+		table.insert(_whoClaimedThis, _name)
+	end
+	-- If a cell might not have biome data yet but you want to guarantee it does by the time this function exits, getOrInit handles that without a separate has() check followed by a set()
+	local function ensureStructureData(yourCell)
+		return structureExtension:getOrInit(yourCell, function()
+			return defaultValue
+		end)
+	end
+	return {
+		useStructureData = useStructureData,
+		structureClaimLand = structureClaimLand,
+		ensureStructureData = ensureStructureData,
 	}
 
 end
