@@ -1385,7 +1385,7 @@ __modulesFolder["logger"] = function()
 	local DefaultLogTypes = {
 		print = print,
 		warn = warn,
-		info = info,
+		info = info or print,
 		error = error,
 	}
 	local Logger

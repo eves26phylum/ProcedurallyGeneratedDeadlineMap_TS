@@ -10,7 +10,7 @@ export type LogTypes = {
 export const DefaultLogTypes = {
     print: print,
     warn: warn,
-    info: info,
+    info: info || print,
     error: error
 }
 export class Logger {
