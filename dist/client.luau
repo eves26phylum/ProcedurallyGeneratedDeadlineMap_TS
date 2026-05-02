@@ -1635,18 +1635,221 @@ end
 task.defer(function()
 	local script
 	script = newFakeInstance({"main"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
+	local createTerrain = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "createTerrainFromVerticesUsingAdapter").createTerrain
+	local robloxAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "robloxAdapter").robloxAdapter
+	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
+	local PerlinNoise = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "PerlinNoise").PerlinNoise
+	local biomeBox = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeAndStructureRegistrySystem").biomeBox
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	local Biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome").Biome
+	local humanConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "humanConfig").default
+	local translateTerrainOrientationForStructureBonding = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "translateTerrainForStructureBonding").translateTerrainOrientationForStructureBonding
+	local NuristanBuildings = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "NuristanBuildings").NuristanBuildings
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local player = players.get("flanker2000Y2K")
-	if not player then
-		error("NO PLAYER")
+	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
+	-- If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
+	-- Here is the Gigachad Terms of Service 2000 Iteration 0
+	--[[
+		 Terms of Service
+	
+		SECTION 1 - DO NOT BE LAZY:
+		- Make things extensible and modular as possible, then think about you can extend this in the future. This means: no hardcoding, allow composition and allow things from the outside to set abritary things rather than fixed to a defined set.
+		- Never abbreviate variable names. EVER: They must be readable in English, and understandable. Include all details and context inside that variable name. More details is better. Utilise camelCase.
+		- NEVER. EVER. USE. ALIGNMENT SPACES—They're ugly, ignored by beautifiers, and no one ever uses them.
+		Examples of this bad practice:
+		const abanana = dog;
+		const ba      = dog2;
+		const fucku   = fuckingdog;
+		Examples of a good practice:
+		const abanana = dog;
+		const ba = dog2;
+		const fucku = fuckingdog;
+		- Always do the best implementation you can. Never skip out on things or do simpler versions. This is very important. If you do become lazy and do a worse implementation, problems in the future can happen because of that.
+	
+		SECTION 2 - CONSISTENCY AND CODE STYLE:
+		- Use existing code style and don't add weird spaces between stuff like assigment statements.
+		- Embrace never-nesting practices—Use early guard clauses and remember continue statement exists.
+		- Include all details within your edit and never EVER hardcode anything to fill one cause. Other things from outside must be able to edit your cause in a different way to the extend I could add 50 dogs on top of a simple metal reflective box object and turn the box into a polygon that flashes rainbow every two seconds before turning into a yellow dog as an example.
+		- Split concerns across multiple things—Don't make one thing handle it all—Allow for us to retrieve all values from data instead of just stealing one value and running away—This is for extensibility in the future. 
+		Example of bad practice:
+		const ax = (DogArrayData as {dogNameTag: string} & number[])[0];
+		Example of good practice:
+		const customDogArray: dogArrayType = DogArrayData;
+		const firstElementInDogArray = customDogArray[0];
+		- Inheritance is mostly outdated—so unless you're directly touching TypeScript stuff (like classes) or something, a pattern of composition is preferred unless you are forced to use it.
+		- A space around each side of an arithmetic operator is generally advised.
+	
+		SECTION 3 - TYPESCRIPT BEST PRACTICES:
+		- If possible, never use `as` statements in TypeScript—This is considered terrible practice.
+		- Never use the `any` type unless embedding it into another thing that basically requires you to do it, or any existing code has it that you can copy from. Example: assign statement. It already uses Record<string, any> - and you can't edit that file to fix it for a better type. Then, you would use Record<string, any>.
+		- If there is a more suitable type available—use it. Example: Record<string, unknown> could lead to errors when trying to do {dog: new Vector3()}; A better practice would to usePartial<InstanceProperties<BasePart>> or InstanceProperties<BasePart> depending on the context.
+	
+		SECTION 4 - COMMON SENSE AND BEST PRACTICES:
+		- If something you suspect might be wrong—don't adapt your code on that. Do not build on mistakes; Do not make your code based on that mistake—Spot that it's a mistake and if you have been granted permission to edit that part, edit to fix. Otherwise, just inform us.
+		- Don't truncate things—ugly.
+		- Don't add comments that point the obvious. Unless you're explaining some nuanced thing or detail, maybe an algorithm — Just don't.
+		- Don't use outdated APIs or versions—Always refer to newer alternatives rather than using deprecated things in new code.
+		- If you can avoid an else statement using stuff like lookup tables or continue statement, do it.
+	
+		By editing on this file, you agree to the terms of conditions. Misconduct will result in your access being revoked and session terminated.
+	
+		Think of it like this:
+		┌─────────────────────────────────────────────┐
+		│             Visual Studio Code              │
+		├─────────────────────────────────────────────┤
+		│ This code is ass. Session Terminated.       │
+		│                                             │
+		│ [I WILL FIX THIS]                           │
+		└─────────────────────────────────────────────┘
+	
+	]]
+	local function generate(seed)
+		math.randomseed(seed)
+		local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
+		local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
+		local PART_SIZE = 100
+		local MAP_SIZE = Vector2.new(10000, 10000)
+		local RESOLUTION = Vector2.new(math.round(MAP_SIZE.X / PART_SIZE), math.round(MAP_SIZE.Y / PART_SIZE))
+		local ROUGHNESS = 4
+		local PARAMS = {
+			lacunarity = 4,
+			persistence = 0.25,
+			octaves = 2,
+			exaggeratedness = 20,
+			power = 3,
+			scale = math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS,
+		}
+		local POSITION_OFFSET = Vector3.new(-(MAP_SIZE.X / 2), 0, -(MAP_SIZE.Y / 2))
+		local offset = Vector2.new(math.random(1, 10e6), math.random(1, 10e6))
+		local noiseData = PerlinNoise.new():generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power)
+		local wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges")
+		if wedgesFolderToDestroy then
+			adapterToUse.destroy(wedgesFolderToDestroy)
+		end
+		local wedgesFolder = adapterToUse.newInstance("Folder")
+		adapterToUse.setProperty(wedgesFolder, "Name", "Wedges")
+		adapterToUse.setProperty(wedgesFolder, "Parent", workspace)
+		local standardBox = biomeBox.new()
+		local NuristanStandardBiome
+		do
+			local super = Biome
+			NuristanStandardBiome = setmetatable({}, {
+				__tostring = function()
+					return "NuristanStandardBiome"
+				end,
+				__index = super,
+			})
+			NuristanStandardBiome.__index = NuristanStandardBiome
+			function NuristanStandardBiome.new(...)
+				local self = setmetatable({}, NuristanStandardBiome)
+				return self:constructor(...) or self
+			end
+			function NuristanStandardBiome:constructor(adapterToUse, config, parent)
+				super.constructor(self, adapterToUse)
+				self.priority = 100
+				self.config = config
+				self.parent = parent
+				self.name = "nsb"
+			end
+			function NuristanStandardBiome:getColourAndMaterialFromHeight(height)
+				if height < humanConfig.grassDeepness then
+					return self.config.grass()
+				end
+				return self.config.desert()
+			end
+			function NuristanStandardBiome:generate(yourSelf, yourCell)
+				local operateOnThisTriangleInstance = function(data, triangle)
+					local height = data.data.averageHeight
+					local propMap = self:getColourAndMaterialFromHeight(height)
+					assign(triangle, propMap, function(a, b, c)
+						yourSelf.adapter.setProperty(a, b, c)
+					end)
+				end
+				operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1])
+				operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][2])
+				operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][1])
+				operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][2])
+			end
+		end
+		local translateTerrain = translateTerrainOrientationForStructureBonding.new({
+			orientationSubtraction = Vector3.new(0, 0, -90),
+		})
+		local stdnuristanconfig = {
+			grass = function()
+				return {
+					Material = Enum.Material.Grass,
+					Color = Color3.fromRGB(43, 219, 84),
+				}
+			end,
+			desert = function()
+				local secondaryAngs = math.random(-20, 10)
+				return {
+					Material = Enum.Material.Sand,
+					Color = Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs),
+				}
+			end,
+		}
+		standardBox:registerModifier(NuristanStandardBiome.new(adapterToUse, stdnuristanconfig, wedgesFolder))
+		standardBox:registerModifier(NuristanBuildings.new(adapterToUse, translateTerrain, {
+			wallPartProps = {
+				Material = Enum.Material.Sand,
+				Color = Color3.fromRGB(237, 201, 175),
+			},
+			doorway = {
+				width = 2.5,
+				height = 6,
+				offsetAlongWall = 0,
+				bottomOffset = 0,
+			},
+			roomProps = {
+				RoomSize = Vector3.new(20, 2, 20),
+			},
+			wall = {
+				height = 10,
+				thickness = 2,
+			},
+			roomGeneration = {
+				minRooms = 2,
+				maxRooms = 10,
+				mergeWallChance = 0.3,
+			},
+			sniperWindowDoorway = {
+				width = 5,
+				height = 2,
+				bottomOffset = 3,
+				offsetAlongWall = 0,
+			},
+		}, wedgesFolder))
+		local createTerrainDefault = createTerrain.new(function(thisData)
+			local _self = thisData._self
+			standardBox:executeAllModifiers(thisData._self, thisData)
+		end, EgoMoose, adapterToUse, wedgesFolder)
+		local triangles = createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
 	end
-	print(player:get_team())
+	if isDeadline then
+		on_server_event:Connect(function(args)
+			local eventType = args[1]
+			local _arg0 = type(eventType) == "string"
+			assert(_arg0, "event type received from server is not a string")
+			if eventType == "generateTerrain" then
+				local seedNumber = args[2]
+				local _arg0_1 = type(seedNumber) == "number"
+				assert(_arg0_1, "seed number from server is not a number")
+				generate(seedNumber)
+			end
+		end)
+	else
+		generate(os.time())
+	end
 
 end)
