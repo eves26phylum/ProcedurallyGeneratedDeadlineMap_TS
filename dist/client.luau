@@ -1369,6 +1369,103 @@ __modulesFolder["isDeadline"] = function()
 
 end
 
+__modulesFolder["logger"] = function()
+	local script
+	script = newFakeInstance({"logger"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	local DefaultLogTypes = {
+		print = print,
+		warn = warn,
+		info = info,
+		error = error,
+	}
+	local Logger
+	do
+		Logger = setmetatable({}, {
+			__tostring = function()
+				return "Logger"
+			end,
+		})
+		Logger.__index = Logger
+		function Logger.new(...)
+			local self = setmetatable({}, Logger)
+			return self:constructor(...) or self
+		end
+		function Logger:constructor(name, funcs)
+			if funcs == nil then
+				funcs = {}
+			end
+			self.name = name
+			local funcer = assign({}, DefaultLogTypes)
+			self.funcs = assign(funcer, funcs)
+		end
+		function Logger:useFuncToLogMessage(func, message)
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(thisLine, index)
+				func(`   {index}. {thisLine}`)
+			end
+			for _k, _v in message do
+				_callback(_v, _k - 1, message)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+		end
+		function Logger:log(...)
+			local message = { ... }
+			self.funcs.print(`[{self.name}]`)
+			local _self = self
+			local _exp = self.funcs.print
+			local _array = {}
+			local _length = #_array
+			table.move(message, 1, #message, _length + 1, _array)
+			_self:useFuncToLogMessage(_exp, _array)
+		end
+		function Logger:warn(...)
+			local message = { ... }
+			self.funcs.warn(`[{self.name}]`)
+			local _self = self
+			local _exp = self.funcs.warn
+			local _array = {}
+			local _length = #_array
+			table.move(message, 1, #message, _length + 1, _array)
+			_self:useFuncToLogMessage(_exp, _array)
+		end
+		function Logger:error(...)
+			local message = { ... }
+			self.funcs.error(`[{self.name}]`)
+			local _self = self
+			local _exp = self.funcs.error
+			local _array = {}
+			local _length = #_array
+			table.move(message, 1, #message, _length + 1, _array)
+			_self:useFuncToLogMessage(_exp, _array)
+		end
+		function Logger:info(...)
+			local message = { ... }
+			self.funcs.info(`[{self.name}]`)
+			local _self = self
+			local _exp = self.funcs.info
+			local _array = {}
+			local _length = #_array
+			table.move(message, 1, #message, _length + 1, _array)
+			_self:useFuncToLogMessage(_exp, _array)
+		end
+	end
+	return {
+		DefaultLogTypes = DefaultLogTypes,
+		Logger = Logger,
+	}
+
+end
+
 __modulesFolder["robloxAdapter"] = function()
 	local script
 	script = newFakeInstance({"robloxAdapter"})
