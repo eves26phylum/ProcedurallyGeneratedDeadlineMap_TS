@@ -73,6 +73,85 @@ local require = function(_ref)
 	}
 end
 
+__modulesFolder["DepthFirstMazeSearch"] = function()
+	local script
+	script = newFakeInstance({"DepthFirstMazeSearch"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local fisherYatesShuffle = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").fisherYatesShuffle
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
+	local function mazePassageKey(firstColumn, firstRow, secondColumn, secondRow)
+		if firstColumn < secondColumn or (firstColumn == secondColumn and firstRow < secondRow) then
+			return `{firstColumn},{firstRow}|{secondColumn},{secondRow}`
+		end
+		return `{secondColumn},{secondRow}|{firstColumn},{firstRow}`
+	end
+	local function cellKey(gridColumn, gridRow)
+		return `{gridColumn},{gridRow}`
+	end
+	local DepthFirstMazeSearch
+	do
+		DepthFirstMazeSearch = setmetatable({}, {
+			__tostring = function()
+				return "DepthFirstMazeSearch"
+			end,
+		})
+		DepthFirstMazeSearch.__index = DepthFirstMazeSearch
+		function DepthFirstMazeSearch.new(...)
+			local self = setmetatable({}, DepthFirstMazeSearch)
+			return self:constructor(...) or self
+		end
+		function DepthFirstMazeSearch:constructor(shuffleFunction)
+			if shuffleFunction == nil then
+				shuffleFunction = fisherYatesShuffle
+			end
+			self.shuffleFunction = shuffleFunction
+		end
+		function DepthFirstMazeSearch:generatePassages(hasRoom, startColumn, startRow)
+			local visitedCells = {}
+			local passages = {}
+			self:search(hasRoom, startColumn, startRow, visitedCells, passages)
+			return passages
+		end
+		function DepthFirstMazeSearch:search(hasRoom, gridColumn, gridRow, visitedCells, passages)
+			local adjacencyDeltas = { { 0, -1 }, { 0, 1 }, { 1, 0 }, { -1, 0 } }
+			local _visitedCells = visitedCells
+			local _arg0 = cellKey(gridColumn, gridRow)
+			_visitedCells[_arg0] = true
+			for _, _binding in self.shuffleFunction(adjacencyDeltas) do
+				local gridColumnDelta = _binding[1]
+				local gridRowDelta = _binding[2]
+				local neighborColumn = gridColumn + gridColumnDelta
+				local neighborRow = gridRow + gridRowDelta
+				if not hasRoom(neighborColumn, neighborRow) then
+					continue
+				end
+				local _visitedCells_1 = visitedCells
+				local _arg0_1 = cellKey(neighborColumn, neighborRow)
+				if _visitedCells_1[_arg0_1] ~= nil then
+					continue
+				end
+				local _passages = passages
+				local _arg0_2 = mazePassageKey(gridColumn, gridRow, neighborColumn, neighborRow)
+				_passages[_arg0_2] = true
+				self:search(hasRoom, neighborColumn, neighborRow, visitedCells, passages)
+			end
+		end
+	end
+	return {
+		mazePassageKey = mazePassageKey,
+		DepthFirstMazeSearch = DepthFirstMazeSearch,
+	}
+
+end
+
 __modulesFolder["EgoMoose"] = function()
 	local script
 	script = newFakeInstance({"EgoMoose"})
@@ -166,6 +245,9 @@ __modulesFolder["NuristanBuildings"] = function()
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	local humanConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "humanConfig").default
 	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
+	local ProceduralRoomGrid = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "ProceduralRoomGeneration").ProceduralRoomGrid
+	local DepthFirstMazeSearch = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "DepthFirstMazeSearch").DepthFirstMazeSearch
+	local fisherYatesShuffle = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").fisherYatesShuffle
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -214,7 +296,7 @@ __modulesFolder["NuristanBuildings"] = function()
 		SECTION 4 - COMMON SENSE AND BEST PRACTICES:
 		- If something you suspect might be wrong—don't adapt your code on that. Do not build on mistakes; Do not make your code based on that mistake—Spot that it's a mistake and if you have been granted permission to edit that part, edit to fix. Otherwise, just inform us.
 		- Don't truncate things—ugly.
-		- Don't add comments that point the obvious. Unless you're explaining some nuanced thing or detail, maybe an algorithm — Just don't.
+		- Don't add comments that point the obvious. Unless you're explaining some nuanced thing or detail, maybe an algorithm — Just don't.
 		- Don't use outdated APIs or versions—Always refer to newer alternatives rather than using deprecated things in new code.
 		- If you can avoid an else statement using stuff like lookup tables or continue statement, do it.
 	
@@ -230,6 +312,7 @@ __modulesFolder["NuristanBuildings"] = function()
 		└─────────────────────────────────────────────┘
 	
 	]]
+	local ALL_WALL_FACES = { "north", "south", "east", "west" }
 	local faceAxisConfigMap = {
 		north = {
 			faceLocalOffset = function(plateSize, thickness)
@@ -345,6 +428,78 @@ __modulesFolder["NuristanBuildings"] = function()
 			adapter.setProperty(wallPart, "Parent", parent)
 		end
 	end
+	local SniperWindowRoomHandler
+	do
+		SniperWindowRoomHandler = setmetatable({}, {
+			__tostring = function()
+				return "SniperWindowRoomHandler"
+			end,
+		})
+		SniperWindowRoomHandler.__index = SniperWindowRoomHandler
+		function SniperWindowRoomHandler.new(...)
+			local self = setmetatable({}, SniperWindowRoomHandler)
+			return self:constructor(...) or self
+		end
+		function SniperWindowRoomHandler:constructor(buildings, sniperWindowDoorway)
+			self.priority = 10
+			self.buildings = buildings
+			self.sniperWindowDoorway = sniperWindowDoorway
+		end
+		function SniperWindowRoomHandler:hasExteriorFace(faceData)
+			for _, face in ALL_WALL_FACES do
+				if faceData[face].state == "exteriorWall" then
+					return true
+				end
+			end
+			return false
+		end
+		function SniperWindowRoomHandler:tryGenerate(roomCFrame, faceData)
+			if not SniperWindowRoomHandler:hasExteriorFace(faceData) then
+				return false
+			end
+			local roomSize = self.buildings.config.roomProps.RoomSize
+			self.buildings:instantiateRoomShell(roomCFrame)
+			for _, face in ALL_WALL_FACES do
+				local faceDatum = faceData[face]
+				if faceDatum.state == "empty" then
+					continue
+				end
+				if faceDatum.state == "exteriorWall" then
+					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face, {
+						doorway = self.sniperWindowDoorway,
+					})
+					continue
+				end
+				if faceDatum.state == "doorway" then
+					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face)
+					continue
+				end
+				self.buildings:makeWallWithoutDoorway(roomCFrame, roomSize, face)
+			end
+			return true
+		end
+	end
+	local LivingRoomHandler
+	do
+		LivingRoomHandler = setmetatable({}, {
+			__tostring = function()
+				return "LivingRoomHandler"
+			end,
+		})
+		LivingRoomHandler.__index = LivingRoomHandler
+		function LivingRoomHandler.new(...)
+			local self = setmetatable({}, LivingRoomHandler)
+			return self:constructor(...) or self
+		end
+		function LivingRoomHandler:constructor(buildings)
+			self.priority = 0
+			self.buildings = buildings
+		end
+		function LivingRoomHandler:tryGenerate(roomCFrame, faceData)
+			self.buildings:createStandardRoom(roomCFrame, faceData)
+			return true
+		end
+	end
 	local NuristanBuildings
 	do
 		local super = Biome
@@ -384,108 +539,77 @@ __modulesFolder["NuristanBuildings"] = function()
 			local segments = computeDoorwayWallFaceGeometry(roomPlateSize, resolvedConfig.wall, resolvedConfig.doorway, face)
 			instantiateWallSegments(roomPlateCFrame, segments, resolvedConfig.wallPartProps, self.parent, self.adapter)
 		end
-		function NuristanBuildings:createStandardRoom(roomCFrame, config, wallDirections)
+		function NuristanBuildings:instantiateRoomShell(roomCFrame, configOverrides)
+			local resolvedConfig = if configOverrides ~= nil then self:mergeConfig(configOverrides) else self.config
+			local roomSize = resolvedConfig.roomProps.RoomSize
 			local roomPlate = self.adapter.newInstance("Part")
 			self.adapter.setProperty(roomPlate, "CFrame", roomCFrame)
-			self.adapter.setProperty(roomPlate, "Size", config.roomProps.RoomSize)
+			self.adapter.setProperty(roomPlate, "Size", roomSize)
 			self.adapter.setProperty(roomPlate, "Anchored", true)
-			assign(roomPlate, self.config.wallPartProps, self.adapter.setProperty)
+			assign(roomPlate, resolvedConfig.wallPartProps, self.adapter.setProperty)
 			self.adapter.setProperty(roomPlate, "Parent", self.parent)
 			local roomRoof = self.adapter.newInstance("Part")
 			local _adapter = self.adapter
 			local _roomCFrame = roomCFrame
 			local _upVector = roomCFrame.UpVector
-			local _height = config.wall.height
+			local _height = resolvedConfig.wall.height
 			local _upVector_1 = roomCFrame.UpVector
-			local _arg0 = config.roomProps.RoomSize.Y / 2
+			local _arg0 = roomSize.Y / 2
 			_adapter.setProperty(roomRoof, "CFrame", _roomCFrame + (_upVector * _height + (_upVector_1 * _arg0)))
-			self.adapter.setProperty(roomRoof, "Size", config.roomProps.RoomSize)
+			self.adapter.setProperty(roomRoof, "Size", roomSize)
 			self.adapter.setProperty(roomRoof, "Name", "RoomRoof")
 			self.adapter.setProperty(roomRoof, "Anchored", true)
-			assign(roomRoof, self.config.wallPartProps, self.adapter.setProperty)
+			assign(roomRoof, resolvedConfig.wallPartProps, self.adapter.setProperty)
 			self.adapter.setProperty(roomRoof, "Parent", self.parent)
-			local allWallDirections = { "north", "south", "east", "west" }
-			-- ▼ ReadonlyArray.forEach ▼
-			local _callback = function(wallface, index)
-				self:makeWallWithDoorway(roomCFrame, config.roomProps.RoomSize, wallface)
-			end
-			for _k, _v in wallDirections do
-				_callback(_v, _k - 1, wallDirections)
-			end
-			-- ▲ ReadonlyArray.forEach ▲
-			-- ▼ ReadonlyArray.forEach ▼
-			local _callback_1 = function(wallFace, index)
-				local hasWallDirection = false
-				-- ▼ ReadonlyArray.forEach ▼
-				local _callback_2 = function(wallface, index)
-					if wallface == wallFace then
-						hasWallDirection = true
-					end
+		end
+		function NuristanBuildings:createStandardRoom(roomCFrame, faceData, configOverrides)
+			self:instantiateRoomShell(roomCFrame, configOverrides)
+			local resolvedConfig = if configOverrides ~= nil then self:mergeConfig(configOverrides) else self.config
+			local roomSize = resolvedConfig.roomProps.RoomSize
+			for _, face in ALL_WALL_FACES do
+				local faceDatum = faceData[face]
+				if faceDatum.state == "empty" then
+					continue
 				end
-				for _k, _v in wallDirections do
-					_callback_2(_v, _k - 1, wallDirections)
+				if faceDatum.state == "doorway" then
+					self:makeWallWithDoorway(roomCFrame, roomSize, face, configOverrides)
+					continue
 				end
-				-- ▲ ReadonlyArray.forEach ▲
-				if hasWallDirection then
-					return nil
-				end
-				self:makeWallWithoutDoorway(roomCFrame, config.roomProps.RoomSize, wallFace)
+				self:makeWallWithoutDoorway(roomCFrame, roomSize, face, configOverrides)
 			end
-			for _k, _v in allWallDirections do
-				_callback_1(_v, _k - 1, allWallDirections)
-			end
-			-- ▲ ReadonlyArray.forEach ▲
 		end
 		function NuristanBuildings:createSingleHouse(houseCFrame, vertices)
-			-- procedural room grid LOLOLOLOL
-			local proceduralRoomGrid = {}
-			proceduralRoomGrid[1] = {}
-			proceduralRoomGrid[1][2] = "LivingRoom"
-			-- exit room
-			-- going down is where you go down
-			local exitRoomHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(houseCFrame.X, houseCFrame.Z))
+			local registeredRoomTypeNames = { "LivingRoom" }
+			local proceduralGrid = ProceduralRoomGrid.new(self.config.roomGeneration, registeredRoomTypeNames, DepthFirstMazeSearch.new(fisherYatesShuffle), fisherYatesShuffle)
+			-- Handlers in descending priority order — SniperWindowRoomHandler (10) is tried first,
+			-- LivingRoomHandler (0) is the fallback that always accepts.
+			local roomHandlers = { SniperWindowRoomHandler.new(self, self.config.sniperWindowDoorway), LivingRoomHandler.new(self) }
+			local entranceHeightResult = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(houseCFrame.X, houseCFrame.Z))
+			if entranceHeightResult[1] == nil then
+				return nil
+			end
 			local _rotation = houseCFrame.Rotation
 			local _vector3 = Vector3.new(houseCFrame.Position.X, 0, houseCFrame.Position.Z)
 			local baseCFrame = _rotation + _vector3
-			local _vector3_1 = Vector3.new(0, exitRoomHeight[1], 0)
-			local exitRoomCFrame = baseCFrame + _vector3_1
-			self:createStandardRoom(exitRoomCFrame, self.config, { "north", "south" })
-			-- proceduralRoomGrid.forEach((row, x) => {
-			--     row.forEach((value, y) => {
-			--         const roomPosX = this.config.roomProps.RoomSize.X * x;
-			--         const roomPosZ = this.config.roomProps.RoomSize.Z * y;
-			--         const worldPos = baseCFrame.mul(new CFrame(roomPosX, 0, roomPosZ)).Position;
-			--         const roomHeight = EgoMoose.getBarycentricHeight(vertices[0], vertices[1], vertices[2], new Vector2(worldPos.X, worldPos.Z));
-			--         // if (roomHeight[0] === undefined) return;
-			--         const roomWorldCFrame = baseCFrame.Rotation.add(new Vector3(worldPos.X, roomHeight[0], worldPos.Z));
-			--         this.createStandardRoom(roomWorldCFrame, this.config, ["north"]);
-			--     });
-			-- });
-			-- ▼ ReadonlyArray.forEach ▼
-			local _callback = function(row, x)
-				-- ▼ ReadonlyArray.forEach ▼
-				local _callback_1 = function(value, y)
-					local roomPosX = self.config.roomProps.RoomSize.X * x
-					local roomPosZ = self.config.roomProps.RoomSize.Z * y
-					local _cFrame = CFrame.new(roomPosX, 0, roomPosZ)
-					local worldPos = (exitRoomCFrame * _cFrame).Position
-					local roomHeight = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(worldPos.X, worldPos.Z))
-					if roomHeight[1] == nil then
-						return nil
+			local _vector3_1 = Vector3.new(0, entranceHeightResult[1], 0)
+			local entranceCFrame = baseCFrame + _vector3_1
+			local roomSize = self.config.roomProps.RoomSize
+			proceduralGrid:forEachRoom(function(gridColumn, gridRow, faceData)
+				local _cFrame = CFrame.new(roomSize.X * gridColumn, 0, roomSize.Z * gridRow)
+				local roomWorldPosition = (entranceCFrame * _cFrame).Position
+				local roomHeightResult = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], Vector2.new(roomWorldPosition.X, roomWorldPosition.Z))
+				if roomHeightResult[1] == nil then
+					return nil
+				end
+				local _rotation_1 = baseCFrame.Rotation
+				local _vector3_2 = Vector3.new(roomWorldPosition.X, roomHeightResult[1], roomWorldPosition.Z)
+				local roomCFrame = _rotation_1 + _vector3_2
+				for _, handler in roomHandlers do
+					if handler:tryGenerate(roomCFrame, faceData) then
+						break
 					end
-					local _self = self
-					local _cFrame_1 = CFrame.new(roomPosX, 0, roomPosZ)
-					_self:createStandardRoom(exitRoomCFrame * _cFrame_1, self.config, { "north" })
 				end
-				for _k, _v in row do
-					_callback_1(_v, _k - 1, row)
-				end
-				-- ▲ ReadonlyArray.forEach ▲
-			end
-			for _k, _v in proceduralRoomGrid do
-				_callback(_v, _k - 1, proceduralRoomGrid)
-			end
-			-- ▲ ReadonlyArray.forEach ▲
+			end)
 		end
 		function NuristanBuildings:operateOnThisTriangleInstance(data, trianglePair, verticesForTriangles)
 			local orientation = trianglePair[1].Orientation
@@ -624,6 +748,202 @@ __modulesFolder["PerlinNoise"] = function()
 
 end
 
+__modulesFolder["ProceduralRoomGeneration"] = function()
+	local script
+	script = newFakeInstance({"ProceduralRoomGeneration"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local mazePassageKey = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "DepthFirstMazeSearch").mazePassageKey
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
+	local EXIT_ROOM_CELL_TYPE = "__exitRoom__"
+	local ProceduralRoomGrid
+	do
+		ProceduralRoomGrid = setmetatable({}, {
+			__tostring = function()
+				return "ProceduralRoomGrid"
+			end,
+		})
+		ProceduralRoomGrid.__index = ProceduralRoomGrid
+		function ProceduralRoomGrid.new(...)
+			local self = setmetatable({}, ProceduralRoomGrid)
+			return self:constructor(...) or self
+		end
+		function ProceduralRoomGrid:constructor(generationConfig, registeredRoomTypeNames, mazeStrategy, shuffleFunction)
+			self.shuffleFunction = shuffleFunction
+			self.roomGrid = self:buildRoomGrid(generationConfig, registeredRoomTypeNames)
+			local passages = mazeStrategy:generatePassages(function(gridColumn, gridRow)
+				return self:hasRoom(gridColumn, gridRow)
+			end, 0, 0)
+			local mergedWalls = self:generateMergedWalls(passages, generationConfig.mergeWallChance)
+			self.roomFaceDataMap = self:computeAllRoomFaceData(passages, mergedWalls)
+		end
+		function ProceduralRoomGrid:hasRoomInGrid(roomGrid, gridColumn, gridRow)
+			local _result = roomGrid[gridColumn + 1]
+			if _result ~= nil then
+				_result = _result[gridRow + 1]
+			end
+			return not not (_result ~= "" and _result)
+		end
+		function ProceduralRoomGrid:hasRoom(gridColumn, gridRow)
+			return ProceduralRoomGrid:hasRoomInGrid(self.roomGrid, gridColumn, gridRow)
+		end
+		function ProceduralRoomGrid:forEachRoom(callback)
+			for gridColumn = 0, #self.roomGrid - 1 do
+				local roomRow = self.roomGrid[gridColumn + 1]
+				if not roomRow then
+					continue
+				end
+				for gridRow = 0, #roomRow - 1 do
+					if not self:hasRoom(gridColumn, gridRow) then
+						continue
+					end
+					local _roomFaceDataMap = self.roomFaceDataMap
+					local _arg0 = `{gridColumn},{gridRow}`
+					local faceData = _roomFaceDataMap[_arg0]
+					if not faceData then
+						continue
+					end
+					callback(gridColumn, gridRow, faceData, self.roomGrid[gridColumn + 1][gridRow + 1])
+				end
+			end
+		end
+		function ProceduralRoomGrid:buildRoomGrid(generationConfig, registeredRoomTypeNames)
+			local roomGrid = {}
+			local targetRoomCount = generationConfig.minRooms + math.floor(math.random() * (generationConfig.maxRooms - generationConfig.minRooms + 1))
+			roomGrid[1] = {}
+			roomGrid[1][1] = EXIT_ROOM_CELL_TYPE
+			local occupiedCells = { { 0, 0 } }
+			local growthDirections = { { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 } }
+			while #occupiedCells < targetRoomCount do
+				local _binding = occupiedCells[math.floor(math.random() * #occupiedCells) + 1]
+				local sourceColumn = _binding[1]
+				local sourceRow = _binding[2]
+				local _binding_1 = self.shuffleFunction(growthDirections)[1]
+				local gridColumnDelta = _binding_1[1]
+				local gridRowDelta = _binding_1[2]
+				local neighborColumn = sourceColumn + gridColumnDelta
+				local neighborRow = sourceRow + gridRowDelta
+				if neighborColumn < 0 or neighborRow < 0 then
+					continue
+				end
+				if ProceduralRoomGrid:hasRoomInGrid(roomGrid, neighborColumn, neighborRow) then
+					continue
+				end
+				if not roomGrid[neighborColumn + 1] then
+					roomGrid[neighborColumn + 1] = {}
+				end
+				local assignedRoomType = registeredRoomTypeNames[math.floor(math.random() * #registeredRoomTypeNames) + 1]
+				roomGrid[neighborColumn + 1][neighborRow + 1] = assignedRoomType
+				local _arg0 = { neighborColumn, neighborRow }
+				table.insert(occupiedCells, _arg0)
+			end
+			return roomGrid
+		end
+		function ProceduralRoomGrid:collectMergedWallsForCell(passages, mergedWalls, mergeWallChance, gridColumn, gridRow)
+			local mergeCheckDirections = { { 0, 1 }, { 1, 0 } }
+			for _, _binding in mergeCheckDirections do
+				local gridColumnDelta = _binding[1]
+				local gridRowDelta = _binding[2]
+				local neighborColumn = gridColumn + gridColumnDelta
+				local neighborRow = gridRow + gridRowDelta
+				if not self:hasRoom(neighborColumn, neighborRow) then
+					continue
+				end
+				local sharedWallKey = mazePassageKey(gridColumn, gridRow, neighborColumn, neighborRow)
+				if passages[sharedWallKey] ~= nil then
+					continue
+				end
+				if math.random() >= mergeWallChance then
+					continue
+				end
+				mergedWalls[sharedWallKey] = true
+			end
+		end
+		function ProceduralRoomGrid:generateMergedWalls(passages, mergeWallChance)
+			local mergedWalls = {}
+			for gridColumn = 0, #self.roomGrid - 1 do
+				local roomRow = self.roomGrid[gridColumn + 1]
+				if not roomRow then
+					continue
+				end
+				for gridRow = 0, #roomRow - 1 do
+					if not self:hasRoom(gridColumn, gridRow) then
+						continue
+					end
+					self:collectMergedWallsForCell(passages, mergedWalls, mergeWallChance, gridColumn, gridRow)
+				end
+			end
+			return mergedWalls
+		end
+		function ProceduralRoomGrid:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, gridColumnDelta, gridRowDelta, thisFace)
+			local neighborColumn = gridColumn + gridColumnDelta
+			local neighborRow = gridRow + gridRowDelta
+			local neighborExists = self:hasRoom(neighborColumn, neighborRow)
+			local sharedWallKey = mazePassageKey(gridColumn, gridRow, neighborColumn, neighborRow)
+			if neighborExists and mergedWalls[sharedWallKey] ~= nil then
+				return {
+					state = "empty",
+				}
+			end
+			if neighborExists and passages[sharedWallKey] ~= nil then
+				return {
+					state = "doorway",
+				}
+			end
+			if neighborExists then
+				return {
+					state = "interiorWall",
+				}
+			end
+			if self.roomGrid[gridColumn + 1][gridRow + 1] == EXIT_ROOM_CELL_TYPE and thisFace == "north" then
+				return {
+					state = "doorway",
+				}
+			end
+			return {
+				state = "exteriorWall",
+			}
+		end
+		function ProceduralRoomGrid:computeFaceDataForCell(passages, mergedWalls, gridColumn, gridRow)
+			return {
+				north = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, 0, -1, "north"),
+				south = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, 0, 1, "south"),
+				east = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, 1, 0, "east"),
+				west = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, -1, 0, "west"),
+			}
+		end
+		function ProceduralRoomGrid:computeAllRoomFaceData(passages, mergedWalls)
+			local allRoomFaceData = {}
+			for gridColumn = 0, #self.roomGrid - 1 do
+				local roomRow = self.roomGrid[gridColumn + 1]
+				if roomRow == nil then
+					continue
+				end
+				for gridRow = 0, #roomRow - 1 do
+					if not self:hasRoom(gridColumn, gridRow) then
+						continue
+					end
+					local _arg0 = `{gridColumn},{gridRow}`
+					local _arg1 = self:computeFaceDataForCell(passages, mergedWalls, gridColumn, gridRow)
+					allRoomFaceData[_arg0] = _arg1
+				end
+			end
+			return allRoomFaceData
+		end
+	end
+	return {
+		ProceduralRoomGrid = ProceduralRoomGrid,
+	}
+
+end
+
 __modulesFolder["Util"] = function()
 	local script
 	script = newFakeInstance({"Util"})
@@ -650,8 +970,22 @@ __modulesFolder["Util"] = function()
 		end
 		return a
 	end
+	local function fisherYatesShuffle(inputArray)
+		local _array = {}
+		local _length = #_array
+		table.move(inputArray, 1, #inputArray, _length + 1, _array)
+		local result = _array
+		for currentIndex = #result - 1, 1, -1 do
+			local randomSwapIndex = math.floor(math.random() * (currentIndex + 1))
+			local elementAtCurrentIndex = result[currentIndex + 1]
+			result[currentIndex + 1] = result[randomSwapIndex + 1]
+			result[randomSwapIndex + 1] = elementAtCurrentIndex
+		end
+		return result
+	end
 	return {
 		assign = assign,
+		fisherYatesShuffle = fisherYatesShuffle,
 	}
 
 end

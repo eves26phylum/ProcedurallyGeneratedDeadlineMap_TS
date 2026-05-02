@@ -43,8 +43,12 @@ export class ProceduralRoomGrid {
         this.roomFaceDataMap = this.computeAllRoomFaceData(passages, mergedWalls);
     }
 
+    static hasRoomInGrid(roomGrid: RoomGrid, gridColumn: number, gridRow: number): boolean {
+        return !!roomGrid[gridColumn]?.[gridRow];
+    }
+
     hasRoom(gridColumn: number, gridRow: number): boolean {
-        return !!this.roomGrid[gridColumn]?.[gridRow];
+        return ProceduralRoomGrid.hasRoomInGrid(this.roomGrid, gridColumn, gridRow);
     }
 
     forEachRoom(callback: (gridColumn: number, gridRow: number, faceData: RoomFaceData, roomType: string) => void): void {
@@ -59,7 +63,6 @@ export class ProceduralRoomGrid {
             }
         }
     }
-
     private buildRoomGrid(generationConfig: RoomGenerationConfig, registeredRoomTypeNames: ReadonlyArray<string>): RoomGrid {
         const roomGrid: RoomGrid = [];
         const targetRoomCount = generationConfig.minRooms + math.floor(
@@ -78,8 +81,8 @@ export class ProceduralRoomGrid {
             const neighborColumn = sourceColumn + gridColumnDelta;
             const neighborRow = sourceRow + gridRowDelta;
             if (neighborColumn < 0 || neighborRow < 0) continue;
-            if (this.hasRoom(neighborColumn, neighborRow)) continue;
-            if (roomGrid[neighborColumn] === undefined) roomGrid[neighborColumn] = [];
+            if (ProceduralRoomGrid.hasRoomInGrid(roomGrid, neighborColumn, neighborRow)) continue;
+            if (!roomGrid[neighborColumn]) roomGrid[neighborColumn] = [];
             const assignedRoomType = registeredRoomTypeNames[math.floor(math.random() * registeredRoomTypeNames.size())];
             roomGrid[neighborColumn][neighborRow] = assignedRoomType;
             occupiedCells.push([neighborColumn, neighborRow]);
@@ -87,7 +90,6 @@ export class ProceduralRoomGrid {
 
         return roomGrid;
     }
-
     private collectMergedWallsForCell(
         passages: Set<string>,
         mergedWalls: Set<string>,
