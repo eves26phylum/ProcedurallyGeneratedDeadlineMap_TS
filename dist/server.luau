@@ -2,17 +2,39 @@
 function assert(condition, messageIfFalse)
     if not condition then error(messageIfFalse or _VERSION.." assertion error") end
 end
+local WRAPPED_INSTANCE_SENTINEL_METHODS = { "find_first_child", "destroy", "clone", "get_tags", "is_a", "is_in_workspace" }
+
+local function is_wrapped_instance(obj)
+    if type(obj) ~= "table" then return false end
+    for _, method in ipairs(WRAPPED_INSTANCE_SENTINEL_METHODS) do
+        if type(obj[method]) == "function" then return true end
+    end
+    return false
+end
+
+local deep_wrap_result
+
 local function dot_wrap(obj)
     if obj == nil then return nil end
     local proxy = {}
     for k, v in pairs(obj) do
         if type(v) == "function" then
-            proxy[k] = function(_, ...) return v(...) end
+            proxy[k] = function(_, ...) return deep_wrap_result(v(...)) end
         else
             proxy[k] = v
         end
     end
     return proxy
+end
+
+deep_wrap_result = function(result)
+    if is_wrapped_instance(result) then return dot_wrap(result) end
+    if type(result) ~= "table" then return result end
+    local wrappedResult = {}
+    for k, v in pairs(result) do
+        wrappedResult[k] = is_wrapped_instance(v) and dot_wrap(v) or v
+    end
+    return wrappedResult
 end
 
 local function dot_wrap_array(arr)
@@ -45,6 +67,11 @@ query = {
 	create_raycast_params = function() return dot_wrap(_query.create_raycast_params()) end,
 	raycast = function(origin, direction, params) return _query.raycast(origin, direction, params) end,
 }
+local _get_map_root = get_map_root
+get_map_root = function() return dot_wrap(_get_map_root()) end
+
+local _get_chars_root = get_chars_root
+get_chars_root = function() return dot_wrap(_get_chars_root()) end
 
 local _create_instance = create_instance
 create_instance = function(className, parent) return dot_wrap(_create_instance(className, parent)) end
@@ -1498,7 +1525,7 @@ __modulesFolder["isDeadline"] = function()
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local isDeadline = get_map_root ~= nil
+	local isDeadline = game == nil
 	return {
 		isDeadline = isDeadline,
 	}
@@ -1637,6 +1664,17 @@ task.defer(function()
 	script = newFakeInstance({"main"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
+	local createTerrain = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "createTerrainFromVerticesUsingAdapter").createTerrain
+	local robloxAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "robloxAdapter").robloxAdapter
+	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
+	local PerlinNoise = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "PerlinNoise").PerlinNoise
+	local biomeBox = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeAndStructureRegistrySystem").biomeBox
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	local Biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome").Biome
+	local humanConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "humanConfig").default
+	local translateTerrainOrientationForStructureBonding = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "translateTerrainForStructureBonding").translateTerrainOrientationForStructureBonding
+	local NuristanBuildings = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "NuristanBuildings").NuristanBuildings
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
@@ -1702,6 +1740,131 @@ task.defer(function()
 		└─────────────────────────────────────────────┘
 	
 	]]
+	local function generate()
+		print("Me is generating :3")
+		-- work on this later
+		-- prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
+		local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
+		local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
+		local PART_SIZE = 100
+		local MAP_SIZE = Vector2.new(10000, 10000)
+		local RESOLUTION = Vector2.new(math.round(MAP_SIZE.X / PART_SIZE), math.round(MAP_SIZE.Y / PART_SIZE))
+		local ROUGHNESS = 4
+		local PARAMS = {
+			lacunarity = 4,
+			persistence = 0.25,
+			octaves = 2,
+			exaggeratedness = 20,
+			power = 3,
+			scale = math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS,
+		}
+		local POSITION_OFFSET = Vector3.new(-(MAP_SIZE.X / 2), 0, -(MAP_SIZE.Y / 2))
+		local offset = Vector2.new(math.random(1, 10e6), math.random(1, 10e6))
+		local noiseData = PerlinNoise.new():generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power)
+		local wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges")
+		if wedgesFolderToDestroy then
+			adapterToUse.destroy(wedgesFolderToDestroy)
+		end
+		local wedgesFolder = adapterToUse.newInstance("Folder")
+		adapterToUse.setProperty(wedgesFolder, "Name", "Wedges")
+		adapterToUse.setProperty(wedgesFolder, "Parent", workspace)
+		local standardBox = biomeBox.new()
+		local NuristanStandardBiome
+		do
+			local super = Biome
+			NuristanStandardBiome = setmetatable({}, {
+				__tostring = function()
+					return "NuristanStandardBiome"
+				end,
+				__index = super,
+			})
+			NuristanStandardBiome.__index = NuristanStandardBiome
+			function NuristanStandardBiome.new(...)
+				local self = setmetatable({}, NuristanStandardBiome)
+				return self:constructor(...) or self
+			end
+			function NuristanStandardBiome:constructor(adapterToUse, config, parent)
+				super.constructor(self, adapterToUse)
+				self.priority = 100
+				self.config = config
+				self.parent = parent
+				self.name = "nsb"
+			end
+			function NuristanStandardBiome:getColourAndMaterialFromHeight(height)
+				if height < humanConfig.grassDeepness then
+					return self.config.grass()
+				end
+				return self.config.desert()
+			end
+			function NuristanStandardBiome:generate(yourSelf, yourCell)
+				local operateOnThisTriangleInstance = function(data, triangle)
+					local height = data.data.averageHeight
+					local propMap = self:getColourAndMaterialFromHeight(height)
+					assign(triangle, propMap, function(a, b, c)
+						yourSelf.adapter.setProperty(a, b, c)
+					end)
+				end
+				operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1])
+				operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][2])
+				operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][1])
+				operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][2])
+			end
+		end
+		local translateTerrain = translateTerrainOrientationForStructureBonding.new({
+			orientationSubtraction = Vector3.new(0, 0, -90),
+		})
+		local stdnuristanconfig = {
+			grass = function()
+				return {
+					Material = Enum.Material.Grass,
+					Color = Color3.fromRGB(43, 219, 84),
+				}
+			end,
+			desert = function()
+				local secondaryAngs = math.random(-20, 10)
+				return {
+					Material = Enum.Material.Sand,
+					Color = Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs),
+				}
+			end,
+		}
+		standardBox:registerModifier(NuristanStandardBiome.new(adapterToUse, stdnuristanconfig, wedgesFolder))
+		standardBox:registerModifier(NuristanBuildings.new(adapterToUse, translateTerrain, {
+			wallPartProps = {
+				Material = Enum.Material.Sand,
+				Color = Color3.fromRGB(237, 201, 175),
+			},
+			doorway = {
+				width = 2.5,
+				height = 6,
+				offsetAlongWall = 0,
+				bottomOffset = 0,
+			},
+			roomProps = {
+				RoomSize = Vector3.new(20, 2, 20),
+			},
+			wall = {
+				height = 10,
+				thickness = 2,
+			},
+			roomGeneration = {
+				minRooms = 2,
+				maxRooms = 10,
+				mergeWallChance = 0.3,
+			},
+			sniperWindowDoorway = {
+				width = 5,
+				height = 2,
+				bottomOffset = 3,
+				offsetAlongWall = 0,
+			},
+		}, wedgesFolder))
+		local createTerrainDefault = createTerrain.new(function(thisData)
+			local _self = thisData._self
+			standardBox:executeAllModifiers(thisData._self, thisData)
+		end, EgoMoose, adapterToUse, wedgesFolder)
+		local triangles = createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
+	end
 	if isDeadline then
 		load_modfile("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")
 		map.set_map("template_map")
@@ -1710,6 +1873,7 @@ task.defer(function()
 		sharedvars.plr_ping_warning_threshold_ms = math.huge
 		sharedvars.ac_airtime_kill = false
 		sharedvars.sv_gravity = 20
+		generate()
 		map.set_time(10)
 		local lastSpawns = {
 			defender = 0,
@@ -1741,26 +1905,8 @@ task.defer(function()
 			task.wait(1)
 			player:set_health(100)
 		end)
-		local seed = os.time()
-		local function generateForClient(playerToGenerateFor, seed)
-			playerToGenerateFor:fire_client("generateTerrain", seed)
-		end
-		local _exp = players.get_all()
-		-- ▼ ReadonlyArray.forEach ▼
-		local _callback = function(thisPlayer, index)
-			generateForClient(thisPlayer, seed)
-		end
-		for _k, _v in _exp do
-			_callback(_v, _k - 1, _exp)
-		end
-		-- ▲ ReadonlyArray.forEach ▲
-		on_player_joined:Connect(function(name)
-			local thisPlayer = players.get(name)
-			if not thisPlayer then
-				return nil
-			end
-			generateForClient(thisPlayer, seed)
-		end)
+	else
+		generate()
 	end
 
 end)
