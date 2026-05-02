@@ -1372,16 +1372,16 @@ end
 __modulesFolder["logger"] = function()
 	local script
 	script = newFakeInstance({"logger"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	local DefaultLogTypes = {
 		print = print,
 		warn = warn,
@@ -1801,7 +1801,6 @@ task.defer(function()
 	map.set_map("template_map")
 	local Log = Logger.new("main")
 	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
-	print(isDeadline)
 	local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
 	local PART_SIZE = 100
 	local MAP_SIZE = Vector2.new(10000, 10000)
