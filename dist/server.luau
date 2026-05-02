@@ -1801,6 +1801,7 @@ task.defer(function()
 	map.set_map("template_map")
 	local Log = Logger.new("main")
 	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
+	print(isDeadline)
 	local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
 	local PART_SIZE = 100
 	local MAP_SIZE = Vector2.new(10000, 10000)

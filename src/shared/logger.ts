@@ -1,4 +1,5 @@
 import { assign } from "./Util"
+// !deadline-ts.customFinishSector_FinishModulesEnd
 
 export type LogTypes = {
     print: (...args: defined[]) => void,
