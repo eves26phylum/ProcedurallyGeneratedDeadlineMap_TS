@@ -1715,6 +1715,7 @@ task.defer(function()
 	]]
 	local function generate(seed)
 		math.randomseed(seed)
+		print("Me is generating :3")
 		local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
 		local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
 		local PART_SIZE = 100
@@ -1845,7 +1846,12 @@ task.defer(function()
 				local seedNumber = args[2]
 				local _arg0_1 = type(seedNumber) == "number"
 				assert(_arg0_1, "seed number from server is not a number")
-				generate(seedNumber)
+				local success, result = pcall(function()
+					generate(seedNumber)
+				end)
+				if not success then
+					warn(result)
+				end
 			end
 		end)
 	else

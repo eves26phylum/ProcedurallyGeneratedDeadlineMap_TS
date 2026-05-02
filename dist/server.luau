@@ -1741,26 +1741,26 @@ task.defer(function()
 			task.wait(1)
 			player:set_health(100)
 		end)
-	end
-	local seed = os.time()
-	local function generateForClient(playerToGenerateFor, seed)
-		playerToGenerateFor:fire_client("generateTerrain", seed)
-	end
-	local _exp = players.get_all()
-	-- ▼ ReadonlyArray.forEach ▼
-	local _callback = function(thisPlayer, index)
-		generateForClient(thisPlayer, seed)
-	end
-	for _k, _v in _exp do
-		_callback(_v, _k - 1, _exp)
-	end
-	-- ▲ ReadonlyArray.forEach ▲
-	on_player_joined:Connect(function(name)
-		local thisPlayer = players.get(name)
-		if not thisPlayer then
-			return nil
+		local seed = os.time()
+		local function generateForClient(playerToGenerateFor, seed)
+			playerToGenerateFor:fire_client("generateTerrain", seed)
 		end
-		generateForClient(thisPlayer, seed)
-	end)
+		local _exp = players.get_all()
+		-- ▼ ReadonlyArray.forEach ▼
+		local _callback = function(thisPlayer, index)
+			generateForClient(thisPlayer, seed)
+		end
+		for _k, _v in _exp do
+			_callback(_v, _k - 1, _exp)
+		end
+		-- ▲ ReadonlyArray.forEach ▲
+		on_player_joined:Connect(function(name)
+			local thisPlayer = players.get(name)
+			if not thisPlayer then
+				return nil
+			end
+			generateForClient(thisPlayer, seed)
+		end)
+	end
 
 end)

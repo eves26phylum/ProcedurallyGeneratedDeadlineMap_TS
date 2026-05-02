@@ -71,6 +71,9 @@ Think of it like this:
 */
 function generate(seed: number) {
     math.randomseed(seed);
+    print("Me is generating :3"); // huh this prints but it's not generating
+    // work on this later
+    // prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
     const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
     const workspace: AnyInstance = isDeadline ? get_map_root() : game.GetService("Workspace");
     const PART_SIZE = 100;
@@ -186,7 +189,8 @@ if (isDeadline) {
         if (eventType === "generateTerrain") {
             const seedNumber: unknown | number = args[1];
             assert(typeIs(seedNumber, "number"), "seed number from server is not a number");
-            generate(seedNumber);
+            const [success, result] = pcall(() => {generate(seedNumber)});
+            if (!success) warn(result);
         }
     })
 } else {

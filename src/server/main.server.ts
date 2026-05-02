@@ -93,16 +93,16 @@ if (isDeadline) {
         task.wait(1)
         player.set_health(100)
     })
+    const seed = os.time();
+    function generateForClient(playerToGenerateFor: Player, seed: number) {
+        playerToGenerateFor.fire_client("generateTerrain", seed);
+    }
+    players.get_all().forEach((thisPlayer: Player, index: number) => {
+        generateForClient(thisPlayer, seed);
+    })
+    on_player_joined.Connect((name: string) => {
+        const thisPlayer = players.get(name);
+        if (!thisPlayer) return;
+        generateForClient(thisPlayer, seed);
+    })
 }
-const seed = os.time();
-function generateForClient(playerToGenerateFor: Player, seed: number) {
-    playerToGenerateFor.fire_client("generateTerrain", seed);
-}
-players.get_all().forEach((thisPlayer: Player, index: number) => {
-    generateForClient(thisPlayer, seed);
-})
-on_player_joined.Connect((name: string) => {
-    const thisPlayer = players.get(name);
-    if (!thisPlayer) return;
-    generateForClient(thisPlayer, seed);
-})
