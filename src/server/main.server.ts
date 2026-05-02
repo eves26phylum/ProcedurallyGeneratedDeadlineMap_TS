@@ -158,6 +158,17 @@ standardBox.registerModifier(new NuristanBuildings(adapterToUse, translateTerrai
     wall: {
         height: 10,
         thickness: 2
+    },
+    roomGeneration: {
+        minRooms: 2,
+        maxRooms: 10,
+        mergeWallChance: 0.3
+    },
+    sniperWindowDoorway: {
+        width: 5,
+        height: 2,
+        bottomOffset: 3,
+        offsetAlongWall: 0
     }
 }, wedgesFolder));
 const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
