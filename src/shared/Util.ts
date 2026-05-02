@@ -13,3 +13,14 @@ export function assign<T extends object>(
     }
     return a;
 }
+export type ShuffleFunction = <T>(inputArray: ReadonlyArray<T>) => T[];
+export function fisherYatesShuffle<T>(inputArray: ReadonlyArray<T>): T[] {
+    const result = [...inputArray];
+    for (let currentIndex = result.size() - 1; currentIndex > 0; currentIndex--) {
+        const randomSwapIndex = math.floor(math.random() * (currentIndex + 1));
+        const elementAtCurrentIndex = result[currentIndex];
+        result[currentIndex] = result[randomSwapIndex];
+        result[randomSwapIndex] = elementAtCurrentIndex;
+    }
+    return result;
+}
