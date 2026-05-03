@@ -33,7 +33,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         attacker: undefined
     }
     // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
-    let offset = new Vector3(0, -200, 0);
+    let offset = new Vector3(0, 0, 0);
     const [firstPos, secondPos] = [new Vector3(-5000, 5000, -5000), new Vector3(5000, 5000, 5000)]
     on_player_spawned.Connect((name) => {
         time.wait(1.4)
