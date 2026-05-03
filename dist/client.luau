@@ -1990,7 +1990,7 @@ task.defer(function()
 			self.irisConnection = iris:Connect(function()
 				self:renderThing()
 			end)
-			self.windowSize = iris.State(Vector2.new(100, 400))
+			self.windowSize = iris.State(Vector2.new(500, 100))
 			self.text = "Generating terrain. You cannot spawn until it is done generating."
 		end
 		function lookListener:renderThing()
