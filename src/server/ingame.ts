@@ -1,11 +1,13 @@
 import { AnyInstance, InstanceAdapter } from "shared/definition";
 import { Logger } from "shared/logger";
+import { isDeadline } from "shared/isDeadline";
 import { SpectatorBox } from "shared/spectatorBoxBuilder";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
 const Log = new Logger("team_spawner"); // log, warn, info, error
 export type lastSpawnType = {coordination: number} & Record<PlayerTeam, string[]>;
 export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
+    if (!isDeadline) return Log.info("Did not execute because the environment is not Deadline.");;
     Log.info("Listening for people spawning.");
     sharedvars.plr_ping_limit_sec = math.huge
     sharedvars.plr_ping_timeout_sec = math.huge
