@@ -1968,13 +1968,13 @@ __modulesFolder["ingame"] = function()
 		sharedvars.plr_ping_warning_threshold_ms = math.huge
 		sharedvars.ac_airtime_kill = false
 		sharedvars.ac_movement = false
+		sharedvars.ac_sound_kill = false
 		sharedvars.plr_drum_magazines = 3
 		sharedvars.plr_magazines = 9
 		sharedvars.plr_spare_rounds = 90
 		sharedvars.plr_base_weight = 1.7
 		sharedvars.sv_gravity = 20
 		sharedvars.plr_recoil = 0.5
-		sharedvars.sv_spawning_enabled = false
 		sharedvars.ff_field_voicelines = true
 		map.set_time(10)
 		local lastSpawns = {
@@ -1987,7 +1987,7 @@ __modulesFolder["ingame"] = function()
 			attacker = nil,
 		}
 		-- const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
-		local offset = Vector3.new(0, 15000, 0)
+		local offset = Vector3.new(0, 3000, 0)
 		local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
 		on_player_spawned:Connect(function(name)
 			time.wait(1.4)

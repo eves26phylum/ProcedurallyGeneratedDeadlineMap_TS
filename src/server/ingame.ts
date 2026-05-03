@@ -14,13 +14,13 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
     sharedvars.plr_ping_warning_threshold_ms = math.huge
     sharedvars.ac_airtime_kill = false
     sharedvars.ac_movement = false
+    sharedvars.ac_sound_kill = false
     sharedvars.plr_drum_magazines = 3
     sharedvars.plr_magazines = 9
     sharedvars.plr_spare_rounds = 90
     sharedvars.plr_base_weight = 1.7
     sharedvars.sv_gravity = 20
     sharedvars.plr_recoil = 0.5
-    sharedvars.sv_spawning_enabled = false
     sharedvars.ff_field_voicelines = true
     map.set_time(10)
     const lastSpawns: lastSpawnType = {
@@ -33,7 +33,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         attacker: undefined
     }
     // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
-    let offset = new Vector3(0, 15000, 0);
+    let offset = new Vector3(0, 3000, 0);
     const [firstPos, secondPos] = [new Vector3(-5000, 5000, -5000), new Vector3(5000, 5000, 5000)]
     on_player_spawned.Connect((name) => {
         time.wait(1.4)
