@@ -46,8 +46,10 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             offset = offset.add(new Vector3(200, 0, 0));
             spectatorBoxes[team] = thisSpectatorBox;
         }
-        lastSpawns[team].push(player.name);
-        thisSpectatorBox.setSignText(`${lastSpawns.coordination - lastSpawns[team].size()}`);
+        if (lastSpawns[team].indexOf(player.name) === -1) {
+            lastSpawns[team].push(player.name);
+            thisSpectatorBox.setSignText(`${lastSpawns.coordination - lastSpawns[team].size()}`);
+        }
         player.set_position(spectatorBoxes[team].centerBoxPosition) // replace this with the spectator box pos
 
         lastSpawns[team].forEach((playerName: string, index: number) => { // Remove all players that left
@@ -77,6 +79,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         })
 
         lastSpawns[team] = [];
+        thisSpectatorBox.setSignText(`Zero`);
         // Log.info(`Player ${player.name} is arriving`);
         // Spawn this guy at a spectator box at Y level -200. You must separate spectator boxes for each team. Each wall in a spectator box is 3 studs thick (prevents penetration for rifles). When a spectator box spawns, it will spawn to the left of the last spectator box. Each spectator box is transparent and glass. The inside is filled with no collide water. There is a metal sign bolted to the middle of one of the walls that will say (if defender) `The mission will start when ${playersLeft} more SYNO arrive.`. If they're attacker, they will say `You will protect the homeland! ${playersLeft} players left until you will spawn`. The text resets in the HERE logic.
     });
