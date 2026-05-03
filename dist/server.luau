@@ -962,7 +962,7 @@ __modulesFolder["Tree"] = function()
 			self.adapter.setProperty(leaf, "Size", thisBallSize)
 			local _adapter_1 = self.adapter
 			local _positionToPlaceAt_1 = positionToPlaceAt
-			local _vector3_1 = Vector3.new(0, thisBranchSize.Y * 2 + thisBallSize.Y, 0)
+			local _vector3_1 = Vector3.new(0, (thisBranchSize.Y * 2) + (thisBallSize.Y / 2), 0)
 			_adapter_1.setProperty(leaf, "Position", _positionToPlaceAt_1 + _vector3_1)
 			self.adapter.setProperty(leaf, "Parent", self.parent)
 			assign(leaf, self.config.leaf.props, self.adapter.setProperty)
@@ -2113,6 +2113,7 @@ task.defer(function()
 		sharedvars.plr_ping_timeout_sec = math.huge
 		sharedvars.plr_ping_warning_threshold_ms = math.huge
 		sharedvars.ac_airtime_kill = false
+		sharedvars.ac_movement = false
 		sharedvars.sv_gravity = 20
 		sharedvars.plr_recoil = 0.5
 		Log:warn("Generating for Deadline environment.")
