@@ -17,7 +17,7 @@ export class biomeBox {
         })
     }
     registerModifier(yourObject: modifierObject) {
-        thisLogger.info(`REGISTERED ${yourObject.name}`);
+        thisLogger.log(`REGISTERED ${yourObject.name}`);
         this.modifiers.push(yourObject);
         this.modifiers.sort((a, b) => a.priority > b.priority);
     }

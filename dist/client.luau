@@ -1140,7 +1140,7 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 			-- ▲ ReadonlyArray.forEach ▲
 		end
 		function biomeBox:registerModifier(yourObject)
-			thisLogger:info(`REGISTERED {yourObject.name}`)
+			thisLogger:log(`REGISTERED {yourObject.name}`)
 			local _modifiers = self.modifiers
 			local _yourObject = yourObject
 			table.insert(_modifiers, _yourObject)

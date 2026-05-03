@@ -272,7 +272,6 @@ standardBox.registerModifier(new Tree(adapterToUse, {
     treesPerTriangle: 4
 }, wedgesFolder))
 function generate() {
-    Log.log("Me is generating :3"); // huh this prints but it's not generating
     // work on this later
     // prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
     const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
@@ -289,7 +288,7 @@ if (isDeadline) {
     sharedvars.ac_movement = false
     sharedvars.sv_gravity = 20
     sharedvars.plr_recoil = 0.5
-    Log.warn("Generating for Deadline environment.");
+    Log.log("Generating for Deadline environment.");
     generate();
     Log.info("Done.");
     map.set_time(10)
@@ -311,10 +310,12 @@ if (isDeadline) {
             
             const raycast_params = query.create_raycast_params();
             const hit = query.raycast(new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z)), new Vector3(0, -15000, 0), raycast_params)
-            if (!hit) return warn("Hit was not found when doing spawn logic");
+            if (!hit) return Log.warn("Hit was not found when doing spawn logic");
             
             lastSpawnedPos[team] = hit.position.add(new Vector3(0, 6, 0));
+            Log.info(`Registering team spawn at ${lastSpawnedPos[team]}`)
         }
+        Log.info(`Spawning player ${player.name} at ${lastSpawnedPos[team]}`)
         player.set_position(lastSpawnedPos[team])
         task.wait(1)
         player.set_health(100)

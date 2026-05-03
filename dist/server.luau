@@ -1140,7 +1140,7 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 			-- ▲ ReadonlyArray.forEach ▲
 		end
 		function biomeBox:registerModifier(yourObject)
-			thisLogger:info(`REGISTERED {yourObject.name}`)
+			thisLogger:log(`REGISTERED {yourObject.name}`)
 			local _modifiers = self.modifiers
 			local _yourObject = yourObject
 			table.insert(_modifiers, _yourObject)
@@ -2099,7 +2099,6 @@ task.defer(function()
 		treesPerTriangle = 4,
 	}, wedgesFolder))
 	local function generate()
-		Log:log("Me is generating :3")
 		-- work on this later
 		-- prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
 		local createTerrainDefault = createTerrain.new(function(thisData)
@@ -2116,7 +2115,7 @@ task.defer(function()
 		sharedvars.ac_movement = false
 		sharedvars.sv_gravity = 20
 		sharedvars.plr_recoil = 0.5
-		Log:warn("Generating for Deadline environment.")
+		Log:log("Generating for Deadline environment.")
 		generate()
 		Log:info("Done.")
 		map.set_time(10)
@@ -2140,12 +2139,14 @@ task.defer(function()
 				local raycast_params = query.create_raycast_params()
 				local hit = query.raycast(Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z)), Vector3.new(0, -15000, 0), raycast_params)
 				if not hit then
-					return warn("Hit was not found when doing spawn logic")
+					return Log:warn("Hit was not found when doing spawn logic")
 				end
 				local _position = hit.position
 				local _vector3 = Vector3.new(0, 6, 0)
 				lastSpawnedPos[team] = _position + _vector3
+				Log:info(`Registering team spawn at {lastSpawnedPos[team]}`)
 			end
+			Log:info(`Spawning player {player.name} at {lastSpawnedPos[team]}`)
 			player.set_position(lastSpawnedPos[team])
 			task.wait(1)
 			player.set_health(100)
