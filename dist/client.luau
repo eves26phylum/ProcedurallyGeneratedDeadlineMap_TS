@@ -1987,10 +1987,10 @@ task.defer(function()
 			return self:constructor(...) or self
 		end
 		function lookListener:constructor()
-			self.irisConnection = iris.Connect(function()
+			self.windowSize = iris.State(Vector2.new(500, 100))
+			self.irisConnection = iris:Connect(iris, function()
 				self:renderThing()
 			end)
-			self.windowSize = iris.State(Vector2.new(500, 100))
 			self.text = "Generating terrain. You cannot spawn until it is done generating."
 		end
 		function lookListener:renderThing()

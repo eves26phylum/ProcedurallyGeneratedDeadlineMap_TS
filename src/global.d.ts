@@ -940,9 +940,9 @@ type IrisState<T> = {
     value: T,
     get(): T,
     set(newValue: T): T,
-    onChange(callback: (newValue: T) => void): void,
+    onChange(callback: (newValue: T) => () => void): void,
     ConnectedWidgets: Record<IrisID, IrisWidget>,
-    ConnectedFunctions: ((newValue: T) => void)[]
+    ConnectedFunctions: ((newValue: T) => () => void)[]
 }
 type IrisWindowWidgetState = {
     size?: IrisState<Vector2>,
@@ -979,7 +979,7 @@ interface IrisInstance {
     DragNum: (args?: unknown[]) => IrisWidget;
     State: <T>(value: T) => IrisState<T>;
     /** Call to disconnect it */
-    Connect: (callback: () => void) => () => void
+    Connect(iris: IrisInstance, callback: () => void): () => void
     /** Catch-all for any Iris widget not listed above. */
     [key: string]: unknown;
 }
