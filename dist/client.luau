@@ -2,6 +2,7 @@
 function assert(condition, messageIfFalse)
     if not condition then error(messageIfFalse or _VERSION.." assertion error") end
 end
+local unpack = table.unpack
 local old_require = require
 local __modulesFolder = {}
 local __modulesCachedValues = {}
