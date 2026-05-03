@@ -261,14 +261,15 @@ standardBox.registerModifier(new Tree(adapterToUse, {
         }
     },
     leaf: {
-        minBoxSize: 4,
-        maxBoxSize: 8,
+        minBoxSize: 12,
+        maxBoxSize: 32,
         props: {
             Material: Enum.Material.Grass,
             CanCollide: false,
             Transparency: 0.4
         }
-    }
+    },
+    treesPerTriangle: 5
 }, wedgesFolder))
 function generate() {
     Log.log("Me is generating :3"); // huh this prints but it's not generating

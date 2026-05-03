@@ -962,7 +962,7 @@ __modulesFolder["Tree"] = function()
 			self.adapter.setProperty(leaf, "Size", thisBallSize)
 			local _adapter_1 = self.adapter
 			local _positionToPlaceAt_1 = positionToPlaceAt
-			local _vector3_1 = Vector3.new(0, thisBranchSize.Y * 2, 0)
+			local _vector3_1 = Vector3.new(0, thisBranchSize.Y * 2 + thisBallSize.Y, 0)
 			_adapter_1.setProperty(leaf, "Position", _positionToPlaceAt_1 + _vector3_1)
 			self.adapter.setProperty(leaf, "Parent", self.parent)
 			assign(leaf, self.config.leaf.props, self.adapter.setProperty)
@@ -972,18 +972,32 @@ __modulesFolder["Tree"] = function()
 				return nil
 			end
 			local branchMaxSize, branchMinSize = self.config.branch.maxSize, self.config.branch.minSize
-			local randY = branchMinSize.Y + math.random() * (branchMaxSize.Y - branchMinSize.Y)
-			local randX = branchMinSize.X + math.random() * (branchMaxSize.X - branchMinSize.X)
-			local thisBranchSize = Vector3.new(randY, randX, randX)
-			local randLeafSize = self.config.leaf.minBoxSize + math.random() * (self.config.leaf.maxBoxSize - self.config.leaf.minBoxSize)
-			local thisLeafSize = Vector3.new(randLeafSize, randLeafSize, randLeafSize)
-			local pos1 = self:getRandomSurfacePosition(yourCell.verticesForTriangles[1])
-			local pos2 = self:getRandomSurfacePosition(yourCell.verticesForTriangles[2])
-			if pos1 == nil or pos2 == nil then
-				return nil
+			for _, triangle in yourCell.verticesForTriangles do
+				do
+					local i = 0
+					local _shouldIncrement = false
+					while true do
+						if _shouldIncrement then
+							i += 1
+						else
+							_shouldIncrement = true
+						end
+						if not (i < self.config.treesPerTriangle) then
+							break
+						end
+						local randY = branchMinSize.Y + math.random() * (branchMaxSize.Y - branchMinSize.Y)
+						local randX = branchMinSize.X + math.random() * (branchMaxSize.X - branchMinSize.X)
+						local thisBranchSize = Vector3.new(randY, randX, randX)
+						local randLeafSize = self.config.leaf.minBoxSize + math.random() * (self.config.leaf.maxBoxSize - self.config.leaf.minBoxSize)
+						local thisLeafSize = Vector3.new(randLeafSize, randLeafSize, randLeafSize)
+						local pos = self:getRandomSurfacePosition(triangle)
+						if pos == nil then
+							continue
+						end
+						self:createTree(pos, thisBranchSize, thisLeafSize)
+					end
+				end
 			end
-			self:createTree(pos1, thisBranchSize, thisLeafSize)
-			self:createTree(pos2, thisBranchSize, thisLeafSize)
 			ensureStructureData(yourCell)
 			structureClaimLand(self, yourCell)
 		end

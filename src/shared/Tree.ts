@@ -7,6 +7,7 @@ import { assign } from "./Util";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
 export interface TreeConfig {
+    treesPerTriangle: number; // how many trees to place per triangle in each WedgeCell
     branch: {
         minSize: Vector2,
         maxSize: Vector2,
@@ -59,26 +60,30 @@ export class Tree implements Biome {
         this.adapter.setProperty(leaf, "Anchored", true);
         this.adapter.setProperty(leaf, "Shape", Enum.PartType.Ball);
         this.adapter.setProperty(leaf, "Size", thisBallSize);
-        this.adapter.setProperty(leaf, "Position", positionToPlaceAt.add(new Vector3(0, thisBranchSize.Y * 2, 0))); // half of the ball is leaking up
+        this.adapter.setProperty(leaf, "Position", positionToPlaceAt.add(new Vector3(0, thisBranchSize.Y * 2 + thisBallSize.Y, 0)));
         this.adapter.setProperty(leaf, "Parent", this.parent);
         assign(leaf, this.config.leaf.props, this.adapter.setProperty);
     }
 
     generate(yourSelf: createTerrain, yourCell: WedgeCell) {
         if (useStructureData(yourCell)) return;
+
         const [branchMaxSize, branchMinSize] = [this.config.branch.maxSize, this.config.branch.minSize];
-        const randY = branchMinSize.Y + math.random() * (branchMaxSize.Y - branchMinSize.Y);
-        const randX = branchMinSize.X + math.random() * (branchMaxSize.X - branchMinSize.X);
-        const thisBranchSize = new Vector3(randY, randX, randX);
-        const randLeafSize = this.config.leaf.minBoxSize + math.random() * (this.config.leaf.maxBoxSize - this.config.leaf.minBoxSize);
-        const thisLeafSize = new Vector3(randLeafSize, randLeafSize, randLeafSize);
-        
-        const pos1 = this.getRandomSurfacePosition(yourCell.verticesForTriangles[0]);
-        const pos2 = this.getRandomSurfacePosition(yourCell.verticesForTriangles[1]);
-        
-        if (pos1 === undefined || pos2 === undefined) return;
-        this.createTree(pos1, thisBranchSize, thisLeafSize);
-        this.createTree(pos2, thisBranchSize, thisLeafSize);
+
+        for (const triangle of yourCell.verticesForTriangles) {
+            for (let i = 0; i < this.config.treesPerTriangle; i++) {
+                const randY = branchMinSize.Y + math.random() * (branchMaxSize.Y - branchMinSize.Y);
+                const randX = branchMinSize.X + math.random() * (branchMaxSize.X - branchMinSize.X);
+                const thisBranchSize = new Vector3(randY, randX, randX);
+                const randLeafSize = this.config.leaf.minBoxSize + math.random() * (this.config.leaf.maxBoxSize - this.config.leaf.minBoxSize);
+                const thisLeafSize = new Vector3(randLeafSize, randLeafSize, randLeafSize);
+
+                const pos = this.getRandomSurfacePosition(triangle);
+                if (pos === undefined) continue;
+                this.createTree(pos, thisBranchSize, thisLeafSize);
+            }
+        }
+
         ensureStructureData(yourCell);
         structureClaimLand(this, yourCell);
     }
