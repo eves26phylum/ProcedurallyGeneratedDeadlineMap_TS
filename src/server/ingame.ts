@@ -27,10 +27,18 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         defender: [],
         attacker: [],
         coordination: 10
-    };
+    }
     const spectatorBoxes: Record<PlayerTeam, SpectatorBox | undefined> = {
         defender: undefined,
         attacker: undefined
+    }
+    const voicelines = {
+        defender: [
+            "Let's go my marines! %s until we fly!"
+        ],
+        attacker: [
+            "Let's go my aJGAJGJA! %s until we fly!"
+        ]
     }
     // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
     let offset = new Vector3(0, 3000, 0);
@@ -48,7 +56,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         }
         if (lastSpawns[team].indexOf(player.name) === -1) {
             lastSpawns[team].push(player.name);
-            thisSpectatorBox.setSignText(`${lastSpawns.coordination - lastSpawns[team].size()}`);
+            thisSpectatorBox.setSignText(string.format(voicelines[team][math.random(1, voicelines[team].size())], `${lastSpawns.coordination - lastSpawns[team].size()}`));
         }
         player.set_position(spectatorBoxes[team].centerBoxPosition) // replace this with the spectator box pos
 

@@ -37,7 +37,7 @@ export class SpectatorBox {
         adapter.setProperty(this.boxModel, "Name", "SpectatorBox");
         this.centerBoxPosition = centerBoxPosition;
         this.buildGlassEnclosure(centerBoxPosition);
-        this.signTextDisplayLabel = this.buildInteriorSign(centerBoxPosition);
+        this.signTextDisplayLabel = this.buildInteriorSign(centerBoxPosition.add(new Vector3(0, (WALL_CENTER_OFFSET - WALL_THICKNESS / 2) - SIGN_HEIGHT / 2, 0)));
         this.buildCeilingLightFixture(centerBoxPosition);
     }
 
@@ -109,8 +109,8 @@ export class SpectatorBox {
         this.adapter.setProperty(signTextDisplayLabel, "Font", Enum.Font.Gotham);
         this.adapter.setProperty(signTextDisplayLabel, "TextColor3", SIGN_TEXT_COLOR);
         this.adapter.setProperty(signTextDisplayLabel, "BackgroundTransparency", 1);
-        this.adapter.setProperty(signTextDisplayLabel, "TextXAlignment", Enum.TextXAlignment.Center);
-        this.adapter.setProperty(signTextDisplayLabel, "TextYAlignment", Enum.TextYAlignment.Center);
+        this.adapter.setProperty(signTextDisplayLabel, "TextYAlignment", Enum.TextYAlignment.Top);
+        this.adapter.setProperty(signTextDisplayLabel, "TextXAlignment", Enum.TextXAlignment.Left);
         this.adapter.setProperty(signTextDisplayLabel, "Text", "");
 
         return signTextDisplayLabel;

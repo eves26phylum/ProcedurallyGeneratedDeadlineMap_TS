@@ -1750,7 +1750,10 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 			adapter.setProperty(self.boxModel, "Name", "SpectatorBox")
 			self.centerBoxPosition = centerBoxPosition
 			self:buildGlassEnclosure(centerBoxPosition)
-			self.signTextDisplayLabel = self:buildInteriorSign(centerBoxPosition)
+			local _self = self
+			local _centerBoxPosition = centerBoxPosition
+			local _vector3 = Vector3.new(0, (WALL_CENTER_OFFSET - WALL_THICKNESS / 2) - SIGN_HEIGHT / 2, 0)
+			self.signTextDisplayLabel = _self:buildInteriorSign(_centerBoxPosition + _vector3)
 			self:buildCeilingLightFixture(centerBoxPosition)
 		end
 		function SpectatorBox:setSignText(text)
@@ -1812,8 +1815,8 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 			self.adapter.setProperty(signTextDisplayLabel, "Font", Enum.Font.Gotham)
 			self.adapter.setProperty(signTextDisplayLabel, "TextColor3", SIGN_TEXT_COLOR)
 			self.adapter.setProperty(signTextDisplayLabel, "BackgroundTransparency", 1)
-			self.adapter.setProperty(signTextDisplayLabel, "TextXAlignment", Enum.TextXAlignment.Center)
-			self.adapter.setProperty(signTextDisplayLabel, "TextYAlignment", Enum.TextYAlignment.Center)
+			self.adapter.setProperty(signTextDisplayLabel, "TextYAlignment", Enum.TextYAlignment.Top)
+			self.adapter.setProperty(signTextDisplayLabel, "TextXAlignment", Enum.TextXAlignment.Left)
 			self.adapter.setProperty(signTextDisplayLabel, "Text", "")
 			return signTextDisplayLabel
 		end

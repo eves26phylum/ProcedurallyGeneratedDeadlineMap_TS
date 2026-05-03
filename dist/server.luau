@@ -1750,7 +1750,10 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 			adapter.setProperty(self.boxModel, "Name", "SpectatorBox")
 			self.centerBoxPosition = centerBoxPosition
 			self:buildGlassEnclosure(centerBoxPosition)
-			self.signTextDisplayLabel = self:buildInteriorSign(centerBoxPosition)
+			local _self = self
+			local _centerBoxPosition = centerBoxPosition
+			local _vector3 = Vector3.new(0, (WALL_CENTER_OFFSET - WALL_THICKNESS / 2) - SIGN_HEIGHT / 2, 0)
+			self.signTextDisplayLabel = _self:buildInteriorSign(_centerBoxPosition + _vector3)
 			self:buildCeilingLightFixture(centerBoxPosition)
 		end
 		function SpectatorBox:setSignText(text)
@@ -1812,8 +1815,8 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 			self.adapter.setProperty(signTextDisplayLabel, "Font", Enum.Font.Gotham)
 			self.adapter.setProperty(signTextDisplayLabel, "TextColor3", SIGN_TEXT_COLOR)
 			self.adapter.setProperty(signTextDisplayLabel, "BackgroundTransparency", 1)
-			self.adapter.setProperty(signTextDisplayLabel, "TextXAlignment", Enum.TextXAlignment.Center)
-			self.adapter.setProperty(signTextDisplayLabel, "TextYAlignment", Enum.TextYAlignment.Center)
+			self.adapter.setProperty(signTextDisplayLabel, "TextYAlignment", Enum.TextYAlignment.Top)
+			self.adapter.setProperty(signTextDisplayLabel, "TextXAlignment", Enum.TextXAlignment.Left)
 			self.adapter.setProperty(signTextDisplayLabel, "Text", "")
 			return signTextDisplayLabel
 		end
@@ -2004,6 +2007,10 @@ __modulesFolder["ingame"] = function()
 			defender = nil,
 			attacker = nil,
 		}
+		local voicelines = {
+			defender = { "Let's go my marines! %s until we fly!" },
+			attacker = { "Let's go my aJGAJGJA! %s until we fly!" },
+		}
 		-- const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
 		local offset = Vector3.new(0, 3000, 0)
 		local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
@@ -2028,7 +2035,7 @@ __modulesFolder["ingame"] = function()
 				local _exp_1 = lastSpawns[team]
 				local _name_1 = player.name
 				table.insert(_exp_1, _name_1)
-				thisSpectatorBox:setSignText(`{lastSpawns.coordination - #lastSpawns[team]}`)
+				thisSpectatorBox:setSignText(string.format(voicelines[team][math.random(1, #voicelines[team]) + 1], `{lastSpawns.coordination - #lastSpawns[team]}`))
 			end
 			player.set_position(spectatorBoxes[team].centerBoxPosition)
 			local _exp_1 = lastSpawns[team]
