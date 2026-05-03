@@ -1,5 +1,4 @@
 import { AnyInstance, InstanceAdapter } from "shared/definition";
-import { isDeadline } from "shared/isDeadline";
 import { Logger } from "shared/logger";
 import { SpectatorBox } from "shared/spectatorBoxBuilder";
 // !deadline-ts.customFinishSector_FinishModulesEnd

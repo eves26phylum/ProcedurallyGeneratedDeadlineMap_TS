@@ -1112,7 +1112,7 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	local thisLogger = Logger.new("biomesAndStructures")
+	local thisLogger = Logger.new("biome_box")
 	local biomeBox
 	do
 		biomeBox = setmetatable({}, {
@@ -1140,7 +1140,7 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 			-- ▲ ReadonlyArray.forEach ▲
 		end
 		function biomeBox:registerModifier(yourObject)
-			thisLogger:log(`Registered biome '{yourObject.name}'.`)
+			thisLogger:warn(`Registered modifier '{yourObject.name}'.`)
 			local _modifiers = self.modifiers
 			local _yourObject = yourObject
 			table.insert(_modifiers, _yourObject)
@@ -1676,6 +1676,156 @@ __modulesFolder["selfProp"] = function()
 	end
 	return {
 		returnFunctionWithIdentity = returnFunctionWithIdentity,
+	}
+
+end
+
+__modulesFolder["spectatorBoxBuilder"] = function()
+	local script
+	script = newFakeInstance({"spectatorBoxBuilder"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local INTERIOR_DIMENSION = 9
+	local WALL_THICKNESS = 3
+	local EXTERIOR_DIMENSION = INTERIOR_DIMENSION + WALL_THICKNESS * 2
+	local INTERIOR_HALF_DIMENSION = INTERIOR_DIMENSION / 2
+	local WALL_CENTER_OFFSET = INTERIOR_HALF_DIMENSION + WALL_THICKNESS / 2
+	local GLASS_TRANSPARENCY = 0.3
+	local GLASS_COLOR = Color3.fromRGB(200, 230, 255)
+	local SIGN_WIDTH = 4
+	local SIGN_HEIGHT = 2
+	local SIGN_DEPTH = 0.2
+	local SIGN_TEXT_SIZE = 16
+	local SIGN_PIXELS_PER_STUD = 50
+	local SIGN_TEXT_COLOR = Color3.new(1, 1, 1)
+	local SIGN_SURFACE_COLOR = Color3.fromRGB(102, 102, 110)
+	local LIGHT_FIXTURE_SIZE = Vector3.new(1, 0.5, 1)
+	local LIGHT_FIXTURE_COLOR = Color3.fromRGB(255, 255, 200)
+	local LIGHT_BRIGHTNESS = 2
+	local LIGHT_RANGE = 16
+	local LIGHT_COLOR = Color3.fromRGB(255, 255, 200)
+	-- todo make this a config but whatever it's a preset prefab
+	local SpectatorBox
+	do
+		SpectatorBox = setmetatable({}, {
+			__tostring = function()
+				return "SpectatorBox"
+			end,
+		})
+		SpectatorBox.__index = SpectatorBox
+		function SpectatorBox.new(...)
+			local self = setmetatable({}, SpectatorBox)
+			return self:constructor(...) or self
+		end
+		function SpectatorBox:constructor(adapter, centerBoxPosition, parent)
+			self.adapter = adapter
+			self.boxModel = adapter.newInstance("Folder", parent)
+			adapter.setProperty(self.boxModel, "Name", "SpectatorBox")
+			self.centerBoxPosition = centerBoxPosition
+			self:buildGlassEnclosure(centerBoxPosition)
+			self.signTextDisplayLabel = self:buildInteriorSign(centerBoxPosition)
+			self:buildCeilingLightFixture(centerBoxPosition)
+		end
+		function SpectatorBox:setSignText(text)
+			self.adapter.setProperty(self.signTextDisplayLabel, "Text", text)
+		end
+		function SpectatorBox:destroy()
+			self.adapter.destroy(self.boxModel)
+		end
+		function SpectatorBox:buildGlassEnclosure(center)
+			local _self = self
+			local _exp = Vector3.new(EXTERIOR_DIMENSION, WALL_THICKNESS, EXTERIOR_DIMENSION)
+			local _center = center
+			local _vector3 = Vector3.new(0, -WALL_CENTER_OFFSET, 0)
+			_self:createGlassWall(_exp, _center + _vector3, "Floor")
+			local _self_1 = self
+			local _exp_1 = Vector3.new(EXTERIOR_DIMENSION, WALL_THICKNESS, EXTERIOR_DIMENSION)
+			local _center_1 = center
+			local _vector3_1 = Vector3.new(0, WALL_CENTER_OFFSET, 0)
+			_self_1:createGlassWall(_exp_1, _center_1 + _vector3_1, "Ceiling")
+			local _self_2 = self
+			local _exp_2 = Vector3.new(EXTERIOR_DIMENSION, INTERIOR_DIMENSION, WALL_THICKNESS)
+			local _center_2 = center
+			local _vector3_2 = Vector3.new(0, 0, WALL_CENTER_OFFSET)
+			_self_2:createGlassWall(_exp_2, _center_2 + _vector3_2, "FrontWall")
+			local _self_3 = self
+			local _exp_3 = Vector3.new(EXTERIOR_DIMENSION, INTERIOR_DIMENSION, WALL_THICKNESS)
+			local _center_3 = center
+			local _vector3_3 = Vector3.new(0, 0, -WALL_CENTER_OFFSET)
+			_self_3:createGlassWall(_exp_3, _center_3 + _vector3_3, "BackWall")
+			local _self_4 = self
+			local _exp_4 = Vector3.new(WALL_THICKNESS, INTERIOR_DIMENSION, EXTERIOR_DIMENSION)
+			local _center_4 = center
+			local _vector3_4 = Vector3.new(-WALL_CENTER_OFFSET, 0, 0)
+			_self_4:createGlassWall(_exp_4, _center_4 + _vector3_4, "LeftWall")
+			local _self_5 = self
+			local _exp_5 = Vector3.new(WALL_THICKNESS, INTERIOR_DIMENSION, EXTERIOR_DIMENSION)
+			local _center_5 = center
+			local _vector3_5 = Vector3.new(WALL_CENTER_OFFSET, 0, 0)
+			_self_5:createGlassWall(_exp_5, _center_5 + _vector3_5, "RightWall")
+		end
+		function SpectatorBox:buildInteriorSign(center)
+			local interiorSignPart = self.adapter.newInstance("Part", self.boxModel)
+			self.adapter.setProperty(interiorSignPart, "Name", "InteriorSign")
+			self.adapter.setProperty(interiorSignPart, "Size", Vector3.new(SIGN_WIDTH, SIGN_HEIGHT, SIGN_DEPTH))
+			self.adapter.setProperty(interiorSignPart, "CFrame", CFrame.new(center.X, center.Y, center.Z - INTERIOR_HALF_DIMENSION + SIGN_DEPTH / 2))
+			self.adapter.setProperty(interiorSignPart, "Material", Enum.Material.Metal)
+			self.adapter.setProperty(interiorSignPart, "Color", SIGN_SURFACE_COLOR)
+			self.adapter.setProperty(interiorSignPart, "Anchored", true)
+			local signSurfaceGui = self.adapter.newInstance("SurfaceGui", interiorSignPart)
+			self.adapter.setProperty(signSurfaceGui, "Face", Enum.NormalId.Back)
+			self.adapter.setProperty(signSurfaceGui, "SizingMode", Enum.SurfaceGuiSizingMode.PixelsPerStud)
+			self.adapter.setProperty(signSurfaceGui, "PixelsPerStud", SIGN_PIXELS_PER_STUD)
+			local signTextDisplayLabel = self.adapter.newInstance("TextLabel", signSurfaceGui)
+			self.adapter.setProperty(signTextDisplayLabel, "Size", UDim2.new(1, -8, 1, -8))
+			self.adapter.setProperty(signTextDisplayLabel, "Position", UDim2.new(0, 4, 0, 4))
+			self.adapter.setProperty(signTextDisplayLabel, "TextSize", SIGN_TEXT_SIZE)
+			self.adapter.setProperty(signTextDisplayLabel, "TextWrapped", true)
+			self.adapter.setProperty(signTextDisplayLabel, "RichText", false)
+			self.adapter.setProperty(signTextDisplayLabel, "Font", Enum.Font.Gotham)
+			self.adapter.setProperty(signTextDisplayLabel, "TextColor3", SIGN_TEXT_COLOR)
+			self.adapter.setProperty(signTextDisplayLabel, "BackgroundTransparency", 1)
+			self.adapter.setProperty(signTextDisplayLabel, "TextXAlignment", Enum.TextXAlignment.Center)
+			self.adapter.setProperty(signTextDisplayLabel, "TextYAlignment", Enum.TextYAlignment.Center)
+			self.adapter.setProperty(signTextDisplayLabel, "Text", "")
+			return signTextDisplayLabel
+		end
+		function SpectatorBox:buildCeilingLightFixture(center)
+			local ceilingLightFixturePart = self.adapter.newInstance("Part", self.boxModel)
+			self.adapter.setProperty(ceilingLightFixturePart, "Name", "CeilingLightFixture")
+			self.adapter.setProperty(ceilingLightFixturePart, "Size", LIGHT_FIXTURE_SIZE)
+			self.adapter.setProperty(ceilingLightFixturePart, "CFrame", CFrame.new(center.X, center.Y + INTERIOR_HALF_DIMENSION - LIGHT_FIXTURE_SIZE.Y / 2, center.Z))
+			self.adapter.setProperty(ceilingLightFixturePart, "Material", Enum.Material.Neon)
+			self.adapter.setProperty(ceilingLightFixturePart, "Color", LIGHT_FIXTURE_COLOR)
+			self.adapter.setProperty(ceilingLightFixturePart, "Anchored", true)
+			self.adapter.setProperty(ceilingLightFixturePart, "CastShadow", false)
+			local ceilingPointLight = self.adapter.newInstance("PointLight", ceilingLightFixturePart)
+			self.adapter.setProperty(ceilingPointLight, "Brightness", LIGHT_BRIGHTNESS)
+			self.adapter.setProperty(ceilingPointLight, "Range", LIGHT_RANGE)
+			self.adapter.setProperty(ceilingPointLight, "Color", LIGHT_COLOR)
+			self.adapter.setProperty(ceilingPointLight, "Enabled", true)
+		end
+		function SpectatorBox:createGlassWall(wallSize, wallCenterPosition, wallPartName)
+			local glassWallPart = self.adapter.newInstance("Part", self.boxModel)
+			self.adapter.setProperty(glassWallPart, "Name", wallPartName)
+			self.adapter.setProperty(glassWallPart, "Size", wallSize)
+			self.adapter.setProperty(glassWallPart, "CFrame", CFrame.new(wallCenterPosition))
+			self.adapter.setProperty(glassWallPart, "Material", Enum.Material.Glass)
+			self.adapter.setProperty(glassWallPart, "Transparency", GLASS_TRANSPARENCY)
+			self.adapter.setProperty(glassWallPart, "Color", GLASS_COLOR)
+			self.adapter.setProperty(glassWallPart, "Anchored", true)
+			self.adapter.setProperty(glassWallPart, "CastShadow", false)
+			return glassWallPart
+		end
+	end
+	return {
+		SpectatorBox = SpectatorBox,
 	}
 
 end

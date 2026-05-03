@@ -1112,7 +1112,7 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	local thisLogger = Logger.new("biomesAndStructures")
+	local thisLogger = Logger.new("biome_box")
 	local biomeBox
 	do
 		biomeBox = setmetatable({}, {
@@ -1140,7 +1140,7 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 			-- ▲ ReadonlyArray.forEach ▲
 		end
 		function biomeBox:registerModifier(yourObject)
-			thisLogger:log(`Registered biome '{yourObject.name}'.`)
+			thisLogger:warn(`Registered modifier '{yourObject.name}'.`)
 			local _modifiers = self.modifiers
 			local _yourObject = yourObject
 			table.insert(_modifiers, _yourObject)
@@ -1680,6 +1680,156 @@ __modulesFolder["selfProp"] = function()
 
 end
 
+__modulesFolder["spectatorBoxBuilder"] = function()
+	local script
+	script = newFakeInstance({"spectatorBoxBuilder"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local INTERIOR_DIMENSION = 9
+	local WALL_THICKNESS = 3
+	local EXTERIOR_DIMENSION = INTERIOR_DIMENSION + WALL_THICKNESS * 2
+	local INTERIOR_HALF_DIMENSION = INTERIOR_DIMENSION / 2
+	local WALL_CENTER_OFFSET = INTERIOR_HALF_DIMENSION + WALL_THICKNESS / 2
+	local GLASS_TRANSPARENCY = 0.3
+	local GLASS_COLOR = Color3.fromRGB(200, 230, 255)
+	local SIGN_WIDTH = 4
+	local SIGN_HEIGHT = 2
+	local SIGN_DEPTH = 0.2
+	local SIGN_TEXT_SIZE = 16
+	local SIGN_PIXELS_PER_STUD = 50
+	local SIGN_TEXT_COLOR = Color3.new(1, 1, 1)
+	local SIGN_SURFACE_COLOR = Color3.fromRGB(102, 102, 110)
+	local LIGHT_FIXTURE_SIZE = Vector3.new(1, 0.5, 1)
+	local LIGHT_FIXTURE_COLOR = Color3.fromRGB(255, 255, 200)
+	local LIGHT_BRIGHTNESS = 2
+	local LIGHT_RANGE = 16
+	local LIGHT_COLOR = Color3.fromRGB(255, 255, 200)
+	-- todo make this a config but whatever it's a preset prefab
+	local SpectatorBox
+	do
+		SpectatorBox = setmetatable({}, {
+			__tostring = function()
+				return "SpectatorBox"
+			end,
+		})
+		SpectatorBox.__index = SpectatorBox
+		function SpectatorBox.new(...)
+			local self = setmetatable({}, SpectatorBox)
+			return self:constructor(...) or self
+		end
+		function SpectatorBox:constructor(adapter, centerBoxPosition, parent)
+			self.adapter = adapter
+			self.boxModel = adapter.newInstance("Folder", parent)
+			adapter.setProperty(self.boxModel, "Name", "SpectatorBox")
+			self.centerBoxPosition = centerBoxPosition
+			self:buildGlassEnclosure(centerBoxPosition)
+			self.signTextDisplayLabel = self:buildInteriorSign(centerBoxPosition)
+			self:buildCeilingLightFixture(centerBoxPosition)
+		end
+		function SpectatorBox:setSignText(text)
+			self.adapter.setProperty(self.signTextDisplayLabel, "Text", text)
+		end
+		function SpectatorBox:destroy()
+			self.adapter.destroy(self.boxModel)
+		end
+		function SpectatorBox:buildGlassEnclosure(center)
+			local _self = self
+			local _exp = Vector3.new(EXTERIOR_DIMENSION, WALL_THICKNESS, EXTERIOR_DIMENSION)
+			local _center = center
+			local _vector3 = Vector3.new(0, -WALL_CENTER_OFFSET, 0)
+			_self:createGlassWall(_exp, _center + _vector3, "Floor")
+			local _self_1 = self
+			local _exp_1 = Vector3.new(EXTERIOR_DIMENSION, WALL_THICKNESS, EXTERIOR_DIMENSION)
+			local _center_1 = center
+			local _vector3_1 = Vector3.new(0, WALL_CENTER_OFFSET, 0)
+			_self_1:createGlassWall(_exp_1, _center_1 + _vector3_1, "Ceiling")
+			local _self_2 = self
+			local _exp_2 = Vector3.new(EXTERIOR_DIMENSION, INTERIOR_DIMENSION, WALL_THICKNESS)
+			local _center_2 = center
+			local _vector3_2 = Vector3.new(0, 0, WALL_CENTER_OFFSET)
+			_self_2:createGlassWall(_exp_2, _center_2 + _vector3_2, "FrontWall")
+			local _self_3 = self
+			local _exp_3 = Vector3.new(EXTERIOR_DIMENSION, INTERIOR_DIMENSION, WALL_THICKNESS)
+			local _center_3 = center
+			local _vector3_3 = Vector3.new(0, 0, -WALL_CENTER_OFFSET)
+			_self_3:createGlassWall(_exp_3, _center_3 + _vector3_3, "BackWall")
+			local _self_4 = self
+			local _exp_4 = Vector3.new(WALL_THICKNESS, INTERIOR_DIMENSION, EXTERIOR_DIMENSION)
+			local _center_4 = center
+			local _vector3_4 = Vector3.new(-WALL_CENTER_OFFSET, 0, 0)
+			_self_4:createGlassWall(_exp_4, _center_4 + _vector3_4, "LeftWall")
+			local _self_5 = self
+			local _exp_5 = Vector3.new(WALL_THICKNESS, INTERIOR_DIMENSION, EXTERIOR_DIMENSION)
+			local _center_5 = center
+			local _vector3_5 = Vector3.new(WALL_CENTER_OFFSET, 0, 0)
+			_self_5:createGlassWall(_exp_5, _center_5 + _vector3_5, "RightWall")
+		end
+		function SpectatorBox:buildInteriorSign(center)
+			local interiorSignPart = self.adapter.newInstance("Part", self.boxModel)
+			self.adapter.setProperty(interiorSignPart, "Name", "InteriorSign")
+			self.adapter.setProperty(interiorSignPart, "Size", Vector3.new(SIGN_WIDTH, SIGN_HEIGHT, SIGN_DEPTH))
+			self.adapter.setProperty(interiorSignPart, "CFrame", CFrame.new(center.X, center.Y, center.Z - INTERIOR_HALF_DIMENSION + SIGN_DEPTH / 2))
+			self.adapter.setProperty(interiorSignPart, "Material", Enum.Material.Metal)
+			self.adapter.setProperty(interiorSignPart, "Color", SIGN_SURFACE_COLOR)
+			self.adapter.setProperty(interiorSignPart, "Anchored", true)
+			local signSurfaceGui = self.adapter.newInstance("SurfaceGui", interiorSignPart)
+			self.adapter.setProperty(signSurfaceGui, "Face", Enum.NormalId.Back)
+			self.adapter.setProperty(signSurfaceGui, "SizingMode", Enum.SurfaceGuiSizingMode.PixelsPerStud)
+			self.adapter.setProperty(signSurfaceGui, "PixelsPerStud", SIGN_PIXELS_PER_STUD)
+			local signTextDisplayLabel = self.adapter.newInstance("TextLabel", signSurfaceGui)
+			self.adapter.setProperty(signTextDisplayLabel, "Size", UDim2.new(1, -8, 1, -8))
+			self.adapter.setProperty(signTextDisplayLabel, "Position", UDim2.new(0, 4, 0, 4))
+			self.adapter.setProperty(signTextDisplayLabel, "TextSize", SIGN_TEXT_SIZE)
+			self.adapter.setProperty(signTextDisplayLabel, "TextWrapped", true)
+			self.adapter.setProperty(signTextDisplayLabel, "RichText", false)
+			self.adapter.setProperty(signTextDisplayLabel, "Font", Enum.Font.Gotham)
+			self.adapter.setProperty(signTextDisplayLabel, "TextColor3", SIGN_TEXT_COLOR)
+			self.adapter.setProperty(signTextDisplayLabel, "BackgroundTransparency", 1)
+			self.adapter.setProperty(signTextDisplayLabel, "TextXAlignment", Enum.TextXAlignment.Center)
+			self.adapter.setProperty(signTextDisplayLabel, "TextYAlignment", Enum.TextYAlignment.Center)
+			self.adapter.setProperty(signTextDisplayLabel, "Text", "")
+			return signTextDisplayLabel
+		end
+		function SpectatorBox:buildCeilingLightFixture(center)
+			local ceilingLightFixturePart = self.adapter.newInstance("Part", self.boxModel)
+			self.adapter.setProperty(ceilingLightFixturePart, "Name", "CeilingLightFixture")
+			self.adapter.setProperty(ceilingLightFixturePart, "Size", LIGHT_FIXTURE_SIZE)
+			self.adapter.setProperty(ceilingLightFixturePart, "CFrame", CFrame.new(center.X, center.Y + INTERIOR_HALF_DIMENSION - LIGHT_FIXTURE_SIZE.Y / 2, center.Z))
+			self.adapter.setProperty(ceilingLightFixturePart, "Material", Enum.Material.Neon)
+			self.adapter.setProperty(ceilingLightFixturePart, "Color", LIGHT_FIXTURE_COLOR)
+			self.adapter.setProperty(ceilingLightFixturePart, "Anchored", true)
+			self.adapter.setProperty(ceilingLightFixturePart, "CastShadow", false)
+			local ceilingPointLight = self.adapter.newInstance("PointLight", ceilingLightFixturePart)
+			self.adapter.setProperty(ceilingPointLight, "Brightness", LIGHT_BRIGHTNESS)
+			self.adapter.setProperty(ceilingPointLight, "Range", LIGHT_RANGE)
+			self.adapter.setProperty(ceilingPointLight, "Color", LIGHT_COLOR)
+			self.adapter.setProperty(ceilingPointLight, "Enabled", true)
+		end
+		function SpectatorBox:createGlassWall(wallSize, wallCenterPosition, wallPartName)
+			local glassWallPart = self.adapter.newInstance("Part", self.boxModel)
+			self.adapter.setProperty(glassWallPart, "Name", wallPartName)
+			self.adapter.setProperty(glassWallPart, "Size", wallSize)
+			self.adapter.setProperty(glassWallPart, "CFrame", CFrame.new(wallCenterPosition))
+			self.adapter.setProperty(glassWallPart, "Material", Enum.Material.Glass)
+			self.adapter.setProperty(glassWallPart, "Transparency", GLASS_TRANSPARENCY)
+			self.adapter.setProperty(glassWallPart, "Color", GLASS_COLOR)
+			self.adapter.setProperty(glassWallPart, "Anchored", true)
+			self.adapter.setProperty(glassWallPart, "CastShadow", false)
+			return glassWallPart
+		end
+	end
+	return {
+		SpectatorBox = SpectatorBox,
+	}
+
+end
+
 __modulesFolder["structure"] = function()
 	local script
 	script = newFakeInstance({"structure"})
@@ -1788,9 +1938,125 @@ __modulesFolder["translateTerrainForStructureBonding"] = function()
 
 end
 
+__modulesFolder["ingame"] = function()
+	local script
+	script = newFakeInstance({"ingame"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local SpectatorBox = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "spectatorBoxBuilder").SpectatorBox
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local Log = Logger.new("team_spawner")
+	local function kickStart(adapterToUse, parent)
+		Log:info("Listening for people spawning.")
+		sharedvars.plr_ping_limit_sec = math.huge
+		sharedvars.plr_ping_timeout_sec = math.huge
+		sharedvars.plr_ping_warning_threshold_ms = math.huge
+		sharedvars.ac_airtime_kill = false
+		sharedvars.ac_movement = false
+		sharedvars.plr_drum_magazines = 3
+		sharedvars.plr_magazines = 9
+		sharedvars.plr_spare_rounds = 90
+		sharedvars.plr_base_weight = 1.7
+		sharedvars.sv_gravity = 20
+		sharedvars.plr_recoil = 0.5
+		sharedvars.sv_spawning_enabled = false
+		sharedvars.ff_field_voicelines = true
+		map.set_time(10)
+		local lastSpawns = {
+			defender = {},
+			attacker = {},
+			coordination = 10,
+		}
+		local spectatorBoxes = {
+			defender = nil,
+			attacker = nil,
+		}
+		-- const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
+		local offset = Vector3.new(0, -200, 0)
+		local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
+		on_player_spawned:Connect(function(name)
+			time.wait(1.4)
+			local player = players.get(name)
+			if not player then
+				return nil
+			end
+			local team = player.get_team()
+			local thisSpectatorBox = spectatorBoxes[team] or SpectatorBox.new(adapterToUse, offset, parent)
+			if not spectatorBoxes[team] then
+				thisSpectatorBox:setSignText("Initialisation")
+				local _offset = offset
+				local _vector3 = Vector3.new(200, 0, 0)
+				offset = _offset + _vector3
+				spectatorBoxes[team] = thisSpectatorBox
+			end
+			local _exp = lastSpawns[team]
+			local _name = player.name
+			table.insert(_exp, _name)
+			player.set_position(spectatorBoxes[team].centerBoxPosition)
+			local _exp_1 = lastSpawns[team]
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(playerName, index)
+				local thisPlayer = players.get(playerName)
+				if not thisPlayer then
+					local _exp_2 = lastSpawns[team]
+					local _index = index
+					table.remove(_exp_2, _index + 1)
+				end
+			end
+			for _k, _v in _exp_1 do
+				_callback(_v, _k - 1, _exp_1)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+			if #lastSpawns[team] < lastSpawns.coordination then
+				return nil
+			end
+			local raycast_params = query.create_raycast_params()
+			local hit = query.raycast(Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z)), Vector3.new(0, -15000, 0), raycast_params)
+			if not hit then
+				return Log:warn("Hit was not found when doing spawn logic")
+			end
+			local _position = hit.position
+			local _vector3 = Vector3.new(0, 26, 0)
+			local hitSpawnPos = _position + _vector3
+			-- lastSpawnedPos[team] = hitSpawnPos;
+			Log:info(`Registering team spawn for the following members`, unpack(lastSpawns[team]))
+			local _exp_2 = lastSpawns[team]
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback_1 = function(playerName, index)
+				local thisPlayer = players.get(playerName)
+				if not thisPlayer then
+					return nil
+				end
+				thisPlayer.set_position(hitSpawnPos)
+				task.delay(3, function()
+					thisPlayer.set_health(100)
+				end)
+			end
+			for _k, _v in _exp_2 do
+				_callback_1(_v, _k - 1, _exp_2)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+			lastSpawns[team] = {}
+			-- Log.info(`Player ${player.name} is arriving`);
+			-- Spawn this guy at a spectator box at Y level -200. You must separate spectator boxes for each team. Each wall in a spectator box is 3 studs thick (prevents penetration for rifles). When a spectator box spawns, it will spawn to the left of the last spectator box. Each spectator box is transparent and glass. The inside is filled with no collide water. There is a metal sign bolted to the middle of one of the walls that will say (if defender) `The mission will start when ${playersLeft} more SYNO arrive.`. If they're attacker, they will say `You will protect the homeland! ${playersLeft} players left until you will spawn`. The text resets in the HERE logic.
+		end)
+	end
+	return {
+		kickStart = kickStart,
+	}
+
+end
+
 task.defer(function()
 	local script
-	script = newFakeInstance({"main"})
+	script = newFakeInstance({"map_generator"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
@@ -1811,6 +2077,7 @@ task.defer(function()
 	local ALL_WALL_FACES = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "NuristanBuildings").ALL_WALL_FACES
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
 	local Tree = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Tree").Tree
+	local kickStart = TS.import(script, game:GetService("ServerScriptService"), "TS", "ingame").kickStart
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -1956,7 +2223,7 @@ task.defer(function()
 		load_modfile("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")
 		map.set_map("template_map")
 	end
-	local Log = Logger.new("main")
+	local Log = Logger.new("map_generator")
 	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
 	local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
 	local PART_SIZE = 100
@@ -2108,59 +2375,10 @@ task.defer(function()
 		end, EgoMoose, adapterToUse, wedgesFolder)
 		local triangles = createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
 	end
-	if isDeadline then
-		sharedvars.plr_ping_limit_sec = math.huge
-		sharedvars.plr_ping_timeout_sec = math.huge
-		sharedvars.plr_ping_warning_threshold_ms = math.huge
-		sharedvars.ac_airtime_kill = false
-		sharedvars.ac_movement = false
-		sharedvars.plr_drum_magazines = 3
-		sharedvars.plr_magazines = 9
-		sharedvars.plr_spare_rounds = 90
-		sharedvars.plr_base_weight = 1.7
-		sharedvars.sv_gravity = 20
-		sharedvars.plr_recoil = 0.5
-		Log:log("Generating for Deadline environment.")
-		generate()
-		Log:info("Done.")
-		map.set_time(10)
-		local lastSpawns = {
-			defender = 0,
-			attacker = 0,
-			coordination = 10,
-		}
-		local lastSpawnedPos = {}
-		local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
-		on_player_spawned:Connect(function(name)
-			time.wait(1.4)
-			local player = players.get(name)
-			if not player then
-				return nil
-			end
-			local team = player.get_team()
-			lastSpawns[team] += 1
-			if (lastSpawns[team] > lastSpawns.coordination) or (not lastSpawnedPos[team]) then
-				lastSpawns[team] = 0
-				local raycast_params = query.create_raycast_params()
-				local hit = query.raycast(Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z)), Vector3.new(0, -15000, 0), raycast_params)
-				if not hit then
-					return Log:warn("Hit was not found when doing spawn logic")
-				end
-				local _position = hit.position
-				local _vector3 = Vector3.new(0, 26, 0)
-				lastSpawnedPos[team] = _position + _vector3
-				Log:info(`Registering team spawn at {lastSpawnedPos[team]}`)
-			end
-			Log:info(`Spawning player {player.name} at {lastSpawnedPos[team]}`)
-			player.set_position(lastSpawnedPos[team])
-			task.wait(3)
-			player.set_health(100)
-		end)
-	else
-		Log:warn("Generating for ROBLOX environment.")
-		generate()
-		Log:info("Done.")
-	end
+	kickStart(adapterToUse, workspace)
+	Log:log("Generating Afghanistan map.")
+	generate()
+	Log:info("Done.")
 	-- const [success, result] = pcall(generate);
 	-- warn(success, result);
 	-- function a(b: WrappedInstance){

@@ -15,7 +15,7 @@ import { RoomTypeHandler, DoorwayDataType, ALL_WALL_FACES } from "shared/Nurista
 import { RoomFaceData } from "shared/ProceduralRoomGeneration";
 import { Logger } from "shared/logger";
 import { Tree } from "shared/Tree";
-import { kickStart } from "./ingame.server";
+import { kickStart } from "./ingame";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 // The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 
