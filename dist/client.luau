@@ -1103,6 +1103,8 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 	local script
 	script = newFakeInstance({"biomeAndStructureRegistrySystem"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -1110,6 +1112,7 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
+	local thisLogger = Logger.new("biomesAndStructures")
 	local biomeBox
 	do
 		biomeBox = setmetatable({}, {
@@ -1137,7 +1140,7 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 			-- ▲ ReadonlyArray.forEach ▲
 		end
 		function biomeBox:registerModifier(yourObject)
-			print(`REGISTERED {yourObject}`)
+			thisLogger:info(`REGISTERED {yourObject.name}`)
 			local _modifiers = self.modifiers
 			local _yourObject = yourObject
 			table.insert(_modifiers, _yourObject)

@@ -1,7 +1,9 @@
+import { Biome } from "./biome";
 import { createTerrain, WedgeCell } from "./createTerrainFromVerticesUsingAdapter";
+import { Logger } from "./logger";
 // !deadline-ts.customFinishSector_FinishModulesEnd
-export interface modifierObject {
-    priority: number
+const thisLogger = new Logger("biomesAndStructures")
+export interface modifierObject extends Biome {
     generate(yourSelf: createTerrain, yourCell: WedgeCell): void
 }
 export class biomeBox {
@@ -15,7 +17,7 @@ export class biomeBox {
         })
     }
     registerModifier(yourObject: modifierObject) {
-        print(`REGISTERED ${yourObject}`)
+        thisLogger.info(`REGISTERED ${yourObject.name}`);
         this.modifiers.push(yourObject);
         this.modifiers.sort((a, b) => a.priority > b.priority);
     }

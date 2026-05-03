@@ -269,7 +269,7 @@ standardBox.registerModifier(new Tree(adapterToUse, {
             Transparency: 0.4
         }
     },
-    treesPerTriangle: 5
+    treesPerTriangle: 4
 }, wedgesFolder))
 function generate() {
     Log.log("Me is generating :3"); // huh this prints but it's not generating
