@@ -4,7 +4,7 @@ class lookListener {
     windowSize: IrisState<Vector2>
     constructor() {
         this.windowSize = iris.State(new Vector2(500, 100));
-        this.irisConnection = iris.Connect(iris, () => {this.renderThing()});
+        this.irisConnection = iris.Connect(() => {this.renderThing()});
         this.text = "Generating terrain. You cannot spawn until it is done generating.";
     }
     private renderThing() {

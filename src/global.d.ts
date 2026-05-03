@@ -979,7 +979,7 @@ interface IrisInstance {
     DragNum: (args?: unknown[]) => IrisWidget;
     State: <T>(value: T) => IrisState<T>;
     /** Call to disconnect it */
-    Connect(iris: IrisInstance, callback: () => void): () => void
+    Connect(callback: () => void): () => void
     /** Catch-all for any Iris widget not listed above. */
     [key: string]: unknown;
 }
