@@ -1987,7 +1987,7 @@ task.defer(function()
 			return self:constructor(...) or self
 		end
 		function lookListener:constructor()
-			self.irisConnection = iris:Connect(function()
+			self.irisConnection = iris.Connect(function()
 				self:renderThing()
 			end)
 			self.windowSize = iris.State(Vector2.new(500, 100))
@@ -2004,7 +2004,7 @@ task.defer(function()
 			self.text = text
 		end
 		function lookListener:disable()
-			self.irisConnection:Disconnect()
+			self.irisConnection()
 		end
 	end
 	local look = lookListener.new()
@@ -2018,7 +2018,6 @@ task.defer(function()
 		if eventType == "disconnect_iris" then
 			look:disable()
 		end
-		print(args)
 	end)
 
 end)

@@ -1,5 +1,5 @@
 class lookListener {
-    irisConnection: RBXScriptConnection
+    irisConnection: () => void
     private text: string
     windowSize: IrisState<Vector2>
     constructor() {
@@ -16,7 +16,7 @@ class lookListener {
         this.text = text;
     }
     disable() {
-        this.irisConnection.Disconnect();
+        this.irisConnection();
     }
 }
 const look = new lookListener();
@@ -29,5 +29,4 @@ on_server_event.Connect((args: unknown[]) => {
     if (eventType === "disconnect_iris") {
         look.disable();
     }
-    print(args);
 })

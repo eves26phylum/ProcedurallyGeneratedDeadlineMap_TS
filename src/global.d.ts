@@ -951,7 +951,7 @@ type IrisWindowWidgetState = {
     isOpened?: IrisState<boolean>,
     scrollDistance?: IrisState<number>
 }
-interface IrisInstance extends RBXScriptSignal {
+interface IrisInstance {
     // docs: iris.Window(), iris.Text(), iris.Button(), iris.End() etc. — dot notation
 
     // ── Containers ───────────────────────────────────────────────
@@ -978,7 +978,8 @@ interface IrisInstance extends RBXScriptSignal {
     SliderNum: (args?: unknown[]) => IrisWidget;
     DragNum: (args?: unknown[]) => IrisWidget;
     State: <T>(value: T) => IrisState<T>;
-
+    /** Call to disconnect it */
+    Connect: (callback: () => void) => () => void
     /** Catch-all for any Iris widget not listed above. */
     [key: string]: unknown;
 }
