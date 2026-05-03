@@ -139,7 +139,7 @@ declare const Signal: {
  */
 type WrappedInstance<T extends Instance = Instance> = {
     /** Set the Roblox Parent. Reading it back is not supported. */
-    Parent: WrappedInstance<Instance> | undefined;
+    Parent: WrappedInstance<Instance>;
     /** Set the Roblox Name. Reading it back is not supported. */
     Name: string;
 
@@ -976,6 +976,6 @@ declare function clear_console(): void
 // Note: info
 declare function fire_server(...args: RobloxSerializableInstance[]): void
 // Note: output_trace
-declare function create_instance<T extends keyof CreatableInstances>(className: T, parent?: WrappedInstance): WrappedInstance<CreatableInstances[T]>
+declare function create_instance<T extends keyof CreatableInstances>(className: T): WrappedInstance<CreatableInstances[T]>
 declare function info(...args: any[]): void
 declare function skip_tutorial(): void
