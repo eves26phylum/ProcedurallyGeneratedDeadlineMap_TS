@@ -2008,8 +2008,8 @@ __modulesFolder["ingame"] = function()
 			attacker = nil,
 		}
 		local voicelines = {
-			defender = { "Let's go my marines! %s until we fly!" },
-			attacker = { "Let's go my aJGAJGJA! %s until we fly!" },
+			defender = { "Good morning, marines! We are waiting on %s marines to join us until we deploy.", "Remember what you're here for. We are waiting on %s marines to arrive here until we deploy.", "Don't mess up. We need %s more people. We gave you a lot more ammunition than you would normally get from your training in Complex." },
+			attacker = { "Defend the homeland. Wait for our remaining %s members.", "%s members until we teach this shitty government a lesson. Allah is greater.", "Let's go my brothers. %s more." },
 		}
 		-- const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
 		local offset = Vector3.new(0, 3000, 0)

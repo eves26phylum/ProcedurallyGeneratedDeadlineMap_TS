@@ -34,10 +34,14 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
     }
     const voicelines = {
         defender: [
-            "Let's go my marines! %s until we fly!"
+            "Good morning, marines! We are waiting on %s marines to join us until we deploy.",
+            "Remember what you're here for. We are waiting on %s marines to arrive here until we deploy.",
+            "Don't mess up. We need %s more people. We gave you a lot more ammunition than you would normally get from your training in Complex."
         ],
         attacker: [
-            "Let's go my aJGAJGJA! %s until we fly!"
+            "Defend the homeland. Wait for our remaining %s members.",
+            "%s members until we teach this shitty government a lesson. Allah is greater.",
+            "Let's go my brothers. %s more."
         ]
     }
     // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
