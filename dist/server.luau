@@ -2080,8 +2080,8 @@ task.defer(function()
 	end))
 	standardBox:registerModifier(Tree.new(adapterToUse, {
 		branch = {
-			minSize = Vector2.new(2, 12),
-			maxSize = Vector2.new(4, 24),
+			minSize = Vector2.new(4, 12),
+			maxSize = Vector2.new(8, 24),
 			props = {
 				Material = Enum.Material.Wood,
 				Color = Color3.fromRGB(71, 38, 8),
@@ -2093,6 +2093,7 @@ task.defer(function()
 			props = {
 				Material = Enum.Material.Grass,
 				CanCollide = false,
+				CanQuery = false,
 				Transparency = 0.4,
 			},
 		},

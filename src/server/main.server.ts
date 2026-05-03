@@ -253,8 +253,8 @@ standardBox.registerModifier(new NuristanBuildings(adapterToUse, translateTerrai
 ));
 standardBox.registerModifier(new Tree(adapterToUse, {
     branch: {
-        minSize: new Vector2(2, 12),
-        maxSize: new Vector2(4, 24),
+        minSize: new Vector2(4, 12),
+        maxSize: new Vector2(8, 24),
         props: {
             Material: Enum.Material.Wood,
             Color: Color3.fromRGB(71, 38, 8)
@@ -266,6 +266,7 @@ standardBox.registerModifier(new Tree(adapterToUse, {
         props: {
             Material: Enum.Material.Grass,
             CanCollide: false,
+            CanQuery: false,
             Transparency: 0.4
         }
     },
