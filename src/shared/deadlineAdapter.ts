@@ -7,7 +7,7 @@ export namespace deadlineAdapter {
         }
         wagesCounter++;
         const thisInstance = create_instance<T>(className);
-        thisInstance.Parent = Parent;
+        if (Parent) thisInstance.Parent = Parent;
         return thisInstance;
     }
     export function setProperty(property: Record<any, any>, key: any, value: any) {

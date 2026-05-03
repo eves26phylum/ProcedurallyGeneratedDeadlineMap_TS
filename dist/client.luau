@@ -1459,7 +1459,9 @@ __modulesFolder["deadlineAdapter"] = function()
 			end
 			wagesCounter += 1
 			local thisInstance = create_instance(className)
-			thisInstance.Parent = Parent
+			if Parent then
+				thisInstance.Parent = Parent
+			end
 			return thisInstance
 		end
 		_container.newInstance = newInstance
