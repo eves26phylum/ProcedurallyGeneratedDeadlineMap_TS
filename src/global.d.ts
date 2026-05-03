@@ -139,7 +139,7 @@ declare const Signal: {
  */
 type WrappedInstance<T extends Instance = Instance> = {
     /** Set the Roblox Parent. Reading it back is not supported. */
-    Parent: WrappedInstance<Instance> | null;
+    Parent: WrappedInstance<Instance> | undefined;
     /** Set the Roblox Name. Reading it back is not supported. */
     Name: string;
 
@@ -176,7 +176,7 @@ type WrappedInstance<T extends Instance = Instance> = {
     apply_impulse: (impulse: Vector3) => void;
     apply_impulse_at_position: (impulse: Vector3, position: Vector3) => void;
     apply_angular_impulse_at_position: (angular: Vector3, position: Vector3) => void;
-    set_network_owner: (owner: string | null) => void;
+    set_network_owner: (owner: string | undefined) => void;
 
     // ── Hierarchy / util ─────────────────────────────────────────
     // docs: dot notation throughout instance examples
@@ -537,7 +537,7 @@ interface Player {
     // docs: player.set_position(), player.get_position(), player.set_camera_mode() — dot notation
     set_position: (position: Vector3) => void;
     /** Returns null when the player is dead and has no character. */
-    get_position: () => Vector3 | null;
+    get_position: () => Vector3 | undefined;
     set_camera_mode: (mode: string) => void;
     /**
      * Activates a registered custom camera controller for this player.

@@ -6,7 +6,9 @@ export namespace deadlineAdapter {
             task.wait(0.05);
         }
         wagesCounter++;
-        return create_instance<T>(className, Parent);
+        const thisInstance = create_instance<T>(className);
+        thisInstance.Parent = Parent || undefined;
+        return thisInstance;
     }
     export function setProperty(property: Record<any, any>, key: any, value: any) {
         property[key] = value;

@@ -1458,7 +1458,9 @@ __modulesFolder["deadlineAdapter"] = function()
 				task.wait(0.05)
 			end
 			wagesCounter += 1
-			return create_instance(className, Parent)
+			local thisInstance = create_instance(className)
+			thisInstance.Parent = Parent or nil
+			return thisInstance
 		end
 		_container.newInstance = newInstance
 		local function setProperty(property, key, value)
