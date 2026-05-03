@@ -47,6 +47,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             spectatorBoxes[team] = thisSpectatorBox;
         }
         lastSpawns[team].push(player.name);
+        thisSpectatorBox.setSignText(`${lastSpawns.coordination - lastSpawns[team].size()}`);
         player.set_position(spectatorBoxes[team].centerBoxPosition) // replace this with the spectator box pos
 
         lastSpawns[team].forEach((playerName: string, index: number) => { // Remove all players that left

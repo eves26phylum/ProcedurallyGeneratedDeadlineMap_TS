@@ -1459,7 +1459,7 @@ __modulesFolder["deadlineAdapter"] = function()
 			end
 			wagesCounter += 1
 			local thisInstance = create_instance(className)
-			thisInstance.Parent = Parent or nil
+			thisInstance.Parent = Parent
 			return thisInstance
 		end
 		_container.newInstance = newInstance
@@ -2005,6 +2005,7 @@ __modulesFolder["ingame"] = function()
 			local _exp = lastSpawns[team]
 			local _name = player.name
 			table.insert(_exp, _name)
+			thisSpectatorBox:setSignText(`{lastSpawns.coordination - #lastSpawns[team]}`)
 			player.set_position(spectatorBoxes[team].centerBoxPosition)
 			local _exp_1 = lastSpawns[team]
 			-- ▼ ReadonlyArray.forEach ▼
