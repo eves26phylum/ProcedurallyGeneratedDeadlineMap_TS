@@ -51,7 +51,7 @@ export class Tree implements Biome {
         this.adapter.setProperty(cylinder, "Anchored", true);
         this.adapter.setProperty(cylinder, "Shape", Enum.PartType.Cylinder);
         this.adapter.setProperty(cylinder, "Size", thisBranchSize);
-        this.adapter.setProperty(cylinder, "CFrame", CFrame.fromEulerAnglesXYZ(0, 0, math.rad(90)).add(positionToPlaceAt.add(new Vector3(thisBranchSize.Y / 2, 0, 0))));
+        this.adapter.setProperty(cylinder, "CFrame", CFrame.fromEulerAnglesXYZ(0, 0, math.rad(90)).add(positionToPlaceAt.add(new Vector3(0, thisBranchSize.Y / 2, 0))));
         this.adapter.setProperty(cylinder, "Parent", this.parent);
         this.adapter.setProperty(cylinder, "Name", "Branch");
         assign(cylinder, this.config.branch.props, this.adapter.setProperty);
@@ -59,7 +59,7 @@ export class Tree implements Biome {
         this.adapter.setProperty(leaf, "Anchored", true);
         this.adapter.setProperty(leaf, "Shape", Enum.PartType.Ball);
         this.adapter.setProperty(leaf, "Size", thisBallSize);
-        this.adapter.setProperty(leaf, "Position", positionToPlaceAt.add(new Vector3(0, thisBranchSize.Y, 0))); // half of the ball is leaking up
+        this.adapter.setProperty(leaf, "Position", positionToPlaceAt.add(new Vector3(0, thisBranchSize.Y * 2, 0))); // half of the ball is leaking up
         this.adapter.setProperty(leaf, "Parent", this.parent);
         assign(leaf, this.config.leaf.props, this.adapter.setProperty);
     }

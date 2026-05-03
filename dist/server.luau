@@ -951,7 +951,7 @@ __modulesFolder["Tree"] = function()
 			local _adapter = self.adapter
 			local _exp = CFrame.fromEulerAnglesXYZ(0, 0, math.rad(90))
 			local _positionToPlaceAt = positionToPlaceAt
-			local _vector3 = Vector3.new(thisBranchSize.Y / 2, 0, 0)
+			local _vector3 = Vector3.new(0, thisBranchSize.Y / 2, 0)
 			_adapter.setProperty(cylinder, "CFrame", _exp + (_positionToPlaceAt + _vector3))
 			self.adapter.setProperty(cylinder, "Parent", self.parent)
 			self.adapter.setProperty(cylinder, "Name", "Branch")
@@ -962,7 +962,7 @@ __modulesFolder["Tree"] = function()
 			self.adapter.setProperty(leaf, "Size", thisBallSize)
 			local _adapter_1 = self.adapter
 			local _positionToPlaceAt_1 = positionToPlaceAt
-			local _vector3_1 = Vector3.new(0, thisBranchSize.Y, 0)
+			local _vector3_1 = Vector3.new(0, thisBranchSize.Y * 2, 0)
 			_adapter_1.setProperty(leaf, "Position", _positionToPlaceAt_1 + _vector3_1)
 			self.adapter.setProperty(leaf, "Parent", self.parent)
 			assign(leaf, self.config.leaf.props, self.adapter.setProperty)
