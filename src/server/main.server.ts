@@ -313,12 +313,12 @@ if (isDeadline) {
             const hit = query.raycast(new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z)), new Vector3(0, -15000, 0), raycast_params)
             if (!hit) return Log.warn("Hit was not found when doing spawn logic");
             
-            lastSpawnedPos[team] = hit.position.add(new Vector3(0, 6, 0));
+            lastSpawnedPos[team] = hit.position.add(new Vector3(0, 26, 0));
             Log.info(`Registering team spawn at ${lastSpawnedPos[team]}`)
         }
         Log.info(`Spawning player ${player.name} at ${lastSpawnedPos[team]}`)
         player.set_position(lastSpawnedPos[team])
-        task.wait(1)
+        task.wait(3)
         player.set_health(100)
     })
 } else {

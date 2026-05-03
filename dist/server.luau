@@ -2143,13 +2143,13 @@ task.defer(function()
 					return Log:warn("Hit was not found when doing spawn logic")
 				end
 				local _position = hit.position
-				local _vector3 = Vector3.new(0, 6, 0)
+				local _vector3 = Vector3.new(0, 26, 0)
 				lastSpawnedPos[team] = _position + _vector3
 				Log:info(`Registering team spawn at {lastSpawnedPos[team]}`)
 			end
 			Log:info(`Spawning player {player.name} at {lastSpawnedPos[team]}`)
 			player.set_position(lastSpawnedPos[team])
-			task.wait(1)
+			task.wait(3)
 			player.set_health(100)
 		end)
 	else
