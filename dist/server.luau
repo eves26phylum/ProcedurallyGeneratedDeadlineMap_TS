@@ -2006,8 +2006,12 @@ __modulesFolder["ingame"] = function()
 			end
 			local _exp = lastSpawns[team]
 			local _name = player.name
-			table.insert(_exp, _name)
-			thisSpectatorBox:setSignText(`{lastSpawns.coordination - #lastSpawns[team]}`)
+			if (table.find(_exp, _name) or 0) - 1 == -1 then
+				local _exp_1 = lastSpawns[team]
+				local _name_1 = player.name
+				table.insert(_exp_1, _name_1)
+				thisSpectatorBox:setSignText(`{lastSpawns.coordination - #lastSpawns[team]}`)
+			end
 			player.set_position(spectatorBoxes[team].centerBoxPosition)
 			local _exp_1 = lastSpawns[team]
 			-- ▼ ReadonlyArray.forEach ▼
@@ -2053,6 +2057,7 @@ __modulesFolder["ingame"] = function()
 			end
 			-- ▲ ReadonlyArray.forEach ▲
 			lastSpawns[team] = {}
+			thisSpectatorBox:setSignText(`Zero`)
 			-- Log.info(`Player ${player.name} is arriving`);
 			-- Spawn this guy at a spectator box at Y level -200. You must separate spectator boxes for each team. Each wall in a spectator box is 3 studs thick (prevents penetration for rifles). When a spectator box spawns, it will spawn to the left of the last spectator box. Each spectator box is transparent and glass. The inside is filled with no collide water. There is a metal sign bolted to the middle of one of the walls that will say (if defender) `The mission will start when ${playersLeft} more SYNO arrive.`. If they're attacker, they will say `You will protect the homeland! ${playersLeft} players left until you will spawn`. The text resets in the HERE logic.
 		end)
