@@ -10,4 +10,5 @@ export interface InstanceAdapter<T extends AnyInstance = AnyInstance> {
     setProperty(this: void, property: T, key: string, value: unknown): void;
     findFirstChild(this: void, target: T, name: string, recursive?: boolean): T | undefined;
     destroy(this: void, instance: T): void;
+    addTag(this: void, target: T, tag: string): void;
 }

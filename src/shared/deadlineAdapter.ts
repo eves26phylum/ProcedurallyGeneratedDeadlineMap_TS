@@ -19,4 +19,7 @@ export namespace deadlineAdapter {
     export function destroy(target: WrappedInstance) {
         return target.destroy();
     }
+    export function addTag(target: WrappedInstance, tag: string) {
+        target.add_tag(tag);
+    }
 }

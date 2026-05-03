@@ -1477,6 +1477,10 @@ __modulesFolder["deadlineAdapter"] = function()
 			return target.destroy()
 		end
 		_container.destroy = destroy
+		local function addTag(target, tag)
+			target.add_tag(tag)
+		end
+		_container.addTag = addTag
 	end
 	return {
 		deadlineAdapter = deadlineAdapter,
@@ -1631,6 +1635,11 @@ __modulesFolder["robloxAdapter"] = function()
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local _CollectionService = game
+	if _CollectionService ~= nil then
+		_CollectionService = _CollectionService:GetService("CollectionService")
+	end
+	local CollectionService = _CollectionService
 	local robloxAdapter = {}
 	do
 		local _container = robloxAdapter
@@ -1650,6 +1659,13 @@ __modulesFolder["robloxAdapter"] = function()
 			return target:Destroy()
 		end
 		_container.destroy = destroy
+		local function addTag(target, tag)
+			if not CollectionService then
+				return nil
+			end
+			CollectionService:AddTag(target, tag)
+		end
+		_container.addTag = addTag
 	end
 	return {
 		robloxAdapter = robloxAdapter,
@@ -1711,7 +1727,7 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 	local SIGN_SURFACE_COLOR = Color3.fromRGB(102, 102, 110)
 	local LIGHT_FIXTURE_SIZE = Vector3.new(1, 0.5, 1)
 	local LIGHT_FIXTURE_COLOR = Color3.fromRGB(255, 255, 200)
-	local LIGHT_BRIGHTNESS = 2
+	local LIGHT_BRIGHTNESS = 1
 	local LIGHT_RANGE = 16
 	local LIGHT_COLOR = Color3.fromRGB(255, 255, 200)
 	-- todo make this a config but whatever it's a preset prefab
@@ -1825,6 +1841,7 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 			self.adapter.setProperty(glassWallPart, "Color", GLASS_COLOR)
 			self.adapter.setProperty(glassWallPart, "Anchored", true)
 			self.adapter.setProperty(glassWallPart, "CastShadow", false)
+			self.adapter.addTag(glassWallPart, "glass_invincible")
 			return glassWallPart
 		end
 	end
@@ -2389,10 +2406,16 @@ task.defer(function()
 		end, EgoMoose, adapterToUse, wedgesFolder)
 		local triangles = createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
 	end
+	if isDeadline then
+		sharedvars.sv_spawning_enabled = false
+	end
 	kickStart(adapterToUse, workspace)
 	Log:log("Generating Afghanistan map.")
 	generate()
 	Log:info("Done.")
+	if isDeadline then
+		sharedvars.sv_spawning_enabled = true
+	end
 	-- const [success, result] = pcall(generate);
 	-- warn(success, result);
 	-- function a(b: WrappedInstance){

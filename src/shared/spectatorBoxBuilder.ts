@@ -20,7 +20,7 @@ const SIGN_SURFACE_COLOR = Color3.fromRGB(102, 102, 110);
 
 const LIGHT_FIXTURE_SIZE = new Vector3(1, 0.5, 1);
 const LIGHT_FIXTURE_COLOR = Color3.fromRGB(255, 255, 200);
-const LIGHT_BRIGHTNESS = 2;
+const LIGHT_BRIGHTNESS = 1;
 const LIGHT_RANGE = 16;
 const LIGHT_COLOR = Color3.fromRGB(255, 255, 200);
 // todo make this a config but whatever it's a preset prefab
@@ -147,6 +147,7 @@ export class SpectatorBox {
         this.adapter.setProperty(glassWallPart, "Color", GLASS_COLOR);
         this.adapter.setProperty(glassWallPart, "Anchored", true);
         this.adapter.setProperty(glassWallPart, "CastShadow", false);
+        this.adapter.addTag(glassWallPart, "glass_invincible");
         return glassWallPart;
     }
 }

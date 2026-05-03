@@ -282,11 +282,16 @@ function generate() {
     }, EgoMoose, adapterToUse, wedgesFolder);
     const triangles = createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);
 }
-
+if (isDeadline) {
+    sharedvars.sv_spawning_enabled = false;
+}
 kickStart(adapterToUse, workspace);
 Log.log("Generating Afghanistan map.");
 generate();
 Log.info("Done.");
+if (isDeadline) {
+    sharedvars.sv_spawning_enabled = true;
+}
 // const [success, result] = pcall(generate);
 // warn(success, result);
 // function a(b: WrappedInstance){

@@ -1,3 +1,4 @@
+const CollectionService = game?.GetService("CollectionService");
 export namespace robloxAdapter {
     export function newInstance<T extends keyof CreatableInstances>(className: T, Parent?: Instance) {
         return new Instance(className, Parent);
@@ -10,5 +11,9 @@ export namespace robloxAdapter {
     }
     export function destroy(target: Instance) {
         return target.Destroy();
+    }
+    export function addTag(target: Instance, tag: string) {
+        if (!CollectionService) return;
+        CollectionService.AddTag(target, tag);
     }
 }
