@@ -15,10 +15,6 @@ export function useBiomeData(yourCell: WedgeCell): BiomeData | undefined {
   return data;
 }
 
-const defaultValue = {
-    whoClaimedThis: []
-};
-
 export function biomeClaimLand(thisBiome: Biome, yourCell: WedgeCell): void {
   const data = biomeExtension.get(yourCell);
   if (!data) return;
@@ -27,5 +23,7 @@ export function biomeClaimLand(thisBiome: Biome, yourCell: WedgeCell): void {
 
 // If a cell might not have biome data yet but you want to guarantee it does by the time this function exits, getOrInit handles that without a separate has() check followed by a set()
 export function ensureBiomeData(yourCell: WedgeCell): BiomeData {
-  return biomeExtension.getOrInit(yourCell, () => (defaultValue));
+  return biomeExtension.getOrInit(yourCell, () => ({
+    whoClaimedThis: []
+}));
 }

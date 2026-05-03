@@ -15,6 +15,7 @@ export class biomeBox {
         })
     }
     registerModifier(yourObject: modifierObject) {
+        print(`REGISTERED ${yourObject}`)
         this.modifiers.push(yourObject);
         this.modifiers.sort((a, b) => a.priority > b.priority);
     }

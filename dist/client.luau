@@ -950,6 +950,7 @@ __modulesFolder["Tree"] = function()
 			local _vector3 = Vector3.new(thisBranchSize.Y / 2, 0, 0)
 			_adapter.setProperty(cylinder, "CFrame", _exp + (_positionToPlaceAt + _vector3))
 			self.adapter.setProperty(cylinder, "Parent", self.parent)
+			self.adapter.setProperty(cylinder, "Name", "Branch")
 			assign(cylinder, self.config.branch.props, self.adapter.setProperty)
 			local leaf = self.adapter.newInstance("Part")
 			self.adapter.setProperty(leaf, "Anchored", true)
@@ -1055,9 +1056,6 @@ __modulesFolder["biome"] = function()
 		end
 		return data
 	end
-	local defaultValue = {
-		whoClaimedThis = {},
-	}
 	local function biomeClaimLand(thisBiome, yourCell)
 		local data = biomeExtension:get(yourCell)
 		if not data then
@@ -1070,7 +1068,9 @@ __modulesFolder["biome"] = function()
 	-- If a cell might not have biome data yet but you want to guarantee it does by the time this function exits, getOrInit handles that without a separate has() check followed by a set()
 	local function ensureBiomeData(yourCell)
 		return biomeExtension:getOrInit(yourCell, function()
-			return defaultValue
+			return {
+				whoClaimedThis = {},
+			}
 		end)
 	end
 	return {
@@ -1119,6 +1119,7 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 			-- ▲ ReadonlyArray.forEach ▲
 		end
 		function biomeBox:registerModifier(yourObject)
+			print(`REGISTERED {yourObject}`)
 			local _modifiers = self.modifiers
 			local _yourObject = yourObject
 			table.insert(_modifiers, _yourObject)
@@ -1678,9 +1679,6 @@ __modulesFolder["structure"] = function()
 		end
 		return data
 	end
-	local defaultValue = {
-		whoClaimedThis = {},
-	}
 	local function structureClaimLand(thisBiome, yourCell)
 		local data = structureExtension:get(yourCell)
 		if not data then
@@ -1693,7 +1691,9 @@ __modulesFolder["structure"] = function()
 	-- If a cell might not have biome data yet but you want to guarantee it does by the time this function exits, getOrInit handles that without a separate has() check followed by a set()
 	local function ensureStructureData(yourCell)
 		return structureExtension:getOrInit(yourCell, function()
-			return defaultValue
+			return {
+				whoClaimedThis = {},
+			}
 		end)
 	end
 	return {

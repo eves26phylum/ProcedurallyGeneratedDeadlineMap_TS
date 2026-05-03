@@ -9,10 +9,6 @@ export function useStructureData(yourCell: WedgeCell): BiomeData | undefined {
   return data;
 }
 
-const defaultValue = {
-    whoClaimedThis: []
-};
-
 export function structureClaimLand(thisBiome: Biome, yourCell: WedgeCell): void {
   const data = structureExtension.get(yourCell);
   if (!data) return;
@@ -21,5 +17,7 @@ export function structureClaimLand(thisBiome: Biome, yourCell: WedgeCell): void 
 
 // If a cell might not have biome data yet but you want to guarantee it does by the time this function exits, getOrInit handles that without a separate has() check followed by a set()
 export function ensureStructureData(yourCell: WedgeCell): BiomeData {
-  return structureExtension.getOrInit(yourCell, () => (defaultValue));
+  return structureExtension.getOrInit(yourCell, () => ({
+      whoClaimedThis: []
+  }));
 }

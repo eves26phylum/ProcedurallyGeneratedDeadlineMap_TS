@@ -18,7 +18,6 @@ export interface TreeConfig {
         props: Partial<InstanceProperties<Part>>
     }
 }
-
 export class Tree implements Biome {
     priority: number;
     name: string;
@@ -54,6 +53,7 @@ export class Tree implements Biome {
         this.adapter.setProperty(cylinder, "Size", thisBranchSize);
         this.adapter.setProperty(cylinder, "CFrame", CFrame.fromEulerAnglesXYZ(0, 0, math.rad(90)).add(positionToPlaceAt.add(new Vector3(thisBranchSize.Y / 2, 0, 0))));
         this.adapter.setProperty(cylinder, "Parent", this.parent);
+        this.adapter.setProperty(cylinder, "Name", "Branch");
         assign(cylinder, this.config.branch.props, this.adapter.setProperty);
         const leaf = this.adapter.newInstance("Part");
         this.adapter.setProperty(leaf, "Anchored", true);
@@ -72,10 +72,10 @@ export class Tree implements Biome {
         const thisBranchSize = new Vector3(randY, randX, randX);
         const randLeafSize = this.config.leaf.minBoxSize + math.random() * (this.config.leaf.maxBoxSize - this.config.leaf.minBoxSize);
         const thisLeafSize = new Vector3(randLeafSize, randLeafSize, randLeafSize);
-
+        
         const pos1 = this.getRandomSurfacePosition(yourCell.verticesForTriangles[0]);
         const pos2 = this.getRandomSurfacePosition(yourCell.verticesForTriangles[1]);
-
+        
         if (pos1 === undefined || pos2 === undefined) return;
         this.createTree(pos1, thisBranchSize, thisLeafSize);
         this.createTree(pos2, thisBranchSize, thisLeafSize);
