@@ -962,7 +962,7 @@ __modulesFolder["Tree"] = function()
 			self.adapter.setProperty(leaf, "Size", thisBallSize)
 			local _adapter_1 = self.adapter
 			local _positionToPlaceAt_1 = positionToPlaceAt
-			local _vector3_1 = Vector3.new(0, thisBranchSize.X + thisBallSize.X / 2, 0)
+			local _vector3_1 = Vector3.new(0, thisBranchSize.X, 0)
 			_adapter_1.setProperty(leaf, "Position", _positionToPlaceAt_1 + _vector3_1)
 			self.adapter.setProperty(leaf, "Parent", self.parent)
 			assign(leaf, self.config.leaf.props, self.adapter.setProperty)

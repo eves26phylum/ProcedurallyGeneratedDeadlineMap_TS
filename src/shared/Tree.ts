@@ -60,7 +60,7 @@ export class Tree implements Biome {
         this.adapter.setProperty(leaf, "Anchored", true);
         this.adapter.setProperty(leaf, "Shape", Enum.PartType.Ball);
         this.adapter.setProperty(leaf, "Size", thisBallSize);
-        this.adapter.setProperty(leaf, "Position", positionToPlaceAt.add(new Vector3(0, thisBranchSize.X + thisBallSize.X / 2, 0)));
+        this.adapter.setProperty(leaf, "Position", positionToPlaceAt.add(new Vector3(0, thisBranchSize.X, 0)));
         this.adapter.setProperty(leaf, "Parent", this.parent);
         assign(leaf, this.config.leaf.props, this.adapter.setProperty);
     }
