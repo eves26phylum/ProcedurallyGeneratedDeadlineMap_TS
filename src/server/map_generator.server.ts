@@ -284,6 +284,7 @@ function generate() {
 }
 if (isDeadline) {
     sharedvars.sv_spawning_enabled = false;
+    chat.set_spawning_disabled_reason("The map is generating. Please be patient.");
 }
 kickStart(adapterToUse, workspace);
 Log.log("Generating Afghanistan map.");

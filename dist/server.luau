@@ -2408,6 +2408,7 @@ task.defer(function()
 	end
 	if isDeadline then
 		sharedvars.sv_spawning_enabled = false
+		chat.set_spawning_disabled_reason("The map is generating. Please be patient.")
 	end
 	kickStart(adapterToUse, workspace)
 	Log:log("Generating Afghanistan map.")
