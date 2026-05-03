@@ -1944,6 +1944,7 @@ __modulesFolder["ingame"] = function()
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	local SpectatorBox = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "spectatorBoxBuilder").SpectatorBox
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
@@ -1954,6 +1955,9 @@ __modulesFolder["ingame"] = function()
 	local __modulesFolder = nil
 	local Log = Logger.new("team_spawner")
 	local function kickStart(adapterToUse, parent)
+		if not isDeadline then
+			return Log:info("Did not execute because the environment is not Deadline.")
+		end
 		Log:info("Listening for people spawning.")
 		sharedvars.plr_ping_limit_sec = math.huge
 		sharedvars.plr_ping_timeout_sec = math.huge
