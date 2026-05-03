@@ -287,6 +287,10 @@ if (isDeadline) {
     sharedvars.plr_ping_warning_threshold_ms = math.huge
     sharedvars.ac_airtime_kill = false
     sharedvars.ac_movement = false
+    sharedvars.plr_drum_magazines = 3
+    sharedvars.plr_magazines = 9
+    sharedvars.plr_spare_rounds = 90
+    sharedvars.plr_base_weight = 1.7
     sharedvars.sv_gravity = 20
     sharedvars.plr_recoil = 0.5
     Log.log("Generating for Deadline environment.");
