@@ -2009,17 +2009,13 @@ task.defer(function()
 		local eventType = args[1]
 		local _arg0 = type(eventType) == "string"
 		assert(_arg0, "Event is not a string")
-		if eventType == "disconnect_iris" then
+		if eventType == "terrain_finished" then
 			look:setText("Terrain has been generated. Feel free to spawn to get rid of this message.")
 		end
-	end)
-	local thisConn
-	thisConn = framework.on_spawned:Connect(function()
-		look:disable()
-		local _result = thisConn
-		if _result ~= nil then
-			_result:Disconnect()
+		if eventType == "disconnect_iris" then
+			look:disable()
 		end
+		print(args)
 	end)
 
 end)

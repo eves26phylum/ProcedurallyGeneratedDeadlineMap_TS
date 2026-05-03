@@ -21,12 +21,11 @@ const look = new lookListener();
 on_server_event.Connect((args: unknown[]) => {
     const eventType: unknown = args[0];
     assert(typeIs(eventType, "string"), "Event is not a string");
-    if (eventType === "disconnect_iris") {
+    if (eventType === "terrain_finished") {
         look.setText("Terrain has been generated. Feel free to spawn to get rid of this message.");
     }
-})
-let thisConn: RBXScriptConnection | undefined
-thisConn = framework.on_spawned.Connect(function() {
-    look.disable();
-    thisConn?.Disconnect();
+    if (eventType === "disconnect_iris") {
+        look.disable();
+    }
+    print(args);
 })

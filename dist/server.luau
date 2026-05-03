@@ -2428,13 +2428,20 @@ task.defer(function()
 		local _exp = players.get_all()
 		-- ▼ ReadonlyArray.forEach ▼
 		local _callback = function(player, index)
-			player.fire_client("disconnect_iris")
+			player.fire_client("terrain_finished")
 		end
 		for _k, _v in _exp do
 			_callback(_v, _k - 1, _exp)
 		end
 		-- ▲ ReadonlyArray.forEach ▲
 		on_player_joined:Connect(function(name)
+			local player = players.get(name)
+			if not player then
+				return nil
+			end
+			player.fire_client("terrain_finished")
+		end)
+		on_player_spawned:Connect(function(name)
 			local player = players.get(name)
 			if not player then
 				return nil
