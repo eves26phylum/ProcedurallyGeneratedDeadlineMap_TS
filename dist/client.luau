@@ -1990,10 +1990,13 @@ task.defer(function()
 			self.irisConnection = iris:Connect(function()
 				self:renderThing()
 			end)
+			self.windowSize = iris.State(Vector2.new(100, 400))
 			self.text = "Generating terrain. You cannot spawn until it is done generating."
 		end
 		function lookListener:renderThing()
-			iris.Window({ "BIOME STATUS (DRAGGABLE WINDOW)" })
+			iris.Window({ "BIOME STATUS (DRAGGABLE WINDOW)" }, {
+				size = self.windowSize,
+			})
 			iris.Text({ self.text })
 			iris.End()
 		end

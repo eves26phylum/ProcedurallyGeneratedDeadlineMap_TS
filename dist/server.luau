@@ -2035,7 +2035,7 @@ __modulesFolder["ingame"] = function()
 				local _exp_1 = lastSpawns[team]
 				local _name_1 = player.name
 				table.insert(_exp_1, _name_1)
-				local thisVoicelineStr = voicelines[team][math.random(0, #voicelines[team]) + 1]
+				local thisVoicelineStr = voicelines[team][math.random(0, #voicelines[team] - 1) + 1]
 				thisSpectatorBox:setSignText(string.format(thisVoicelineStr, `{lastSpawns.coordination - #lastSpawns[team]}`))
 			end
 			player.set_position(spectatorBoxes[team].centerBoxPosition)

@@ -1,12 +1,14 @@
 class lookListener {
     irisConnection: RBXScriptConnection
     private text: string
+    windowSize: IrisState<Vector2>
     constructor() {
         this.irisConnection = iris.Connect(() => {this.renderThing()});
+        this.windowSize = iris.State(new Vector2(100, 400));
         this.text = "Generating terrain. You cannot spawn until it is done generating.";
     }
     private renderThing() {
-        iris.Window(["BIOME STATUS (DRAGGABLE WINDOW)"]);
+        iris.Window(["BIOME STATUS (DRAGGABLE WINDOW)"], {size: this.windowSize});
         iris.Text([this.text]);
         iris.End();
     }

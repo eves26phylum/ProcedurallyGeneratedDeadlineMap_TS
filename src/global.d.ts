@@ -934,11 +934,28 @@ interface IrisWidget {
  *   iris.End();
  * });
  */
+type IrisID = string;
+type IrisState<T> = {
+    ID: IrisID,
+    value: T,
+    get(): T,
+    set(newValue: T): T,
+    onChange(callback: (newValue: T) => void): void,
+    ConnectedWidgets: Record<IrisID, IrisWidget>,
+    ConnectedFunctions: ((newValue: T) => void)[]
+}
+type IrisWindowWidgetState = {
+    size?: IrisState<Vector2>,
+    position?: IrisState<Vector2>,
+    isUncollapsed?: IrisState<boolean>,
+    isOpened?: IrisState<boolean>,
+    scrollDistance?: IrisState<number>
+}
 interface IrisInstance extends RBXScriptSignal {
     // docs: iris.Window(), iris.Text(), iris.Button(), iris.End() etc. — dot notation
 
     // ── Containers ───────────────────────────────────────────────
-    Window: (args: [title: string, ...rest: unknown[]]) => IrisWidget;
+    Window: (args: [title: string, ...rest: unknown[]], state: IrisWindowWidgetState) => IrisWidget;
     Tree: (args?: [label: string, ...rest: unknown[]]) => IrisWidget;
     CollapsingHeader: (args?: [label: string, ...rest: unknown[]]) => IrisWidget;
     /** Closes the most recently opened container. */
@@ -960,6 +977,7 @@ interface IrisInstance extends RBXScriptSignal {
     InputColor4: (args?: unknown[]) => IrisWidget;
     SliderNum: (args?: unknown[]) => IrisWidget;
     DragNum: (args?: unknown[]) => IrisWidget;
+    State: <T>(value: T) => IrisState<T>;
 
     /** Catch-all for any Iris widget not listed above. */
     [key: string]: unknown;
