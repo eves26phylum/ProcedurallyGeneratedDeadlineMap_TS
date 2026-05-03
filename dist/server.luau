@@ -2035,7 +2035,8 @@ __modulesFolder["ingame"] = function()
 				local _exp_1 = lastSpawns[team]
 				local _name_1 = player.name
 				table.insert(_exp_1, _name_1)
-				thisSpectatorBox:setSignText(string.format(voicelines[team][math.random(1, #voicelines[team]) + 1], `{lastSpawns.coordination - #lastSpawns[team]}`))
+				local thisVoicelineStr = voicelines[team][math.random(0, #voicelines[team]) + 1]
+				thisSpectatorBox:setSignText(string.format(thisVoicelineStr, `{lastSpawns.coordination - #lastSpawns[team]}`))
 			end
 			player.set_position(spectatorBoxes[team].centerBoxPosition)
 			local _exp_1 = lastSpawns[team]
@@ -2424,6 +2425,22 @@ task.defer(function()
 	Log:info("Done.")
 	if isDeadline then
 		sharedvars.sv_spawning_enabled = true
+		local _exp = players.get_all()
+		-- ▼ ReadonlyArray.forEach ▼
+		local _callback = function(player, index)
+			player.fire_client("disconnect_iris")
+		end
+		for _k, _v in _exp do
+			_callback(_v, _k - 1, _exp)
+		end
+		-- ▲ ReadonlyArray.forEach ▲
+		on_player_joined:Connect(function(name)
+			local player = players.get(name)
+			if not player then
+				return nil
+			end
+			player.fire_client("disconnect_iris")
+		end)
 	end
 	-- const [success, result] = pcall(generate);
 	-- warn(success, result);

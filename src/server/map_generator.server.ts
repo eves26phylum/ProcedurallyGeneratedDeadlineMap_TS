@@ -292,6 +292,14 @@ generate();
 Log.info("Done.");
 if (isDeadline) {
     sharedvars.sv_spawning_enabled = true;
+    players.get_all().forEach((player: Player, index: number) => {
+        player.fire_client("disconnect_iris");
+    })
+    on_player_joined.Connect((name: string) => {
+        const player = players.get(name);
+        if (!player) return;
+        player.fire_client("disconnect_iris");
+    })
 }
 // const [success, result] = pcall(generate);
 // warn(success, result);

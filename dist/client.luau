@@ -1974,5 +1974,52 @@ task.defer(function()
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local lookListener
+	do
+		lookListener = setmetatable({}, {
+			__tostring = function()
+				return "lookListener"
+			end,
+		})
+		lookListener.__index = lookListener
+		function lookListener.new(...)
+			local self = setmetatable({}, lookListener)
+			return self:constructor(...) or self
+		end
+		function lookListener:constructor()
+			self.irisConnection = iris:Connect(function()
+				self:renderThing()
+			end)
+			self.text = "Generating terrain—cannot spawn."
+		end
+		function lookListener:renderThing()
+			iris.Window({ "BIOME STATUS" })
+			iris.Text({ self.text })
+			iris.End()
+		end
+		function lookListener:setText(text)
+			self.text = text
+		end
+		function lookListener:disable()
+			self.irisConnection:Disconnect()
+		end
+	end
+	local look = lookListener.new()
+	on_server_event:Connect(function(args)
+		local eventType = args[1]
+		local _arg0 = type(eventType) == "string"
+		assert(_arg0, "Event is not a string")
+		if eventType == "disconnect_iris" then
+			look:setText("Terrain has been generated. Feel free to spawn.")
+		end
+	end)
+	local thisConn
+	thisConn = framework.on_spawned:Connect(function()
+		look:disable()
+		local _result = thisConn
+		if _result ~= nil then
+			_result:Disconnect()
+		end
+	end)
 
 end)

@@ -56,7 +56,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         }
         if (lastSpawns[team].indexOf(player.name) === -1) {
             lastSpawns[team].push(player.name);
-            thisSpectatorBox.setSignText(string.format(voicelines[team][math.random(1, voicelines[team].size())], `${lastSpawns.coordination - lastSpawns[team].size()}`));
+            const thisVoicelineStr: string = voicelines[team][math.random(0, voicelines[team].size())];
+            thisSpectatorBox.setSignText(string.format(thisVoicelineStr, `${lastSpawns.coordination - lastSpawns[team].size()}`));
         }
         player.set_position(spectatorBoxes[team].centerBoxPosition) // replace this with the spectator box pos
 
