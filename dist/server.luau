@@ -217,6 +217,26 @@ __modulesFolder["EgoMoose"] = function()
 			return { _object, _object_1 }
 		end
 		_container.draw3dTriangle = draw3dTriangle
+		local function getRandomWeights()
+			local r1 = math.random()
+			local r2 = math.random()
+			local sqrtR1 = math.sqrt(r1)
+			local wA = 1 - sqrtR1
+			local wB = sqrtR1 * (1 - r2)
+			local wC = r2 * sqrtR1
+			return { wA, wB, wC }
+		end
+		_container.getRandomWeights = getRandomWeights
+		local function getPointFromWeights(a, b, c, weights)
+			local wA = weights[1]
+			local wB = weights[2]
+			local wC = weights[3]
+			local _exp = a * wA
+			local _arg0 = b * wB
+			local _arg0_1 = c * wC
+			return _exp + _arg0 + _arg0_1
+		end
+		_container.getPointFromWeights = getPointFromWeights
 		local function getBarycentricHeight(vertexA, vertexB, vertexC, samplePoint)
 			local projectedDenominator = (vertexB.Z - vertexC.Z) * (vertexA.X - vertexC.X) + (vertexC.X - vertexB.X) * (vertexA.Z - vertexC.Z)
 			if projectedDenominator == 0 then
@@ -247,6 +267,10 @@ __modulesFolder["NuristanBuildings"] = function()
 	local ProceduralRoomGrid = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "ProceduralRoomGeneration").ProceduralRoomGrid
 	local DepthFirstMazeSearch = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "DepthFirstMazeSearch").DepthFirstMazeSearch
 	local fisherYatesShuffle = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").fisherYatesShuffle
+	local _structure = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "structure")
+	local ensureStructureData = _structure.ensureStructureData
+	local structureClaimLand = _structure.structureClaimLand
+	local useStructureData = _structure.useStructureData
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -440,7 +464,7 @@ __modulesFolder["NuristanBuildings"] = function()
 			return self:constructor(...) or self
 		end
 		function NuristanBuildings:constructor(adapterToUse, translateTerrain, config, parent, roomHandlers)
-			self.priority = 100
+			self.priority = 50
 			self.config = config
 			self.translateTerrain = translateTerrain
 			self.parent = parent
@@ -546,8 +570,13 @@ __modulesFolder["NuristanBuildings"] = function()
 			_self:createSingleHouse(rotationalCFrame + _position, verticesForTriangles)
 		end
 		function NuristanBuildings:generate(yourSelf, yourCell)
+			if useStructureData(yourCell) then
+				return nil
+			end
 			self:operateOnThisTriangleInstance(yourCell, yourCell.triangles[1], yourCell.verticesForTriangles[1])
 			self:operateOnThisTriangleInstance(yourCell, yourCell.triangles[2], yourCell.verticesForTriangles[2])
+			ensureStructureData(yourCell)
+			structureClaimLand(self, yourCell)
 		end
 	end
 	return {
@@ -857,6 +886,105 @@ __modulesFolder["ProceduralRoomGeneration"] = function()
 	end
 	return {
 		ProceduralRoomGrid = ProceduralRoomGrid,
+	}
+
+end
+
+__modulesFolder["Tree"] = function()
+	local script
+	script = newFakeInstance({"Tree"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
+	local _structure = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "structure")
+	local ensureStructureData = _structure.ensureStructureData
+	local structureClaimLand = _structure.structureClaimLand
+	local useStructureData = _structure.useStructureData
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local Tree
+	do
+		Tree = setmetatable({}, {
+			__tostring = function()
+				return "Tree"
+			end,
+		})
+		Tree.__index = Tree
+		function Tree.new(...)
+			local self = setmetatable({}, Tree)
+			return self:constructor(...) or self
+		end
+		function Tree:constructor(adapterToUse, config, parent)
+			self.adapter = adapterToUse
+			self.name = "Tree"
+			self.priority = 30
+			self.config = config
+			self.parent = parent
+		end
+		function Tree:getRandomSurfacePosition(vertices)
+			local toXZ = function(v)
+				return Vector2.new(v.X, v.Z)
+			end
+			local randomPoint = EgoMoose.getPointFromWeights(toXZ(vertices[1]), toXZ(vertices[2]), toXZ(vertices[3]), EgoMoose.getRandomWeights())
+			local _binding = EgoMoose.getBarycentricHeight(vertices[1], vertices[2], vertices[3], randomPoint)
+			local height = _binding[1]
+			if height == nil then
+				return nil
+			end
+			return Vector3.new(randomPoint.X, height, randomPoint.Y)
+		end
+		function Tree:createTree(positionToPlaceAt, thisBranchSize, thisBallSize)
+			local cylinder = self.adapter.newInstance("Part")
+			self.adapter.setProperty(cylinder, "Anchored", true)
+			self.adapter.setProperty(cylinder, "Shape", Enum.PartType.Cylinder)
+			self.adapter.setProperty(cylinder, "Size", thisBranchSize)
+			local _adapter = self.adapter
+			local _exp = CFrame.fromEulerAnglesXYZ(0, 0, math.rad(90))
+			local _positionToPlaceAt = positionToPlaceAt
+			local _vector3 = Vector3.new(thisBranchSize.Y / 2, 0, 0)
+			_adapter.setProperty(cylinder, "CFrame", _exp + (_positionToPlaceAt + _vector3))
+			self.adapter.setProperty(cylinder, "Parent", self.parent)
+			assign(cylinder, self.config.branch.props, self.adapter.setProperty)
+			local leaf = self.adapter.newInstance("Part")
+			self.adapter.setProperty(leaf, "Anchored", true)
+			self.adapter.setProperty(leaf, "Shape", Enum.PartType.Ball)
+			self.adapter.setProperty(leaf, "Size", thisBallSize)
+			local _adapter_1 = self.adapter
+			local _positionToPlaceAt_1 = positionToPlaceAt
+			local _vector3_1 = Vector3.new(thisBranchSize.Y, 0, 0)
+			_adapter_1.setProperty(leaf, "Position", _positionToPlaceAt_1 + _vector3_1)
+			self.adapter.setProperty(leaf, "Parent", self.parent)
+			assign(leaf, self.config.leaf.props, self.adapter.setProperty)
+		end
+		function Tree:generate(yourSelf, yourCell)
+			if useStructureData(yourCell) then
+				return nil
+			end
+			local branchMaxSize, branchMinSize = self.config.branch.maxSize, self.config.branch.minSize
+			local randY = branchMinSize.Y + math.random() * (branchMaxSize.Y - branchMinSize.Y)
+			local randX = branchMinSize.X + math.random() * (branchMaxSize.X - branchMinSize.X)
+			local thisBranchSize = Vector3.new(randY, randX, randX)
+			local randLeafSize = self.config.leaf.minBoxSize + math.random() * (self.config.leaf.maxBoxSize - self.config.leaf.minBoxSize)
+			local thisLeafSize = Vector3.new(randLeafSize, randLeafSize, randLeafSize)
+			local pos1 = self:getRandomSurfacePosition(yourCell.verticesForTriangles[1])
+			local pos2 = self:getRandomSurfacePosition(yourCell.verticesForTriangles[2])
+			if pos1 == nil or pos2 == nil then
+				return nil
+			end
+			self:createTree(pos1, thisBranchSize, thisLeafSize)
+			self:createTree(pos2, thisBranchSize, thisLeafSize)
+			ensureStructureData(yourCell)
+			structureClaimLand(self, yourCell)
+		end
+	end
+	return {
+		Tree = Tree,
 	}
 
 end

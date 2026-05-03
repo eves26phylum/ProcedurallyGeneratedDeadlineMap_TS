@@ -36,6 +36,24 @@ export namespace EgoMoose {
             }
         ];
     }
+    
+    export function getRandomWeights(): [number, number, number] {
+        const r1 = math.random();
+        const r2 = math.random();
+        const sqrtR1 = math.sqrt(r1);
+
+        const wA = 1 - sqrtR1;
+        const wB = sqrtR1 * (1 - r2);
+        const wC = r2 * sqrtR1;
+
+        return [wA, wB, wC];
+    }
+
+    export function getPointFromWeights(a: Vector2, b: Vector2, c: Vector2, weights: [number, number, number]): Vector2 {
+        const [wA, wB, wC] = weights;
+        return a.mul(wA).add(b.mul(wB)).add(c.mul(wC));
+    }
+
     export function getBarycentricHeight(vertexA: Vector3, vertexB: Vector3, vertexC: Vector3, samplePoint: Vector2): EgoMooseExportGetBarycentricHeight {
         const projectedDenominator = (vertexB.Z - vertexC.Z) * (vertexA.X - vertexC.X) + (vertexC.X - vertexB.X) * (vertexA.Z - vertexC.Z);
         if (projectedDenominator === 0) return [undefined, 0, 0, 0];

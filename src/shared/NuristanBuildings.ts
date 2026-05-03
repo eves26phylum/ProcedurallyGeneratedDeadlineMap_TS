@@ -9,6 +9,7 @@ import { EgoMoose } from "./EgoMoose";
 import { ProceduralRoomGrid, RoomGenerationConfig, RoomFaceData, WallFace } from "./ProceduralRoomGeneration";
 import { DepthFirstMazeSearch } from "./DepthFirstMazeSearch";
 import { fisherYatesShuffle } from "./Util";
+import { ensureStructureData, structureClaimLand, useStructureData } from "./structure";
 
 // !deadline-ts.customFinishSector_FinishModulesEnd
 // The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
@@ -237,7 +238,7 @@ export class NuristanBuildings implements Biome {
     name: string
     adapter: InstanceAdapter
     constructor(adapterToUse: InstanceAdapter, translateTerrain: translateTerrainOrientationForStructureBonding, config: NuristanBuildingsConfig, parent: AnyInstance, roomHandlers: (thisThing: NuristanBuildings) => RoomTypeHandler[]) {
-        this.priority = 100;
+        this.priority = 50; // priority of structures should be less than priority of biomes
         this.config = config;
         this.translateTerrain = translateTerrain;
         this.parent = parent;
@@ -369,7 +370,10 @@ export class NuristanBuildings implements Biome {
     }
 
     generate(yourSelf: createTerrain, yourCell: WedgeCell): void {
+        if (useStructureData(yourCell)) return;
         this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[0], yourCell.verticesForTriangles[0]);
         this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[1], yourCell.verticesForTriangles[1]);
+        ensureStructureData(yourCell);
+        structureClaimLand(this, yourCell);
     }
 }
