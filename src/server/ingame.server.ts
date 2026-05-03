@@ -31,7 +31,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         defender: undefined,
         attacker: undefined
     }
-    const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
+    // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
     let offset = new Vector3(0, -200, 0);
     const [firstPos, secondPos] = [new Vector3(-5000, 5000, -5000), new Vector3(5000, 5000, 5000)]
     on_player_spawned.Connect((name) => {
@@ -39,32 +39,43 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         const player: Player | undefined = players.get(name);
         if (!player) return;
         const team: PlayerTeam = player.get_team();
+        const thisSpectatorBox = spectatorBoxes[team] || new SpectatorBox(adapterToUse, offset, parent); // Get spectator box or create a new one if does not exist
         if (!spectatorBoxes[team]) {
-            const thisSpectatorBox = new SpectatorBox(adapterToUse, offset, parent);
-            thisSpectatorBox.setSignText("Banana");
+            thisSpectatorBox.setSignText("Initialisation");
             offset = offset.add(new Vector3(200, 0, 0));
             spectatorBoxes[team] = thisSpectatorBox;
         }
-        if ((lastSpawns[team].size() > lastSpawns.coordination) || (!lastSpawnedPos[team])) {
-            const raycast_params = query.create_raycast_params();
-            const hit = query.raycast(new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z)), new Vector3(0, -15000, 0), raycast_params)
-            if (!hit) return Log.warn("Hit was not found when doing spawn logic");
-            const hitSpawnPos = hit.position.add(new Vector3(0, 26, 0));
-            lastSpawnedPos[team] = hitSpawnPos;
-            Log.info(`Registering team spawn for the following members`, ...lastSpawns[team]);
-            lastSpawns[team].forEach((playerName: string, index: number) => {
-                const thisPlayer = players.get(playerName);
-                if (!thisPlayer) return;
-                thisPlayer.set_position(hitSpawnPos);
-            })
-
-            lastSpawns[team] = [];
-        }
         lastSpawns[team].push(player.name);
+        player.set_position(spectatorBoxes[team].centerBoxPosition) // replace this with the spectator box pos
+
+        lastSpawns[team].forEach((playerName: string, index: number) => { // Remove all players that left
+            const thisPlayer = players.get(playerName);
+            if (!thisPlayer) lastSpawns[team].remove(index);
+        })
+
+        if (lastSpawns[team].size() < lastSpawns.coordination) return;
+        const raycast_params = query.create_raycast_params();
+        const hit = query.raycast(new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z)), new Vector3(0, -15000, 0), raycast_params)
+        if (!hit) {
+            return Log.warn("Hit was not found when doing spawn logic");
+        }
+        
+        const hitSpawnPos = hit.position.add(new Vector3(0, 26, 0));
+        // lastSpawnedPos[team] = hitSpawnPos;
+        
+        Log.info(`Registering team spawn for the following members`, ...lastSpawns[team]);
+        
+        lastSpawns[team].forEach((playerName: string, index: number) => {
+            const thisPlayer = players.get(playerName);
+            if (!thisPlayer) return;
+            thisPlayer.set_position(hitSpawnPos);
+            task.delay(3, () => {
+                thisPlayer.set_health(100);
+            })
+        })
+
+        lastSpawns[team] = [];
         // Log.info(`Player ${player.name} is arriving`);
         // Spawn this guy at a spectator box at Y level -200. You must separate spectator boxes for each team. Each wall in a spectator box is 3 studs thick (prevents penetration for rifles). When a spectator box spawns, it will spawn to the left of the last spectator box. Each spectator box is transparent and glass. The inside is filled with no collide water. There is a metal sign bolted to the middle of one of the walls that will say (if defender) `The mission will start when ${playersLeft} more SYNO arrive.`. If they're attacker, they will say `You will protect the homeland! ${playersLeft} players left until you will spawn`. The text resets in the HERE logic.
-        player.set_position(spectatorBoxes[team].centerBoxPosition) // replace this with the spectator box pos
-        task.wait(3)
-        player.set_health(100)
     });
 }
