@@ -558,7 +558,7 @@ __modulesFolder["NuristanBuildings"] = function()
 			local degreesTiltedOfSteepness = self.translateTerrain:GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z)))
 			local isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness
 			if not isALivableDegree then
-				return nil
+				return false
 			end
 			-- const part = this.adapter.newInstance("Part");
 			-- this.adapter.setProperty(part, "CFrame", middlePos);
@@ -568,13 +568,17 @@ __modulesFolder["NuristanBuildings"] = function()
 			local _self = self
 			local _position = middlePos.Position
 			_self:createSingleHouse(rotationalCFrame + _position, verticesForTriangles)
+			return true
 		end
 		function NuristanBuildings:generate(yourSelf, yourCell)
 			if useStructureData(yourCell) then
 				return nil
 			end
-			self:operateOnThisTriangleInstance(yourCell, yourCell.triangles[1], yourCell.verticesForTriangles[1])
-			self:operateOnThisTriangleInstance(yourCell, yourCell.triangles[2], yourCell.verticesForTriangles[2])
+			local placedFirst = self:operateOnThisTriangleInstance(yourCell, yourCell.triangles[1], yourCell.verticesForTriangles[1])
+			local placedSecond = self:operateOnThisTriangleInstance(yourCell, yourCell.triangles[2], yourCell.verticesForTriangles[2])
+			if not placedFirst and not placedSecond then
+				return nil
+			end
 			ensureStructureData(yourCell)
 			structureClaimLand(self, yourCell)
 		end
@@ -958,7 +962,7 @@ __modulesFolder["Tree"] = function()
 			self.adapter.setProperty(leaf, "Size", thisBallSize)
 			local _adapter_1 = self.adapter
 			local _positionToPlaceAt_1 = positionToPlaceAt
-			local _vector3_1 = Vector3.new(thisBranchSize.Y, 0, 0)
+			local _vector3_1 = Vector3.new(0, thisBranchSize.Y, 0)
 			_adapter_1.setProperty(leaf, "Position", _positionToPlaceAt_1 + _vector3_1)
 			self.adapter.setProperty(leaf, "Parent", self.parent)
 			assign(leaf, self.config.leaf.props, self.adapter.setProperty)

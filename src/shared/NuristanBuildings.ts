@@ -348,7 +348,7 @@ export class NuristanBuildings implements Biome {
                     //     x: x,
                     //     y: y
                     // },
-    private operateOnThisTriangleInstance(data: WedgeCell, trianglePair: [AnyInstance<WedgePart>, AnyInstance<WedgePart>], verticesForTriangles: triangleVerticesTrio): void {
+    private operateOnThisTriangleInstance(data: WedgeCell, trianglePair: [AnyInstance<WedgePart>, AnyInstance<WedgePart>], verticesForTriangles: triangleVerticesTrio): boolean {
         const orientation = trianglePair[0].Orientation;
         const middlePos = trianglePair[0].CFrame.Lerp(trianglePair[1].CFrame, 0.5);
         const translatedOrientationForStructurePlacement = this.translateTerrain.Translate(orientation);
@@ -360,19 +360,21 @@ export class NuristanBuildings implements Biome {
             )
         );
         const isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness;
-        if (!isALivableDegree) return;
+        if (!isALivableDegree) return false;
         // const part = this.adapter.newInstance("Part");
         // this.adapter.setProperty(part, "CFrame", middlePos);
         // this.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement);
         // this.adapter.setProperty(part, "Parent", this.parent);
         const rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y + math.random(0, 360)), math.rad(translatedOrientationForStructurePlacement.Z));
         this.createSingleHouse(rotationalCFrame.add(middlePos.Position), verticesForTriangles);
+        return true;
     }
 
     generate(yourSelf: createTerrain, yourCell: WedgeCell): void {
         if (useStructureData(yourCell)) return;
-        this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[0], yourCell.verticesForTriangles[0]);
-        this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[1], yourCell.verticesForTriangles[1]);
+        const placedFirst = this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[0], yourCell.verticesForTriangles[0]);
+        const placedSecond = this.operateOnThisTriangleInstance(yourCell, yourCell.triangles[1], yourCell.verticesForTriangles[1]);
+        if (!placedFirst && !placedSecond) return;
         ensureStructureData(yourCell);
         structureClaimLand(this, yourCell);
     }
