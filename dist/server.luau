@@ -1987,7 +1987,7 @@ __modulesFolder["ingame"] = function()
 			attacker = nil,
 		}
 		-- const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
-		local offset = Vector3.new(0, -200, 0)
+		local offset = Vector3.new(0, 0, 0)
 		local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
 		on_player_spawned:Connect(function(name)
 			time.wait(1.4)
