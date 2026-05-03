@@ -1990,10 +1990,10 @@ task.defer(function()
 			self.irisConnection = iris:Connect(function()
 				self:renderThing()
 			end)
-			self.text = "Generating terrain—cannot spawn."
+			self.text = "Generating terrain. You cannot spawn until it is done generating."
 		end
 		function lookListener:renderThing()
-			iris.Window({ "BIOME STATUS" })
+			iris.Window({ "BIOME STATUS (DRAGGABLE WINDOW)" })
 			iris.Text({ self.text })
 			iris.End()
 		end
@@ -2010,7 +2010,7 @@ task.defer(function()
 		local _arg0 = type(eventType) == "string"
 		assert(_arg0, "Event is not a string")
 		if eventType == "disconnect_iris" then
-			look:setText("Terrain has been generated. Feel free to spawn.")
+			look:setText("Terrain has been generated. Feel free to spawn to get rid of this message.")
 		end
 	end)
 	local thisConn

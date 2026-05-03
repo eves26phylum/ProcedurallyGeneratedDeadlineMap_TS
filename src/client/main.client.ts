@@ -3,10 +3,10 @@ class lookListener {
     private text: string
     constructor() {
         this.irisConnection = iris.Connect(() => {this.renderThing()});
-        this.text = "Generating terrain—cannot spawn.";
+        this.text = "Generating terrain. You cannot spawn until it is done generating.";
     }
     private renderThing() {
-        iris.Window(["BIOME STATUS"]);
+        iris.Window(["BIOME STATUS (DRAGGABLE WINDOW)"]);
         iris.Text([this.text]);
         iris.End();
     }
@@ -22,7 +22,7 @@ on_server_event.Connect((args: unknown[]) => {
     const eventType: unknown = args[0];
     assert(typeIs(eventType, "string"), "Event is not a string");
     if (eventType === "disconnect_iris") {
-        look.setText("Terrain has been generated. Feel free to spawn.");
+        look.setText("Terrain has been generated. Feel free to spawn to get rid of this message.");
     }
 })
 let thisConn: RBXScriptConnection | undefined
