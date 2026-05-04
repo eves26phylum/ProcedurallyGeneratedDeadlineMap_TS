@@ -2245,7 +2245,7 @@ __modulesFolder["ingame"] = function()
 				return nil
 			end
 			local thisVoicelineStr = voicelines[team][math.random(0, #voicelines[team] - 1) + 1]
-			thisSpectatorBox:setSignText(string.format(thisVoicelineStr, `{lastSpawns.coordination - #lastSpawns[team]} | {ticketsLeft[team]} waves left`))
+			thisSpectatorBox:setSignText(string.format(`${thisVoicelineStr} | {ticketsLeft[team]} waves left`, `{lastSpawns.coordination - #lastSpawns[team]}`))
 			if #lastSpawns[team] < lastSpawns.coordination then
 				return nil
 			end
