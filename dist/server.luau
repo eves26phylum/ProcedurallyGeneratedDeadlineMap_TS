@@ -1541,9 +1541,11 @@ __modulesFolder["getRoot"] = function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	local worldRoot = if isDeadline then get_map_root() else game:GetService("Workspace")
+	local function getWorldRoot()
+		return if isDeadline then get_map_root() else game:GetService("Workspace")
+	end
 	return {
-		worldRoot = worldRoot,
+		getWorldRoot = getWorldRoot,
 	}
 
 end
@@ -2085,7 +2087,6 @@ __modulesFolder["ingame"] = function()
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	local SpectatorBox = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "spectatorBoxBuilder").SpectatorBox
 	local voicelines = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "voicelines").voicelines
-	local worldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").worldRoot
 	local random_drone_noise = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "randomDroneNoise").random_drone_noise
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
@@ -2183,7 +2184,7 @@ __modulesFolder["ingame"] = function()
 		}
 		local lastPingedTime = {}
 		local DroneFolder = adapterToUse.newInstance("Folder")
-		adapterToUse.setProperty(DroneFolder, "Parent", worldRoot)
+		adapterToUse.setProperty(DroneFolder, "Parent", parent)
 		-- const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
 		local offset = Vector3.new(0, 3000, 0)
 		local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
@@ -2372,7 +2373,7 @@ task.defer(function()
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
 	local Tree = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Tree").Tree
 	local kickStart = TS.import(script, game:GetService("ServerScriptService"), "TS", "ingame").kickStart
-	local worldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").worldRoot
+	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -2518,6 +2519,7 @@ task.defer(function()
 		load_modfile("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")
 		map.set_map("template_map")
 	end
+	local worldRoot = getWorldRoot()
 	local Log = Logger.new("map_generator")
 	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
 	local workspace = worldRoot

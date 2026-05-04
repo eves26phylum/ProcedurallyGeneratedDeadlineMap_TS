@@ -1,5 +1,5 @@
 import { AnyInstance, InstanceAdapter } from "shared/definition";
-import { worldRoot } from "shared/getRoot";
+import { getWorldRoot } from "shared/getRoot";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 export class PingUIItem {
     adapter: InstanceAdapter;
@@ -9,7 +9,7 @@ export class PingUIItem {
     }
 
     build(position: Vector3, parent?: AnyInstance): AnyInstance<Part> {
-        const part = this.adapter.newInstance("Part", parent ?? worldRoot);
+        const part = this.adapter.newInstance("Part", parent ?? getWorldRoot());
         this.adapter.setProperty(part, "Size", new Vector3(1, 1, 1));
         this.adapter.setProperty(part, "Position", position);
         this.adapter.setProperty(part, "Anchored", true);

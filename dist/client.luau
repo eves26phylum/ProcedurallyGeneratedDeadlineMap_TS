@@ -1541,9 +1541,11 @@ __modulesFolder["getRoot"] = function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	local worldRoot = if isDeadline then get_map_root() else game:GetService("Workspace")
+	local function getWorldRoot()
+		return if isDeadline then get_map_root() else game:GetService("Workspace")
+	end
 	return {
-		worldRoot = worldRoot,
+		getWorldRoot = getWorldRoot,
 	}
 
 end
@@ -2081,7 +2083,7 @@ __modulesFolder["pingfactory"] = function()
 	script = newFakeInstance({"pingfactory"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local worldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").worldRoot
+	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -2105,7 +2107,7 @@ __modulesFolder["pingfactory"] = function()
 			self.adapter = adapter
 		end
 		function PingUIItem:build(position, parent)
-			local part = self.adapter.newInstance("Part", parent or worldRoot)
+			local part = self.adapter.newInstance("Part", parent or getWorldRoot())
 			self.adapter.setProperty(part, "Size", Vector3.new(1, 1, 1))
 			self.adapter.setProperty(part, "Position", position)
 			self.adapter.setProperty(part, "Anchored", true)

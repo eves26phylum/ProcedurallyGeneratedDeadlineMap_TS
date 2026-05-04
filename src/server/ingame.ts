@@ -3,7 +3,6 @@ import { Logger } from "shared/logger";
 import { isDeadline } from "shared/isDeadline";
 import { SpectatorBox } from "shared/spectatorBoxBuilder";
 import { voicelines } from "shared/voicelines";
-import { worldRoot } from "shared/getRoot";
 import { random_drone_noise } from "shared/randomDroneNoise";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
@@ -91,7 +90,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
     }
     const lastPingedTime: Record<string, number> = {}
     const DroneFolder = adapterToUse.newInstance("Folder");
-    adapterToUse.setProperty(DroneFolder, "Parent", worldRoot);
+    adapterToUse.setProperty(DroneFolder, "Parent", parent);
     // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
     let offset = new Vector3(0, 3000, 0);
     const [firstPos, secondPos] = [new Vector3(-5000, 5000, -5000), new Vector3(5000, 5000, 5000)]
