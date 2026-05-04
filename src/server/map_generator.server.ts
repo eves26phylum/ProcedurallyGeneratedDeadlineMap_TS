@@ -271,7 +271,7 @@ standardBox.registerModifier(new Tree(adapterToUse, {
             CanCollide: false,
             CanQuery: false,
             Transparency: 0.4,
-            Color: Color3.fromRGB(43, 219, 84)
+            Color: Color3.fromRGB(36, 107, 51)
         }
     },
     treesPerTriangle: 4
