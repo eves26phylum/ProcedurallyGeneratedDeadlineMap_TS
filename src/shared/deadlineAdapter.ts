@@ -25,4 +25,7 @@ export namespace deadlineAdapter {
     export function isA<C extends keyof Instances>(target: WrappedInstance, whatClass: C): target is WrappedInstance & Instances[C] {
         return target.is_a(whatClass);
     }
+    export function playSound(target: WrappedInstance<Sound>) {
+        target.play();
+    }
 }

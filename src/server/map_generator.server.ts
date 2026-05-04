@@ -16,6 +16,7 @@ import { RoomFaceData } from "shared/ProceduralRoomGeneration";
 import { Logger } from "shared/logger";
 import { Tree } from "shared/Tree";
 import { kickStart } from "./ingame";
+import { worldRoot } from "shared/getRoot";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 // The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 
@@ -134,7 +135,7 @@ if (isDeadline) {
 }
 const Log = new Logger("map_generator");
 const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
-const workspace: AnyInstance = isDeadline ? get_map_root() : game.GetService("Workspace");
+const workspace = worldRoot;
 const PART_SIZE = 100;
 const MAP_SIZE = new Vector2(10000, 10000);
 const RESOLUTION = new Vector2(

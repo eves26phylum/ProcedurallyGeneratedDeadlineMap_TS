@@ -5,6 +5,7 @@ import { isDeadline } from "shared/isDeadline";
 import { Logger } from "shared/logger";
 import { robloxAdapter } from "shared/robloxAdapter";
 import { assign } from "shared/Util";
+import { Ping, PingNoisePlayer, PingUIItem } from "./pingfactory";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
 const Log = new Logger("main");
@@ -30,6 +31,7 @@ class lookListener {
     }
 }
 const look = new lookListener();
+const pingFactory = new Ping(new PingUIItem(adapterToUse), new PingNoisePlayer(adapterToUse), 0.25)
 let [body_gyro, body_velocity, dronePart]: [AnyInstance<BodyGyro>?, AnyInstance<BodyVelocity>?, AnyInstance<BasePart>?] = [];
 on_server_event.Connect((args: unknown[]) => {
     const eventType: unknown = args[0];
@@ -41,7 +43,7 @@ on_server_event.Connect((args: unknown[]) => {
         look.disable();
     }
     if (eventType === "player_ping") {
-        createPing(event_data.position)
+        pingFactory.play()
         const drones = get_map_root().find_first_child("DronesFolder")
         if (!drones) return Log.warn("Failed to find drones folder");
         const drone_name = args[2];

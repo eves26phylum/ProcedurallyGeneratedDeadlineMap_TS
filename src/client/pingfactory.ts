@@ -1,14 +1,15 @@
 import { AnyInstance, InstanceAdapter } from "shared/definition";
+import { worldRoot } from "shared/getRoot";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 export class PingUIItem {
     adapter: InstanceAdapter;
 
-    constructor(adapter: InstanceAdapter, position: Vector3, parent?: AnyInstance) {
+    constructor(adapter: InstanceAdapter) {
         this.adapter = adapter;
     }
 
     build(position: Vector3, parent?: AnyInstance): AnyInstance<Part> {
-        const part = this.adapter.newInstance("Part", parent ?? get_map_root());
+        const part = this.adapter.newInstance("Part", parent ?? worldRoot);
         this.adapter.setProperty(part, "Size", new Vector3(1, 1, 1));
         this.adapter.setProperty(part, "Position", position);
         this.adapter.setProperty(part, "Anchored", true);
@@ -40,16 +41,21 @@ export class PingUIItem {
 
         return part;
     }
+    destroy(part: AnyInstance<Part>) {
+        this.adapter.destroy(part);
+    }
 }
 
-class PingNoisePlayer {
+export class PingNoisePlayer {
     adapter: InstanceAdapter;
-    constructor(adapter: InstanceAdapter) {
+    soundId: string;
+    constructor(adapter: InstanceAdapter, soundId?: string) {
         this.adapter = adapter;
+        this.soundId = soundId || "rbxassetid://17208204604";
     }
     play(): void {
         const newSound = this.adapter.newInstance("Sound");
-        this.adapter.setProperty(newSound, "SoundId", "rbxassetid://17208204604");
+        this.adapter.setProperty(newSound, "SoundId", this.soundId);
         this.adapter.playSound(newSound);
         task.delay(newSound.TimeLength, () => {
             this.adapter.destroy(newSound);
@@ -57,7 +63,7 @@ class PingNoisePlayer {
     }
 }
 
-class Ping {
+export class Ping {
     private uiItem: PingUIItem;
     private noisePlayer: PingNoisePlayer;
     private lastingTime: number;
@@ -68,12 +74,12 @@ class Ping {
         this.lastingTime = lastingTime;
     }
 
-    play(): void {
+    play(position: Vector3): void {
         task.defer(() => {
             this.noisePlayer.play();
-            
-            pcall(() => {
-                task.delay(this.lastingTime, () => this.uiItem.destroy());
+            const part = this.uiItem.build(position);
+            task.delay(this.lastingTime, () => {
+                this.uiItem.destroy(part);
             });
         });
     }
