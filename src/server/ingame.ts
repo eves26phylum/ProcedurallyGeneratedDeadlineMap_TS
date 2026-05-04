@@ -3,6 +3,8 @@ import { Logger } from "shared/logger";
 import { isDeadline } from "shared/isDeadline";
 import { SpectatorBox } from "shared/spectatorBoxBuilder";
 import { voicelines } from "shared/voicelines";
+import { worldRoot } from "shared/getRoot";
+import { random_drone_noise } from "shared/randomDroneNoise";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
 const Log = new Logger("team_spawner"); // log, warn, info, error
@@ -11,12 +13,19 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
     const player_name = player.name;
 
     const drone = adapterToUse.newInstance("Part");
+    const [firstPos, secondPos] = [new Vector3(-5000, 5000, -5000), new Vector3(5000, 5000, 5000)]
+    const raycast_params = query.create_raycast_params();
+    const posToHitStartFrom = new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z));
+    const hit = query.raycast(posToHitStartFrom, new Vector3(0, -15000, 0), raycast_params)
+    if (!hit) {
+        Log.error(`Hit was not found when doing drone spawn logic`, `Position from: ${posToHitStartFrom}`);
+    }
     adapterToUse.setProperty(drone, "Size", new Vector3(1, 0.5, 2));
     adapterToUse.setProperty(drone, "Anchored", true);
     adapterToUse.setProperty(drone, "CanCollide", false);
     adapterToUse.setProperty(drone, "Transparency", 0.5);
     adapterToUse.setProperty(drone, "Name", player_name);
-    adapterToUse.setProperty(drone, "CFrame", new CFrame());
+    adapterToUse.setProperty(drone, "CFrame", new CFrame(hit?.position || new Vector3(0, 2000, 0)));
     adapterToUse.setProperty(drone, "Position", new Vector3(0, 900.662, 0));
     adapterToUse.setProperty(drone, "Material", Enum.Material.Glass);
     adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100));
@@ -48,6 +57,7 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
     adapterToUse.playSound(drone_noise);
 
     player.fire_client("send_drone_info", player.name);
+    return drone;
 }
 export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
     if (!isDeadline) return Log.info("Did not execute because the environment is not Deadline.");;
@@ -80,6 +90,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         attacker: 5
     }
     const lastPingedTime: Record<string, number> = {}
+    const DroneFolder = adapterToUse.newInstance("Folder");
+    adapterToUse.setProperty(DroneFolder, "Parent", worldRoot);
     // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
     let offset = new Vector3(0, 3000, 0);
     const [firstPos, secondPos] = [new Vector3(-5000, 5000, -5000), new Vector3(5000, 5000, 5000)]
@@ -111,8 +123,12 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         
         if (ticketsLeft[team] <= 0) {
             // SET FREE CAMERA
-            
+            const drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team]);
             player.set_custom_camera_mode("DroneFreecam");
+            task.defer(function() {
+                while (spawnedAmount === spawnedAmounts[player.name] && drone.Parent !== undefined) {task.wait(1);}
+                player.respawn();
+            });
             return;
         }
         const thisVoicelineStr: string = voicelines[team][math.random(0, voicelines[team].size() - 1)];
@@ -150,11 +166,15 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
     on_player_died.Connect((name) => {
         const player: Player | undefined = players.get(name);
         if (!player) return;
+        const spawnedAmount = spawnedAmounts[player.name] !== undefined ? spawnedAmounts[player.name] + 1 : 0;
+        spawnedAmounts[player.name] = spawnedAmount;
         lastSpawns[player.get_team()].remove(lastSpawns[player.get_team()].indexOf(player.name));
     })
     on_player_left.Connect((name) => {
         const player: Player | undefined = players.get(name);
         if (!player) return;
+        const spawnedAmount = spawnedAmounts[player.name] !== undefined ? spawnedAmounts[player.name] + 1 : 0;
+        spawnedAmounts[player.name] = spawnedAmount;
         lastSpawns[player.get_team()].remove(lastSpawns[player.get_team()].indexOf(player.name));
     })
     on_client_event.Connect((player: Player, args: unknown[]) => {
