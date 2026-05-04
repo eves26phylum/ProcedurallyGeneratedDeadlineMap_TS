@@ -13,4 +13,5 @@ export interface InstanceAdapter<T extends AnyInstance = AnyInstance> {
     addTag(this: void, target: T, tag: string): void;
     isA<C extends keyof Instances>(this: void, target: T, className: C): target is T & AnyInstance<Instances[C]>;
     playSound(this: void, target: T): void;
+    setNetworkOwner(this: void, target: AnyInstance<BasePart>, player: Player): void;
 }

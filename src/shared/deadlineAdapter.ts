@@ -28,4 +28,7 @@ export namespace deadlineAdapter {
     export function playSound(target: WrappedInstance<Sound>) {
         target.play();
     }
+    export function setNetworkOwner(part: WrappedInstance<BasePart>, player: Player) {
+        part.set_network_owner(player.name);
+    }
 }

@@ -22,4 +22,7 @@ export namespace robloxAdapter {
     export function playSound(target: Sound) {
         target.Play();
     }
+    export function setNetworkOwner(part: BasePart, player: Player) {
+        part.SetNetworkOwner(player);
+    }
 }

@@ -42,20 +42,25 @@ on_server_event.Connect((args: unknown[]) => {
     if (eventType === "disconnect_iris") {
         look.disable();
     }
-    if (eventType === "player_ping") {
-        pingFactory.play()
+    if (eventType === "player_ping") { // args[0]: event, args[1]: position, args[2]: drone name
         const drones = get_map_root().find_first_child("DronesFolder")
         if (!drones) return Log.warn("Failed to find drones folder");
-        const drone_name = args[2];
+        const drone_name = args[1];
         assert(typeIs(drone_name, "string"), "Drone name is not a string");
         const drone = adapterToUse.findFirstChild(drones, drone_name);
         assert(drone && adapterToUse.isA(drone, "BasePart"), "drone does not exist or is not a BasePart");
+
         adapterToUse.setProperty(drone, "Color", Color3.fromRGB(255, 255, 255))
         adapterToUse.setProperty(drone, "Material", Enum.Material.SmoothPlastic)
         assign(drone, droneMaterialConfig.selected, adapterToUse.setProperty);
         task.delay(0.2, () => {
             assign(drone, droneMaterialConfig.normal, adapterToUse.setProperty);
         })
+    }
+    if (eventType === "team_ping") {
+        const pingPosition = args[1];
+        assert(typeIs(pingPosition, "Vector3"), "Ping position is not a Vector3");
+        pingFactory.play(pingPosition);
     }
     if (eventType === "send_drone_info") {
         const drones = get_map_root().find_first_child("DronesFolder");
@@ -87,10 +92,17 @@ class DroneFreecam {
     current_velocity: Vector3;
     camera_cframe: CFrame
     constructor(get_head_cframe: () => CFrame) {
+        const [firstPos, secondPos] = [new Vector3(-5000, 5000, -5000), new Vector3(5000, 5000, 5000)]
+        const raycast_params = query.create_raycast_params();
+        const posToHitStartFrom = new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z));
+        const hit = query.raycast(posToHitStartFrom, new Vector3(0, -15000, 0), raycast_params)
+        if (!hit) {
+            Log.error(`Hit was not found when doing drone spawn logic`, `Position from: ${posToHitStartFrom}`);
+        }
         this.get_head_cframe = get_head_cframe;
         this.rot_x = 0;
         this.rot_y = 0;
-        this.cam_position = new CFrame();
+        this.cam_position = new CFrame(hit?.position || new Vector3(0, 2000, 0));
         this.min_roll = -math.pi / 2 + 0.2;
         this.max_roll = math.pi / 2 - 0.2;
         this.current_velocity = Vector3.zero;

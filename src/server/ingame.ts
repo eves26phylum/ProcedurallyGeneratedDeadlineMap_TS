@@ -2,10 +2,53 @@ import { AnyInstance, InstanceAdapter } from "shared/definition";
 import { Logger } from "shared/logger";
 import { isDeadline } from "shared/isDeadline";
 import { SpectatorBox } from "shared/spectatorBoxBuilder";
+import { voicelines } from "shared/voicelines";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
 const Log = new Logger("team_spawner"); // log, warn, info, error
 export type lastSpawnType = {coordination: number} & Record<PlayerTeam, string[]>;
+export function createDrone(player: Player, adapterToUse: InstanceAdapter, DroneFolder: AnyInstance<Folder>, random_drone_noise: string[]) {
+    const player_name = player.name;
+
+    const drone = adapterToUse.newInstance("Part");
+    adapterToUse.setProperty(drone, "Size", new Vector3(1, 0.5, 2));
+    adapterToUse.setProperty(drone, "Anchored", true);
+    adapterToUse.setProperty(drone, "CanCollide", false);
+    adapterToUse.setProperty(drone, "Transparency", 0.5);
+    adapterToUse.setProperty(drone, "Name", player_name);
+    adapterToUse.setProperty(drone, "CFrame", new CFrame());
+    adapterToUse.setProperty(drone, "Position", new Vector3(0, 900.662, 0));
+    adapterToUse.setProperty(drone, "Material", Enum.Material.Glass);
+    adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100));
+    adapterToUse.addTag(drone, "glass_destructible");
+    adapterToUse.setNetworkOwner(drone, player);
+    adapterToUse.setProperty(drone, "Parent", DroneFolder);
+
+    const body_gyro = adapterToUse.newInstance("BodyGyro");
+    adapterToUse.setProperty(body_gyro, "MaxTorque", new Vector3(math.huge, math.huge, math.huge));
+    adapterToUse.setProperty(body_gyro, "CFrame", drone.CFrame);
+    adapterToUse.setProperty(body_gyro, "Name", "CoolGyro");
+    adapterToUse.setProperty(body_gyro, "D", 500);
+    adapterToUse.setProperty(body_gyro, "P", 3000);
+    adapterToUse.setProperty(body_gyro, "Parent", drone);
+
+    const body_velocity = adapterToUse.newInstance("BodyVelocity");
+    adapterToUse.setProperty(body_velocity, "MaxForce", new Vector3(math.huge, math.huge, math.huge));
+    adapterToUse.setProperty(body_velocity, "Velocity", new Vector3(0, 0, 0));
+    adapterToUse.setProperty(body_velocity, "Name", "CoolVelocity");
+    adapterToUse.setProperty(body_velocity, "P", 10000);
+    adapterToUse.setProperty(body_velocity, "Parent", drone);
+
+    const drone_noise = adapterToUse.newInstance("Sound");
+    adapterToUse.setProperty(drone_noise, "Looped", true);
+    adapterToUse.setProperty(drone_noise, "SoundId", random_drone_noise[math.random(0, random_drone_noise.size() - 1)]);
+    adapterToUse.setProperty(drone_noise, "Volume", 1);
+    adapterToUse.setProperty(drone_noise, "RollOffMaxDistance", 74);
+    adapterToUse.setProperty(drone_noise, "Parent", drone);
+    adapterToUse.playSound(drone_noise);
+
+    player.fire_client("send_drone_info", player.name);
+}
 export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
     if (!isDeadline) return Log.info("Did not execute because the environment is not Deadline.");;
     Log.info("Listening for people spawning.");
@@ -32,22 +75,11 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         defender: undefined,
         attacker: undefined
     }
-    const voicelines = {
-        defender: [
-            "Good morning, SYNO! We are waiting on %s more SYNO until we deploy. Stay cool, stay frosty.",
-            "Eyes up, SYNO. %s personnel still need to link up for deployment. Remember your objective.",
-            "Listen up. Command sent you here with triple the ammunition compared to a mission in Complex for a reason. We need %s more. Do not waste your rounds."
-        ],
-        attacker: [
-            "Hold your position. %s of our people still making their way here. We move together.",
-            "%s more. Together, we can do it. They have been bleeding us dry long enough. We finish this.",
-            "Brothers. %s still on route. When they get here, we remind thempoliticians why they should have left us alone."
-        ]
-    }
     const ticketsLeft: Record<PlayerTeam, number> = {
         defender: 5,
         attacker: 5
     }
+    const lastPingedTime: Record<string, number> = {}
     // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
     let offset = new Vector3(0, 3000, 0);
     const [firstPos, secondPos] = [new Vector3(-5000, 5000, -5000), new Vector3(5000, 5000, 5000)]
@@ -70,14 +102,17 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             lastSpawns[team].push(player.name);
         }
         player.set_position(spectatorBoxes[team].centerBoxPosition) // replace this with the spectator box pos
-        
+        player.set_camera_mode("Default");
+
         lastSpawns[team].forEach((playerName: string, index: number) => { // Remove all players that left
             const thisPlayer = players.get(playerName);
             if (!thisPlayer) lastSpawns[team].remove(index);
         })
         
         if (ticketsLeft[team] <= 0) {
+            // SET FREE CAMERA
             
+            player.set_custom_camera_mode("DroneFreecam");
             return;
         }
         const thisVoicelineStr: string = voicelines[team][math.random(0, voicelines[team].size() - 1)];
@@ -121,5 +156,21 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         const player: Player | undefined = players.get(name);
         if (!player) return;
         lastSpawns[player.get_team()].remove(lastSpawns[player.get_team()].indexOf(player.name));
+    })
+    on_client_event.Connect((player: Player, args: unknown[]) => {
+        if (!player) return;
+        const eventType = args[0];
+        if (!typeIs(eventType, "string")) return player.kick();
+        if (eventType === "ping_at_position") {
+            const pingPosition = args[1];
+            if (!typeIs(pingPosition, "Vector3")) return player.kick();
+            if (os.time() - lastPingedTime[player.name] < 3) return;
+            lastPingedTime[player.name] = os.time();
+            players.get_all().forEach((thisPlayer: Player, index: number) => {
+                thisPlayer.fire_client("player_ping", player.name);
+                if (thisPlayer.get_team() !== player.get_team()) return;
+                thisPlayer.fire_client("team_ping", pingPosition);
+            })
+        }
     })
 }
