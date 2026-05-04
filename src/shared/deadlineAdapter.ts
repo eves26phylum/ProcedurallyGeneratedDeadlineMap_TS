@@ -22,4 +22,7 @@ export namespace deadlineAdapter {
     export function addTag(target: WrappedInstance, tag: string) {
         target.add_tag(tag);
     }
+    export function isA<C extends keyof Instances>(target: WrappedInstance, whatClass: C): target is WrappedInstance & Instances[C] {
+        return target.is_a(whatClass);
+    }
 }

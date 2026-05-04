@@ -849,9 +849,14 @@ declare const ClientInputGroup: {
  * Read `input` to get movement intent; write to `camera_cframe` to
  * communicate the desired camera position back to the framework.
  */
+type CameraControllerMovementInputType = {
+    movementX: number,
+    movementY: number,
+    movementZ: number
+}
 interface CameraControllerFrameState {
-    input: Vector3
-    camera_cframe?: CFrame
+    input: CameraControllerMovementInputType
+    camera_cframe: CFrame
     cam_position?: CFrame
     rot_x?: number
     rot_y?: number

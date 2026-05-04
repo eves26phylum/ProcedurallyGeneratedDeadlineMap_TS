@@ -16,4 +16,10 @@ export namespace robloxAdapter {
         if (!CollectionService) return;
         CollectionService.AddTag(target, tag);
     }
+    export function isA<C extends keyof Instances>(target: Instance, whatClass: C): target is Instance & Instances[C] {
+        return target.IsA(whatClass);
+    }
+    export function playSound(target: Sound) {
+        target.Play();
+    }
 }
