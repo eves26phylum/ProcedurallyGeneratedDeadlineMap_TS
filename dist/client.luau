@@ -1482,9 +1482,68 @@ __modulesFolder["deadlineAdapter"] = function()
 			target.add_tag(tag)
 		end
 		_container.addTag = addTag
+		local function isA(target, whatClass)
+			return target.is_a(whatClass)
+		end
+		_container.isA = isA
+		local function playSound(target)
+			target.play()
+		end
+		_container.playSound = playSound
+		local function setNetworkOwner(part, player)
+			part.set_network_owner(player.name)
+		end
+		_container.setNetworkOwner = setNetworkOwner
 	end
 	return {
 		deadlineAdapter = deadlineAdapter,
+	}
+
+end
+
+__modulesFolder["droneMaterialConfig"] = function()
+	local script
+	script = newFakeInstance({"droneMaterialConfig"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local droneMaterialConfig = {
+		selected = {
+			Material = Enum.Material.SmoothPlastic,
+			Color = Color3.fromRGB(255, 255, 255),
+		},
+		normal = {
+			Material = Enum.Material.Glass,
+			Color = Color3.fromRGB(100, 100, 100),
+		},
+	}
+	return {
+		droneMaterialConfig = droneMaterialConfig,
+	}
+
+end
+
+__modulesFolder["getRoot"] = function()
+	local script
+	script = newFakeInstance({"getRoot"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local worldRoot = if isDeadline then get_map_root() else game:GetService("Workspace")
+	return {
+		worldRoot = worldRoot,
 	}
 
 end
@@ -1625,6 +1684,27 @@ __modulesFolder["logger"] = function()
 
 end
 
+__modulesFolder["randomDroneNoise"] = function()
+	local script
+	script = newFakeInstance({"randomDroneNoise"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local random_drone_noise = {
+		defender = { "rbxassetid://131625660349459", "rbxassetid://126734205451508", "rbxassetid://112226499298758" },
+		attacker = { "rbxassetid://131680050661663", "rbxassetid://130659529431639", "rbxassetid://99988554071618" },
+	}
+	return {
+		random_drone_noise = random_drone_noise,
+	}
+
+end
+
 __modulesFolder["robloxAdapter"] = function()
 	local script
 	script = newFakeInstance({"robloxAdapter"})
@@ -1667,6 +1747,18 @@ __modulesFolder["robloxAdapter"] = function()
 			CollectionService:AddTag(target, tag)
 		end
 		_container.addTag = addTag
+		local function isA(target, whatClass)
+			return target:IsA(whatClass)
+		end
+		_container.isA = isA
+		local function playSound(target)
+			target:Play()
+		end
+		_container.playSound = playSound
+		local function setNetworkOwner(part, player)
+			part:SetNetworkOwner(player)
+		end
+		_container.setNetworkOwner = setNetworkOwner
 	end
 	return {
 		robloxAdapter = robloxAdapter,
@@ -1963,9 +2055,9 @@ __modulesFolder["translateTerrainForStructureBonding"] = function()
 
 end
 
-task.defer(function()
+__modulesFolder["voicelines"] = function()
 	local script
-	script = newFakeInstance({"main"})
+	script = newFakeInstance({"voicelines"})
 	local require = old_require
 	local old_require = nil
 	local newFakeInstance = nil
@@ -1974,6 +2066,164 @@ task.defer(function()
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local voicelines = {
+		defender = { "Good morning, SYNO! We are waiting on %s more SYNO until we deploy. Stay cool, stay frosty.", "Eyes up, SYNO. %s personnel still need to link up for deployment. Remember your objective.", "Listen up. Command sent you here with triple the ammunition compared to a mission in Complex for a reason. We need %s more. Do not waste your rounds." },
+		attacker = { "Hold your position. %s of our people still making their way here. We move together.", "%s more. Together, we can do it. They have been bleeding us dry long enough. We finish this.", "Brothers. %s still on route. When they get here, we remind thempoliticians why they should have left us alone." },
+	}
+	return {
+		voicelines = voicelines,
+	}
+
+end
+
+__modulesFolder["pingfactory"] = function()
+	local script
+	script = newFakeInstance({"pingfactory"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local worldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").worldRoot
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local PingUIItem
+	do
+		PingUIItem = setmetatable({}, {
+			__tostring = function()
+				return "PingUIItem"
+			end,
+		})
+		PingUIItem.__index = PingUIItem
+		function PingUIItem.new(...)
+			local self = setmetatable({}, PingUIItem)
+			return self:constructor(...) or self
+		end
+		function PingUIItem:constructor(adapter)
+			self.adapter = adapter
+		end
+		function PingUIItem:build(position, parent)
+			local part = self.adapter.newInstance("Part", parent or worldRoot)
+			self.adapter.setProperty(part, "Size", Vector3.new(1, 1, 1))
+			self.adapter.setProperty(part, "Position", position)
+			self.adapter.setProperty(part, "Anchored", true)
+			self.adapter.setProperty(part, "Transparency", 1)
+			self.adapter.setProperty(part, "CanCollide", false)
+			self.adapter.setProperty(part, "CastShadow", false)
+			local billboard = self.adapter.newInstance("BillboardGui", part)
+			self.adapter.setProperty(billboard, "AlwaysOnTop", true)
+			self.adapter.setProperty(billboard, "ClipsDescendants", false)
+			self.adapter.setProperty(billboard, "LightInfluence", 0)
+			self.adapter.setProperty(billboard, "Size", UDim2.new(0, 12, 0, 12))
+			local dot = self.adapter.newInstance("Frame", billboard)
+			self.adapter.setProperty(dot, "Size", UDim2.new(1, 0, 1, 0))
+			self.adapter.setProperty(dot, "AnchorPoint", Vector2.new(0.5, 0.5))
+			self.adapter.setProperty(dot, "Position", UDim2.new(0.5, 0, 0.5, 0))
+			self.adapter.setProperty(dot, "BackgroundColor3", Color3.fromRGB(255, 80, 80))
+			self.adapter.setProperty(dot, "BackgroundTransparency", 0.9)
+			self.adapter.setProperty(dot, "BorderSizePixel", 0)
+			local corner = self.adapter.newInstance("UICorner", dot)
+			self.adapter.setProperty(corner, "CornerRadius", UDim.new(1, 0))
+			local stroke = self.adapter.newInstance("UIStroke", dot)
+			self.adapter.setProperty(stroke, "Color", Color3.fromRGB(255, 255, 255))
+			self.adapter.setProperty(stroke, "Thickness", 2)
+			self.adapter.setProperty(stroke, "Transparency", 0.7)
+			return part
+		end
+		function PingUIItem:destroy(part)
+			self.adapter.destroy(part)
+		end
+	end
+	local PingNoisePlayer
+	do
+		PingNoisePlayer = setmetatable({}, {
+			__tostring = function()
+				return "PingNoisePlayer"
+			end,
+		})
+		PingNoisePlayer.__index = PingNoisePlayer
+		function PingNoisePlayer.new(...)
+			local self = setmetatable({}, PingNoisePlayer)
+			return self:constructor(...) or self
+		end
+		function PingNoisePlayer:constructor(adapter, soundId)
+			self.adapter = adapter
+			local _condition = soundId
+			if not (_condition ~= "" and _condition) then
+				_condition = "rbxassetid://17208204604"
+			end
+			self.soundId = _condition
+		end
+		function PingNoisePlayer:play()
+			local newSound = self.adapter.newInstance("Sound")
+			self.adapter.setProperty(newSound, "SoundId", self.soundId)
+			self.adapter.playSound(newSound)
+			task.delay(newSound.TimeLength, function()
+				self.adapter.destroy(newSound)
+			end)
+		end
+	end
+	local Ping
+	do
+		Ping = setmetatable({}, {
+			__tostring = function()
+				return "Ping"
+			end,
+		})
+		Ping.__index = Ping
+		function Ping.new(...)
+			local self = setmetatable({}, Ping)
+			return self:constructor(...) or self
+		end
+		function Ping:constructor(uiItem, noisePlayer, lastingTime)
+			self.uiItem = uiItem
+			self.noisePlayer = noisePlayer
+			self.lastingTime = lastingTime
+		end
+		function Ping:play(position)
+			task.defer(function()
+				self.noisePlayer:play()
+				local part = self.uiItem:build(position)
+				task.delay(self.lastingTime, function()
+					self.uiItem:destroy(part)
+				end)
+			end)
+		end
+	end
+	return {
+		PingUIItem = PingUIItem,
+		PingNoisePlayer = PingNoisePlayer,
+		Ping = Ping,
+	}
+
+end
+
+task.defer(function()
+	local script
+	script = newFakeInstance({"main"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
+	local droneMaterialConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "droneMaterialConfig").droneMaterialConfig
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local robloxAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "robloxAdapter").robloxAdapter
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	local _pingfactory = TS.import(script, script.Parent, "pingfactory")
+	local Ping = _pingfactory.Ping
+	local PingNoisePlayer = _pingfactory.PingNoisePlayer
+	local PingUIItem = _pingfactory.PingUIItem
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
+	local Log = Logger.new("main")
 	local lookListener
 	do
 		lookListener = setmetatable({}, {
@@ -2008,6 +2258,11 @@ task.defer(function()
 		end
 	end
 	local look = lookListener.new()
+	local pingFactory = Ping.new(PingUIItem.new(adapterToUse), PingNoisePlayer.new(adapterToUse), 0.25)
+	local _binding = {}
+	local body_gyro = _binding[1]
+	local body_velocity = _binding[2]
+	local dronePart = _binding[3]
 	on_server_event:Connect(function(args)
 		local eventType = args[1]
 		local _arg0 = type(eventType) == "string"
@@ -2018,6 +2273,154 @@ task.defer(function()
 		if eventType == "disconnect_iris" then
 			look:disable()
 		end
+		if eventType == "player_ping" then
+			local drones = get_map_root().find_first_child("DronesFolder")
+			if not drones then
+				return Log:warn("Failed to find drones folder")
+			end
+			local drone_name = args[2]
+			local _arg0_1 = type(drone_name) == "string"
+			assert(_arg0_1, "Drone name is not a string")
+			local drone = adapterToUse.findFirstChild(drones, drone_name)
+			local _arg0_2 = drone and adapterToUse.isA(drone, "BasePart")
+			assert(_arg0_2, "drone does not exist or is not a BasePart")
+			adapterToUse.setProperty(drone, "Color", Color3.fromRGB(255, 255, 255))
+			adapterToUse.setProperty(drone, "Material", Enum.Material.SmoothPlastic)
+			assign(drone, droneMaterialConfig.selected, adapterToUse.setProperty)
+			task.delay(0.2, function()
+				assign(drone, droneMaterialConfig.normal, adapterToUse.setProperty)
+			end)
+		end
+		if eventType == "team_ping" then
+			local pingPosition = args[2]
+			local _arg0_1 = typeof(pingPosition) == "Vector3"
+			assert(_arg0_1, "Ping position is not a Vector3")
+			pingFactory:play(pingPosition)
+		end
+		if eventType == "send_drone_info" then
+			local drones = get_map_root().find_first_child("DronesFolder")
+			if not drones then
+				return Log:warn("Failed to find drones folder")
+			end
+			local drone_name = args[2]
+			local _arg0_1 = type(drone_name) == "string"
+			assert(_arg0_1, "Drone name is not a string")
+			local drone = adapterToUse.findFirstChild(drones, drone_name)
+			if not drone then
+				return Log:warn(`Failed to find drone of {drone_name}`)
+			end
+			local bodyGyroCanidate = adapterToUse.findFirstChild(drone, "CoolGyro")
+			local bodyVelocityCanidate = adapterToUse.findFirstChild(drone, "CoolVelocity")
+			local _arg0_2 = bodyGyroCanidate and adapterToUse.isA(bodyGyroCanidate, "BodyGyro")
+			assert(_arg0_2, "CoolGyro does not exist or is not a BodyGyro")
+			local _arg0_3 = bodyVelocityCanidate and adapterToUse.isA(bodyVelocityCanidate, "BodyVelocity")
+			assert(_arg0_3, "CoolVelocity does not exist or is not a BodyVelocity")
+			local _arg0_4 = drone and adapterToUse.isA(drone, "BasePart")
+			assert(_arg0_4, "drone does not exist or is not a BasePart")
+			body_gyro = bodyGyroCanidate
+			body_velocity = bodyVelocityCanidate
+			dronePart = drone
+			dronePart.CanCollide = true
+		end
 	end)
+	local DroneFreecam
+	do
+		DroneFreecam = setmetatable({}, {
+			__tostring = function()
+				return "DroneFreecam"
+			end,
+		})
+		DroneFreecam.__index = DroneFreecam
+		function DroneFreecam.new(...)
+			local self = setmetatable({}, DroneFreecam)
+			return self:constructor(...) or self
+		end
+		function DroneFreecam:constructor(get_head_cframe)
+			local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
+			local raycast_params = query.create_raycast_params()
+			local posToHitStartFrom = Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z))
+			local hit = query.raycast(posToHitStartFrom, Vector3.new(0, -15000, 0), raycast_params)
+			if not hit then
+				Log:error(`Hit was not found when doing drone spawn logic`, `Position from: {posToHitStartFrom}`)
+			end
+			self.get_head_cframe = get_head_cframe
+			self.rot_x = 0
+			self.rot_y = 0
+			local _result = hit
+			if _result ~= nil then
+				_result = _result.position
+			end
+			local _condition = _result
+			if not _condition then
+				_condition = Vector3.new(0, 2000, 0)
+			end
+			self.cam_position = CFrame.new(_condition)
+			self.min_roll = -math.pi / 2 + 0.2
+			self.max_roll = math.pi / 2 - 0.2
+			self.current_velocity = Vector3.zero
+			self.input = {
+				movementX = 0,
+				movementY = 0,
+				movementZ = 0,
+			}
+			self.camera_cframe = CFrame.new()
+		end
+		function DroneFreecam:update(delta_time)
+			if not body_gyro or not body_velocity or not dronePart then
+				return nil
+			end
+			local _exp = input.get_mouse_delta() * 0.1
+			local _arg0 = input.get_mouse_sensitivity()
+			local mouse_delta = _exp * _arg0
+			self.rot_y -= mouse_delta.Y
+			self.rot_y = math.clamp(self.rot_y, self.min_roll, self.max_roll)
+			self.rot_x -= mouse_delta.X
+			local _exp_1 = CFrame.Angles(0, self.rot_x, 0)
+			local _arg0_1 = CFrame.Angles(self.rot_y, 0, 0)
+			local full_cframe = _exp_1 * _arg0_1
+			body_gyro.CFrame = full_cframe
+			local target_velocity = full_cframe:VectorToWorldSpace(Vector3.new(-self.input.movementX * 16, self.input.movementZ * 4, -self.input.movementY * 16))
+			-- Lerp toward target so velocity builds and bleeds off like a real drone
+			-- Factor of 6 gives ~160ms ramp time; raise it for a snappier feel
+			self.current_velocity = self.current_velocity:Lerp(target_velocity, math.min(1, delta_time * 3))
+			body_velocity.Velocity = self.current_velocity
+			local _cFrame = dronePart.CFrame
+			local _cFrame_1 = CFrame.new(0, 0, 0)
+			self.camera_cframe = _cFrame * _cFrame_1
+		end
+	end
+	-- class DroneFreecamFactory {
+	--     constructor(body_gyro: AnyInstance<BodyGyro>, body_velocity: AnyInstance<BodyVelocity>, drone_part: AnyInstance<BasePart>) {
+	--         return class {
+	--             constructor(get_head_cframe: () => CFrame) { 
+	--                 return new DroneFreecam(get_head_cframe, body_gyro, body_velocity, drone_part);
+	--             }
+	--         }
+	--     }
+	-- }
+	register_camera_mode("DroneFreecam", DroneFreecam)
+	-- function CustomFreecam:update(delta_time)
+	-- 	if not body_gyro     then return end
+	-- 	if not body_velocity then return end
+	-- 	if not dronePart     then return end
+	-- 	local mouse_delta = input.get_mouse_delta() * 0.1 * input.get_mouse_sensitivity()
+	-- 	self.rot_y -= mouse_delta.Y
+	-- 	self.rot_y  = math.clamp(self.rot_y, self.min_roll, self.max_roll)
+	-- 	self.rot_x -= mouse_delta.X
+	-- 	local full_cframe = CFrame.Angles(0, self.rot_x, 0) * CFrame.Angles(self.rot_y, 0, 0)
+	-- 	body_gyro.CFrame = full_cframe
+	-- 	local target_velocity = full_cframe:VectorToWorldSpace(Vector3.new(
+	-- 		-self.input.movementX * 16,  -- Sideways
+	-- 		 self.input.movementZ * 4,   -- Y
+	-- 		-self.input.movementY * 16   -- Forward
+	-- 	))
+	-- 	-- Lerp toward target so velocity builds and bleeds off like a real drone
+	-- 	-- Factor of 6 gives ~160ms ramp time; raise it for a snappier feel
+	-- 	self.current_velocity = self.current_velocity:Lerp(target_velocity, math.min(1, delta_time * 3))
+	-- 	body_velocity.Velocity = self.current_velocity
+	-- 	self.camera_cframe = dronePart.CFrame * CFrame.new(0, 0, 0)
+	-- end
+	-- -- can also use Default to overwrite default cameramode
+	-- register_camera_mode("Freecam", CustomFreecam)
 
 end)

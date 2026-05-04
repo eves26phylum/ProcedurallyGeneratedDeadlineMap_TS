@@ -1482,9 +1482,68 @@ __modulesFolder["deadlineAdapter"] = function()
 			target.add_tag(tag)
 		end
 		_container.addTag = addTag
+		local function isA(target, whatClass)
+			return target.is_a(whatClass)
+		end
+		_container.isA = isA
+		local function playSound(target)
+			target.play()
+		end
+		_container.playSound = playSound
+		local function setNetworkOwner(part, player)
+			part.set_network_owner(player.name)
+		end
+		_container.setNetworkOwner = setNetworkOwner
 	end
 	return {
 		deadlineAdapter = deadlineAdapter,
+	}
+
+end
+
+__modulesFolder["droneMaterialConfig"] = function()
+	local script
+	script = newFakeInstance({"droneMaterialConfig"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local droneMaterialConfig = {
+		selected = {
+			Material = Enum.Material.SmoothPlastic,
+			Color = Color3.fromRGB(255, 255, 255),
+		},
+		normal = {
+			Material = Enum.Material.Glass,
+			Color = Color3.fromRGB(100, 100, 100),
+		},
+	}
+	return {
+		droneMaterialConfig = droneMaterialConfig,
+	}
+
+end
+
+__modulesFolder["getRoot"] = function()
+	local script
+	script = newFakeInstance({"getRoot"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local worldRoot = if isDeadline then get_map_root() else game:GetService("Workspace")
+	return {
+		worldRoot = worldRoot,
 	}
 
 end
@@ -1625,6 +1684,27 @@ __modulesFolder["logger"] = function()
 
 end
 
+__modulesFolder["randomDroneNoise"] = function()
+	local script
+	script = newFakeInstance({"randomDroneNoise"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local random_drone_noise = {
+		defender = { "rbxassetid://131625660349459", "rbxassetid://126734205451508", "rbxassetid://112226499298758" },
+		attacker = { "rbxassetid://131680050661663", "rbxassetid://130659529431639", "rbxassetid://99988554071618" },
+	}
+	return {
+		random_drone_noise = random_drone_noise,
+	}
+
+end
+
 __modulesFolder["robloxAdapter"] = function()
 	local script
 	script = newFakeInstance({"robloxAdapter"})
@@ -1667,6 +1747,18 @@ __modulesFolder["robloxAdapter"] = function()
 			CollectionService:AddTag(target, tag)
 		end
 		_container.addTag = addTag
+		local function isA(target, whatClass)
+			return target:IsA(whatClass)
+		end
+		_container.isA = isA
+		local function playSound(target)
+			target:Play()
+		end
+		_container.playSound = playSound
+		local function setNetworkOwner(part, player)
+			part:SetNetworkOwner(player)
+		end
+		_container.setNetworkOwner = setNetworkOwner
 	end
 	return {
 		robloxAdapter = robloxAdapter,
@@ -1963,6 +2055,27 @@ __modulesFolder["translateTerrainForStructureBonding"] = function()
 
 end
 
+__modulesFolder["voicelines"] = function()
+	local script
+	script = newFakeInstance({"voicelines"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local voicelines = {
+		defender = { "Good morning, SYNO! We are waiting on %s more SYNO until we deploy. Stay cool, stay frosty.", "Eyes up, SYNO. %s personnel still need to link up for deployment. Remember your objective.", "Listen up. Command sent you here with triple the ammunition compared to a mission in Complex for a reason. We need %s more. Do not waste your rounds." },
+		attacker = { "Hold your position. %s of our people still making their way here. We move together.", "%s more. Together, we can do it. They have been bleeding us dry long enough. We finish this.", "Brothers. %s still on route. When they get here, we remind thempoliticians why they should have left us alone." },
+	}
+	return {
+		voicelines = voicelines,
+	}
+
+end
+
 __modulesFolder["ingame"] = function()
 	local script
 	script = newFakeInstance({"ingame"})
@@ -1971,6 +2084,9 @@ __modulesFolder["ingame"] = function()
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	local SpectatorBox = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "spectatorBoxBuilder").SpectatorBox
+	local voicelines = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "voicelines").voicelines
+	local worldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").worldRoot
+	local random_drone_noise = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "randomDroneNoise").random_drone_noise
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -1979,6 +2095,60 @@ __modulesFolder["ingame"] = function()
 	local old_game = nil
 	local __modulesFolder = nil
 	local Log = Logger.new("team_spawner")
+	local function createDrone(player, adapterToUse, DroneFolder, random_drone_noise)
+		local player_name = player.name
+		local drone = adapterToUse.newInstance("Part")
+		local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
+		local raycast_params = query.create_raycast_params()
+		local posToHitStartFrom = Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z))
+		local hit = query.raycast(posToHitStartFrom, Vector3.new(0, -15000, 0), raycast_params)
+		if not hit then
+			Log:error(`Hit was not found when doing drone spawn logic`, `Position from: {posToHitStartFrom}`)
+		end
+		adapterToUse.setProperty(drone, "Size", Vector3.new(1, 0.5, 2))
+		adapterToUse.setProperty(drone, "Anchored", true)
+		adapterToUse.setProperty(drone, "CanCollide", false)
+		adapterToUse.setProperty(drone, "Transparency", 0.5)
+		adapterToUse.setProperty(drone, "Name", player_name)
+		local _adapterToUse = adapterToUse
+		local _result = hit
+		if _result ~= nil then
+			_result = _result.position
+		end
+		local _condition = _result
+		if not _condition then
+			_condition = Vector3.new(0, 2000, 0)
+		end
+		_adapterToUse.setProperty(drone, "CFrame", CFrame.new(_condition))
+		adapterToUse.setProperty(drone, "Position", Vector3.new(0, 900.662, 0))
+		adapterToUse.setProperty(drone, "Material", Enum.Material.Glass)
+		adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100))
+		adapterToUse.addTag(drone, "glass_destructible")
+		adapterToUse.setNetworkOwner(drone, player)
+		adapterToUse.setProperty(drone, "Parent", DroneFolder)
+		local body_gyro = adapterToUse.newInstance("BodyGyro")
+		adapterToUse.setProperty(body_gyro, "MaxTorque", Vector3.new(math.huge, math.huge, math.huge))
+		adapterToUse.setProperty(body_gyro, "CFrame", drone.CFrame)
+		adapterToUse.setProperty(body_gyro, "Name", "CoolGyro")
+		adapterToUse.setProperty(body_gyro, "D", 500)
+		adapterToUse.setProperty(body_gyro, "P", 3000)
+		adapterToUse.setProperty(body_gyro, "Parent", drone)
+		local body_velocity = adapterToUse.newInstance("BodyVelocity")
+		adapterToUse.setProperty(body_velocity, "MaxForce", Vector3.new(math.huge, math.huge, math.huge))
+		adapterToUse.setProperty(body_velocity, "Velocity", Vector3.new(0, 0, 0))
+		adapterToUse.setProperty(body_velocity, "Name", "CoolVelocity")
+		adapterToUse.setProperty(body_velocity, "P", 10000)
+		adapterToUse.setProperty(body_velocity, "Parent", drone)
+		local drone_noise = adapterToUse.newInstance("Sound")
+		adapterToUse.setProperty(drone_noise, "Looped", true)
+		adapterToUse.setProperty(drone_noise, "SoundId", random_drone_noise[math.random(0, #random_drone_noise - 1) + 1])
+		adapterToUse.setProperty(drone_noise, "Volume", 1)
+		adapterToUse.setProperty(drone_noise, "RollOffMaxDistance", 74)
+		adapterToUse.setProperty(drone_noise, "Parent", drone)
+		adapterToUse.playSound(drone_noise)
+		player.fire_client("send_drone_info", player.name)
+		return drone
+	end
 	local function kickStart(adapterToUse, parent)
 		if not isDeadline then
 			return Log:info("Did not execute because the environment is not Deadline.")
@@ -2007,23 +2177,32 @@ __modulesFolder["ingame"] = function()
 			defender = nil,
 			attacker = nil,
 		}
-		local voicelines = {
-			defender = { "Good morning, marines! We are waiting on %s marines to join us until we deploy.", "Remember what you're here for. We are waiting on %s marines to arrive here until we deploy.", "Don't mess up. We need %s more people. We gave you a lot more ammunition than you would normally get from your training in Complex." },
-			attacker = { "Defend the homeland. Wait for our remaining %s members.", "%s members until we teach this shitty government a lesson. Allah is greater.", "Let's go my brothers. %s more." },
+		local ticketsLeft = {
+			defender = 5,
+			attacker = 5,
 		}
+		local lastPingedTime = {}
+		local DroneFolder = adapterToUse.newInstance("Folder")
+		adapterToUse.setProperty(DroneFolder, "Parent", worldRoot)
 		-- const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
 		local offset = Vector3.new(0, 3000, 0)
 		local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
+		local spawnedAmounts = {}
 		on_player_spawned:Connect(function(name)
-			time.wait(1.4)
 			local player = players.get(name)
-			if not player then
+			if not player or not player.is_alive() then
+				return nil
+			end
+			local spawnedAmount = if spawnedAmounts[player.name] ~= nil then spawnedAmounts[player.name] + 1 else 0
+			spawnedAmounts[player.name] = spawnedAmount
+			time.wait(1.4)
+			if spawnedAmount ~= spawnedAmounts[player.name] then
 				return nil
 			end
 			local team = player.get_team()
 			local thisSpectatorBox = spectatorBoxes[team] or SpectatorBox.new(adapterToUse, offset, parent)
 			if not spectatorBoxes[team] then
-				thisSpectatorBox:setSignText("Initialisation")
+				thisSpectatorBox:setSignText("*singing to myself*")
 				local _offset = offset
 				local _vector3 = Vector3.new(200, 0, 0)
 				offset = _offset + _vector3
@@ -2035,10 +2214,9 @@ __modulesFolder["ingame"] = function()
 				local _exp_1 = lastSpawns[team]
 				local _name_1 = player.name
 				table.insert(_exp_1, _name_1)
-				local thisVoicelineStr = voicelines[team][math.random(0, #voicelines[team] - 1) + 1]
-				thisSpectatorBox:setSignText(string.format(thisVoicelineStr, `{lastSpawns.coordination - #lastSpawns[team]}`))
 			end
 			player.set_position(spectatorBoxes[team].centerBoxPosition)
+			player.set_camera_mode("Default")
 			local _exp_1 = lastSpawns[team]
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback = function(playerName, index)
@@ -2053,19 +2231,36 @@ __modulesFolder["ingame"] = function()
 				_callback(_v, _k - 1, _exp_1)
 			end
 			-- ▲ ReadonlyArray.forEach ▲
+			if ticketsLeft[team] <= 0 then
+				-- SET FREE CAMERA
+				local drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team])
+				player.set_custom_camera_mode("DroneFreecam")
+				task.defer(function()
+					while spawnedAmount == spawnedAmounts[player.name] and drone.Parent ~= nil do
+						task.wait(1)
+					end
+					player.respawn()
+				end)
+				return nil
+			end
+			local thisVoicelineStr = voicelines[team][math.random(0, #voicelines[team] - 1) + 1]
+			thisSpectatorBox:setSignText(string.format(thisVoicelineStr, `{lastSpawns.coordination - #lastSpawns[team]} | {ticketsLeft[team]} waves left`))
 			if #lastSpawns[team] < lastSpawns.coordination then
 				return nil
 			end
 			local raycast_params = query.create_raycast_params()
-			local hit = query.raycast(Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z)), Vector3.new(0, -15000, 0), raycast_params)
+			local posToHitStartFrom = Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z))
+			local hit = query.raycast(posToHitStartFrom, Vector3.new(0, -15000, 0), raycast_params)
 			if not hit then
-				return Log:warn("Hit was not found when doing spawn logic")
+				thisSpectatorBox:setSignText("We couldn't find a place to spawn. This is a mapping error, and please report it to the map developers.")
+				return Log:warn(`Hit was not found when doing spawn logic`, `Position from: {posToHitStartFrom}`)
 			end
 			local _position = hit.position
 			local _vector3 = Vector3.new(0, 26, 0)
 			local hitSpawnPos = _position + _vector3
 			-- lastSpawnedPos[team] = hitSpawnPos;
 			Log:info(`Registering team spawn for the following members`, unpack(lastSpawns[team]))
+			ticketsLeft[team] -= 1
 			local _exp_2 = lastSpawns[team]
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback_1 = function(playerName, index)
@@ -2083,12 +2278,71 @@ __modulesFolder["ingame"] = function()
 			end
 			-- ▲ ReadonlyArray.forEach ▲
 			lastSpawns[team] = {}
-			thisSpectatorBox:setSignText(`Zero`)
+			thisSpectatorBox:setSignText(`Good luck on your mission.`)
 			-- Log.info(`Player ${player.name} is arriving`);
 			-- Spawn this guy at a spectator box at Y level -200. You must separate spectator boxes for each team. Each wall in a spectator box is 3 studs thick (prevents penetration for rifles). When a spectator box spawns, it will spawn to the left of the last spectator box. Each spectator box is transparent and glass. The inside is filled with no collide water. There is a metal sign bolted to the middle of one of the walls that will say (if defender) `The mission will start when ${playersLeft} more SYNO arrive.`. If they're attacker, they will say `You will protect the homeland! ${playersLeft} players left until you will spawn`. The text resets in the HERE logic.
 		end)
+		on_player_died:Connect(function(name)
+			local player = players.get(name)
+			if not player then
+				return nil
+			end
+			local spawnedAmount = if spawnedAmounts[player.name] ~= nil then spawnedAmounts[player.name] + 1 else 0
+			spawnedAmounts[player.name] = spawnedAmount
+			local _exp = lastSpawns[player.get_team()]
+			local _exp_1 = lastSpawns[player.get_team()]
+			local _name = player.name
+			local _arg0 = (table.find(_exp_1, _name) or 0) - 1
+			table.remove(_exp, _arg0 + 1)
+		end)
+		on_player_left:Connect(function(name)
+			local player = players.get(name)
+			if not player then
+				return nil
+			end
+			local spawnedAmount = if spawnedAmounts[player.name] ~= nil then spawnedAmounts[player.name] + 1 else 0
+			spawnedAmounts[player.name] = spawnedAmount
+			local _exp = lastSpawns[player.get_team()]
+			local _exp_1 = lastSpawns[player.get_team()]
+			local _name = player.name
+			local _arg0 = (table.find(_exp_1, _name) or 0) - 1
+			table.remove(_exp, _arg0 + 1)
+		end)
+		on_client_event:Connect(function(player, args)
+			if not player then
+				return nil
+			end
+			local eventType = args[1]
+			if not (type(eventType) == "string") then
+				return player.kick()
+			end
+			if eventType == "ping_at_position" then
+				local pingPosition = args[2]
+				if not (typeof(pingPosition) == "Vector3") then
+					return player.kick()
+				end
+				if os.time() - lastPingedTime[player.name] < 3 then
+					return nil
+				end
+				lastPingedTime[player.name] = os.time()
+				local _exp = players.get_all()
+				-- ▼ ReadonlyArray.forEach ▼
+				local _callback = function(thisPlayer, index)
+					thisPlayer.fire_client("player_ping", player.name)
+					if thisPlayer.get_team() ~= player.get_team() then
+						return nil
+					end
+					thisPlayer.fire_client("team_ping", pingPosition)
+				end
+				for _k, _v in _exp do
+					_callback(_v, _k - 1, _exp)
+				end
+				-- ▲ ReadonlyArray.forEach ▲
+			end
+		end)
 	end
 	return {
+		createDrone = createDrone,
 		kickStart = kickStart,
 	}
 
@@ -2118,6 +2372,7 @@ task.defer(function()
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
 	local Tree = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Tree").Tree
 	local kickStart = TS.import(script, game:GetService("ServerScriptService"), "TS", "ingame").kickStart
+	local worldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").worldRoot
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -2265,7 +2520,7 @@ task.defer(function()
 	end
 	local Log = Logger.new("map_generator")
 	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
-	local workspace = if isDeadline then get_map_root() else game:GetService("Workspace")
+	local workspace = worldRoot
 	local PART_SIZE = 100
 	local MAP_SIZE = Vector2.new(10000, 10000)
 	local RESOLUTION = Vector2.new(math.round(MAP_SIZE.X / PART_SIZE), math.round(MAP_SIZE.Y / PART_SIZE))

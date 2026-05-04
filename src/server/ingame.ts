@@ -125,14 +125,14 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             // SET FREE CAMERA
             const drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team]);
             player.set_custom_camera_mode("DroneFreecam");
-            task.defer(function() {
+            task.defer(() => {
                 while (spawnedAmount === spawnedAmounts[player.name] && drone.Parent !== undefined) {task.wait(1);}
                 player.respawn();
             });
             return;
         }
         const thisVoicelineStr: string = voicelines[team][math.random(0, voicelines[team].size() - 1)];
-        thisSpectatorBox.setSignText(string.format(thisVoicelineStr, `${lastSpawns.coordination - lastSpawns[team].size()}`));
+        thisSpectatorBox.setSignText(string.format(thisVoicelineStr, `${lastSpawns.coordination - lastSpawns[team].size()} | ${ticketsLeft[team]} waves left`));
         if (lastSpawns[team].size() < lastSpawns.coordination) return;
         const raycast_params = query.create_raycast_params();
         const posToHitStartFrom = new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z));
