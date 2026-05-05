@@ -3,7 +3,6 @@ import { getWorldRoot } from "shared/getRoot";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 export class PingUIItem {
     adapter: InstanceAdapter;
-
     constructor(adapter: InstanceAdapter) {
         this.adapter = adapter;
     }
@@ -54,7 +53,7 @@ export class PingNoisePlayer {
         this.soundId = soundId || "rbxassetid://17208204604";
     }
     play(): void {
-        const newSound = this.adapter.newInstance("Sound");
+        const newSound = sound ? sound.create() : this.adapter.newInstance("Sound");
         this.adapter.setProperty(newSound, "SoundId", this.soundId);
         this.adapter.playSound(newSound);
         task.delay(newSound.TimeLength, () => {

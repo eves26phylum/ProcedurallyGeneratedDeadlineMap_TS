@@ -2016,6 +2016,40 @@ __modulesFolder["structure"] = function()
 
 end
 
+__modulesFolder["tagsService"] = function()
+	local script
+	script = newFakeInstance({"tagsService"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local _CollectionService = game
+	if _CollectionService ~= nil then
+		_CollectionService = _CollectionService:GetService("CollectionService")
+	end
+	local CollectionService = _CollectionService
+	local tagsService = {}
+	do
+		local _container = tagsService
+		local function getTags()
+			return if CollectionService then CollectionService:GetTags() else tags.get_tags()
+		end
+		_container.getTags = getTags
+		local function getTagged(tag)
+			return if CollectionService then CollectionService:GetTagged(tag) else tags.get_tagged(tag)
+		end
+		_container.getTagged = getTagged
+	end
+	return {
+		tagsService = tagsService,
+	}
+
+end
+
 __modulesFolder["translateTerrainForStructureBonding"] = function()
 	local script
 	script = newFakeInstance({"translateTerrainForStructureBonding"})
@@ -2381,6 +2415,7 @@ __modulesFolder["ingame"] = function()
 					thisPlayer.set_weapon("throwable2", _condition_3, _result_7)
 					thisPlayer.set_position(hitSpawnPos)
 				end
+				thisPlayer.refill_ammo()
 				task.delay(3, function()
 					thisPlayer.set_health(100)
 				end)

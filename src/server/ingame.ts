@@ -189,6 +189,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
                 thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data.name || "Crayon", thisPlayerLoadout.throwable2?.client_data.setup)
                 thisPlayer.set_position(hitSpawnPos);
             }
+            thisPlayer.refill_ammo();
             task.delay(3, () => {
                 thisPlayer.set_health(100);
             })

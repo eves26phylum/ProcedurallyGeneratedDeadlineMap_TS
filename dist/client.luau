@@ -2016,6 +2016,40 @@ __modulesFolder["structure"] = function()
 
 end
 
+__modulesFolder["tagsService"] = function()
+	local script
+	script = newFakeInstance({"tagsService"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local _CollectionService = game
+	if _CollectionService ~= nil then
+		_CollectionService = _CollectionService:GetService("CollectionService")
+	end
+	local CollectionService = _CollectionService
+	local tagsService = {}
+	do
+		local _container = tagsService
+		local function getTags()
+			return if CollectionService then CollectionService:GetTags() else tags.get_tags()
+		end
+		_container.getTags = getTags
+		local function getTagged(tag)
+			return if CollectionService then CollectionService:GetTagged(tag) else tags.get_tagged(tag)
+		end
+		_container.getTagged = getTagged
+	end
+	return {
+		tagsService = tagsService,
+	}
+
+end
+
 __modulesFolder["translateTerrainForStructureBonding"] = function()
 	local script
 	script = newFakeInstance({"translateTerrainForStructureBonding"})
@@ -2181,7 +2215,7 @@ __modulesFolder["pingfactory"] = function()
 			self.soundId = _condition
 		end
 		function PingNoisePlayer:play()
-			local newSound = self.adapter.newInstance("Sound")
+			local newSound = if sound then sound.create() else self.adapter.newInstance("Sound")
 			self.adapter.setProperty(newSound, "SoundId", self.soundId)
 			self.adapter.playSound(newSound)
 			task.delay(newSound.TimeLength, function()

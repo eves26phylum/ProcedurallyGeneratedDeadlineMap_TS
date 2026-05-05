@@ -148,7 +148,6 @@ type WrappedInstance<T extends Instance = Instance> = {
     play: () => void;
     stop: () => void;
     /** Creates a new standalone Sound instance. Valid on Sound instances only. */
-    create: () => WrappedInstance<Instance>;
 
     // ── Lifecycle ────────────────────────────────────────────────
     // docs: sound.clone(), clone.destroy() — dot notation
@@ -479,6 +478,7 @@ declare namespace chat {
 declare namespace sound {
     /** Plays a server-wide guitar riff. A critical gameplay feature. */
     function play_sick_riff(): void;
+    function create(): WrappedInstance<Sound>;
 }
 
 /** Player collection queries. [SERVER] */
