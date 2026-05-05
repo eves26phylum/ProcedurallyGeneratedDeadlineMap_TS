@@ -2264,10 +2264,17 @@ __modulesFolder["ingame"] = function()
 			-- ▲ ReadonlyArray.forEach ▲
 			local drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team])
 			drones[player.name] = drone
-			playerLoadouts[player.name].primary = player.get_weapon_data_from_character("primary")
-			playerLoadouts[player.name].secondary = player.get_weapon_data_from_character("secondary")
-			playerLoadouts[player.name].throwable1 = player.get_weapon_data_from_character("throwable1")
-			playerLoadouts[player.name].throwable2 = player.get_weapon_data_from_character("throwable2")
+			local thisLoadout = playerLoadouts[player.name] or {
+				primary = nil,
+				secondary = nil,
+				throwable1 = nil,
+				throwable2 = nil,
+			}
+			playerLoadouts[player.name] = thisLoadout
+			thisLoadout.primary = player.get_weapon_data_from_character("primary")
+			thisLoadout.secondary = player.get_weapon_data_from_character("secondary")
+			thisLoadout.throwable1 = player.get_weapon_data_from_character("throwable1")
+			thisLoadout.throwable2 = player.get_weapon_data_from_character("throwable2")
 			player.set_weapon("primary", "nothing")
 			player.set_weapon("secondary", "nothing")
 			player.set_weapon("throwable1", "nothing")
@@ -2310,59 +2317,61 @@ __modulesFolder["ingame"] = function()
 				end
 				thisPlayer.set_camera_mode("Default")
 				local thisPlayerLoadout = playerLoadouts[thisPlayer.name]
-				local _result = thisPlayerLoadout.primary
-				if _result ~= nil then
-					_result = _result.client_data.name
+				if thisPlayerLoadout then
+					local _result = thisPlayerLoadout.primary
+					if _result ~= nil then
+						_result = _result.client_data.name
+					end
+					local _condition = _result
+					if not (_condition ~= "" and _condition) then
+						_condition = "M4A1"
+					end
+					local _result_1 = thisPlayerLoadout.primary
+					if _result_1 ~= nil then
+						_result_1 = _result_1.client_data.setup
+					end
+					thisPlayer.set_weapon("primary", _condition, _result_1)
+					local _result_2 = thisPlayerLoadout.secondary
+					if _result_2 ~= nil then
+						_result_2 = _result_2.client_data.name
+					end
+					local _condition_1 = _result_2
+					if not (_condition_1 ~= "" and _condition_1) then
+						_condition_1 = "M4A1"
+					end
+					local _result_3 = thisPlayerLoadout.secondary
+					if _result_3 ~= nil then
+						_result_3 = _result_3.client_data.setup
+					end
+					thisPlayer.set_weapon("secondary", _condition_1, _result_3)
+					local _result_4 = thisPlayerLoadout.throwable1
+					if _result_4 ~= nil then
+						_result_4 = _result_4.client_data.name
+					end
+					local _condition_2 = _result_4
+					if not (_condition_2 ~= "" and _condition_2) then
+						_condition_2 = "Crayon"
+					end
+					local _result_5 = thisPlayerLoadout.throwable1
+					if _result_5 ~= nil then
+						_result_5 = _result_5.client_data.setup
+					end
+					thisPlayer.set_weapon("throwable1", _condition_2, _result_5)
+					local _result_6 = thisPlayerLoadout.throwable2
+					if _result_6 ~= nil then
+						_result_6 = _result_6.client_data.name
+					end
+					local _condition_3 = _result_6
+					if not (_condition_3 ~= "" and _condition_3) then
+						_condition_3 = "Crayon"
+					end
+					local _result_7 = thisPlayerLoadout.throwable2
+					if _result_7 ~= nil then
+						_result_7 = _result_7.client_data.setup
+					end
+					thisPlayer.set_weapon("throwable2", _condition_3, _result_7)
+					thisPlayer.set_position(hitSpawnPos)
 				end
-				local _condition = _result
-				if not (_condition ~= "" and _condition) then
-					_condition = "M4A1"
-				end
-				local _result_1 = thisPlayerLoadout.primary
-				if _result_1 ~= nil then
-					_result_1 = _result_1.client_data.setup
-				end
-				thisPlayer.set_weapon("primary", _condition, _result_1)
-				local _result_2 = thisPlayerLoadout.secondary
-				if _result_2 ~= nil then
-					_result_2 = _result_2.client_data.name
-				end
-				local _condition_1 = _result_2
-				if not (_condition_1 ~= "" and _condition_1) then
-					_condition_1 = "M4A1"
-				end
-				local _result_3 = thisPlayerLoadout.secondary
-				if _result_3 ~= nil then
-					_result_3 = _result_3.client_data.setup
-				end
-				thisPlayer.set_weapon("secondary", _condition_1, _result_3)
-				local _result_4 = thisPlayerLoadout.throwable1
-				if _result_4 ~= nil then
-					_result_4 = _result_4.client_data.name
-				end
-				local _condition_2 = _result_4
-				if not (_condition_2 ~= "" and _condition_2) then
-					_condition_2 = "Crayon"
-				end
-				local _result_5 = thisPlayerLoadout.throwable1
-				if _result_5 ~= nil then
-					_result_5 = _result_5.client_data.setup
-				end
-				thisPlayer.set_weapon("throwable1", _condition_2, _result_5)
-				local _result_6 = thisPlayerLoadout.throwable2
-				if _result_6 ~= nil then
-					_result_6 = _result_6.client_data.name
-				end
-				local _condition_3 = _result_6
-				if not (_condition_3 ~= "" and _condition_3) then
-					_condition_3 = "Crayon"
-				end
-				local _result_7 = thisPlayerLoadout.throwable2
-				if _result_7 ~= nil then
-					_result_7 = _result_7.client_data.setup
-				end
-				thisPlayer.set_weapon("throwable2", _condition_3, _result_7)
-				thisPlayer.set_position(hitSpawnPos)
 				task.delay(3, function()
 					thisPlayer.set_health(100)
 				end)

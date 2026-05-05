@@ -96,7 +96,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         throwable1: CharacterWeaponData | undefined,
         throwable2: CharacterWeaponData | undefined
     }
-    const playerLoadouts: Record<string, PlayerLoadoutData> = {}
+    const playerLoadouts: Record<string, PlayerLoadoutData | undefined> = {}
     const DroneFolder = adapterToUse.newInstance("Folder");
     adapterToUse.setProperty(DroneFolder, "Name", "DronesFolder");
     adapterToUse.setProperty(DroneFolder, "Parent", parent);
@@ -131,10 +131,17 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         
         const drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team]);
         drones[player.name] = drone;
-        playerLoadouts[player.name].primary = player.get_weapon_data_from_character("primary");
-        playerLoadouts[player.name].secondary = player.get_weapon_data_from_character("secondary");
-        playerLoadouts[player.name].throwable1 = player.get_weapon_data_from_character("throwable1");
-        playerLoadouts[player.name].throwable2 = player.get_weapon_data_from_character("throwable2");
+        const thisLoadout = playerLoadouts[player.name] || {
+            primary: undefined,
+            secondary: undefined,
+            throwable1: undefined,
+            throwable2: undefined,
+        };
+        playerLoadouts[player.name] = thisLoadout;
+        thisLoadout.primary = player.get_weapon_data_from_character("primary");
+        thisLoadout.secondary = player.get_weapon_data_from_character("secondary");
+        thisLoadout.throwable1 = player.get_weapon_data_from_character("throwable1");
+        thisLoadout.throwable2 = player.get_weapon_data_from_character("throwable2");
         player.set_weapon("primary", "nothing");
         player.set_weapon("secondary", "nothing");
         player.set_weapon("throwable1", "nothing");
@@ -171,11 +178,13 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             if (!thisPlayer) return;
             thisPlayer.set_camera_mode("Default");
             const thisPlayerLoadout = playerLoadouts[thisPlayer.name];
-            thisPlayer.set_weapon("primary", thisPlayerLoadout.primary?.client_data.name || "M4A1", thisPlayerLoadout.primary?.client_data.setup)
-            thisPlayer.set_weapon("secondary", thisPlayerLoadout.secondary?.client_data.name || "M4A1", thisPlayerLoadout.secondary?.client_data.setup)
-            thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data.name || "Crayon", thisPlayerLoadout.throwable1?.client_data.setup)
-            thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data.name || "Crayon", thisPlayerLoadout.throwable2?.client_data.setup)
-            thisPlayer.set_position(hitSpawnPos);
+            if (thisPlayerLoadout) {
+                thisPlayer.set_weapon("primary", thisPlayerLoadout.primary?.client_data.name || "M4A1", thisPlayerLoadout.primary?.client_data.setup)
+                thisPlayer.set_weapon("secondary", thisPlayerLoadout.secondary?.client_data.name || "M4A1", thisPlayerLoadout.secondary?.client_data.setup)
+                thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data.name || "Crayon", thisPlayerLoadout.throwable1?.client_data.setup)
+                thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data.name || "Crayon", thisPlayerLoadout.throwable2?.client_data.setup)
+                thisPlayer.set_position(hitSpawnPos);
+            }
             task.delay(3, () => {
                 thisPlayer.set_health(100);
             })
