@@ -2315,7 +2315,7 @@ task.defer(function()
 		end
 		if eventType == "team_ping" then
 			local pingPosition = args[2]
-			local _arg0_1 = typeof(pingPosition) == "Vector3"
+			local _arg0_1 = type(pingPosition) == "vector"
 			assert(_arg0_1, "Ping position is not a Vector3")
 			pingFactory:play(pingPosition)
 		end

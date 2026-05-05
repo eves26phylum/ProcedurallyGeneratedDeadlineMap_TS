@@ -2286,13 +2286,13 @@ __modulesFolder["ingame"] = function()
 			player.set_weapon("throwable1", "nothing")
 			player.set_weapon("throwable2", "nothing")
 			player.set_custom_camera_mode("DroneFreecam")
-			task.defer(function()
-				while spawnedAmount == spawnedAmounts[player.name] and drone.Parent ~= nil do
-					task.wait(1)
-				end
-				player.respawn()
-			end)
 			if ticketsLeft[team] <= 0 then
+				task.defer(function()
+					while spawnedAmount == spawnedAmounts[player.name] and drone.Parent ~= nil do
+						task.wait(1)
+					end
+					player.respawn()
+				end)
 				-- SET FREE CAMERA
 				return nil
 			end

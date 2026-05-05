@@ -59,7 +59,7 @@ on_server_event.Connect((args: unknown[]) => {
     }
     if (eventType === "team_ping") {
         const pingPosition = args[1];
-        assert(typeIs(pingPosition, "Vector3"), "Ping position is not a Vector3");
+        assert(typeIs(pingPosition, "vector"), "Ping position is not a Vector3");
         pingFactory.play(pingPosition);
     }
     if (eventType === "send_drone_info") {

@@ -150,11 +150,11 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         player.set_weapon("throwable1", "nothing");
         player.set_weapon("throwable2", "nothing");
         player.set_custom_camera_mode("DroneFreecam");
-        task.defer(() => {
-            while (spawnedAmount === spawnedAmounts[player.name] && drone.Parent !== undefined) {task.wait(1);}
-            player.respawn();
-        });
         if (ticketsLeft[team] <= 0) {
+            task.defer(() => {
+                while (spawnedAmount === spawnedAmounts[player.name] && drone.Parent !== undefined) {task.wait(1);}
+                player.respawn();
+            });
             // SET FREE CAMERA
             return;
         }
