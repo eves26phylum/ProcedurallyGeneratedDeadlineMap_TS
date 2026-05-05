@@ -90,6 +90,13 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
     }
     const drones: Record<string, AnyInstance<BasePart>> = {}
     const lastPingedTime: Record<string, number> = {}
+    type PlayerLoadoutData = {
+        primary: CharacterWeaponData | undefined,
+        secondary: CharacterWeaponData | undefined,
+        throwable1: CharacterWeaponData | undefined,
+        throwable2: CharacterWeaponData | undefined
+    }
+    const playerLoadouts: Record<string, PlayerLoadoutData> = {}
     const DroneFolder = adapterToUse.newInstance("Folder");
     adapterToUse.setProperty(DroneFolder, "Name", "DronesFolder");
     adapterToUse.setProperty(DroneFolder, "Parent", parent);
@@ -124,6 +131,14 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         
         const drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team]);
         drones[player.name] = drone;
+        playerLoadouts[player.name].primary = player.get_weapon_data_from_character("primary");
+        playerLoadouts[player.name].secondary = player.get_weapon_data_from_character("secondary");
+        playerLoadouts[player.name].throwable1 = player.get_weapon_data_from_character("throwable1");
+        playerLoadouts[player.name].throwable2 = player.get_weapon_data_from_character("throwable2");
+        player.set_weapon("primary", "nothing");
+        player.set_weapon("secondary", "nothing");
+        player.set_weapon("throwable1", "nothing");
+        player.set_weapon("throwable2", "nothing");
         player.set_custom_camera_mode("DroneFreecam");
         task.defer(() => {
             while (spawnedAmount === spawnedAmounts[player.name] && drone.Parent !== undefined) {task.wait(1);}
@@ -155,6 +170,11 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             const thisPlayer = players.get(playerName);
             if (!thisPlayer) return;
             thisPlayer.set_camera_mode("Default");
+            const thisPlayerLoadout = playerLoadouts[thisPlayer.name];
+            thisPlayer.set_weapon("primary", thisPlayerLoadout.primary?.client_data.name || "M4A1", thisPlayerLoadout.primary?.client_data.setup)
+            thisPlayer.set_weapon("secondary", thisPlayerLoadout.secondary?.client_data.name || "M4A1", thisPlayerLoadout.secondary?.client_data.setup)
+            thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data.name || "Crayon", thisPlayerLoadout.throwable1?.client_data.setup)
+            thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data.name || "Crayon", thisPlayerLoadout.throwable2?.client_data.setup)
             thisPlayer.set_position(hitSpawnPos);
             task.delay(3, () => {
                 thisPlayer.set_health(100);
@@ -182,13 +202,14 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         spawnedAmounts[player.name] = spawnedAmount;
         lastSpawns[player.get_team()].remove(lastSpawns[player.get_team()].indexOf(player.name));
     })
-    on_client_event.Connect((player: Player, args: unknown[]) => {
+    on_client_event.Connect((playerName: string, args: unknown[]) => {
+        const player = players.get(playerName);
         if (!player) return;
         const eventType = args[0];
         if (!typeIs(eventType, "string")) return player.kick();
         if (eventType === "ping_at_position") {
             const pingPosition = args[1];
-            if (!typeIs(pingPosition, "Vector3")) return player.kick();
+            if (!typeIs(pingPosition, "vector")) return player.kick();
             if (os.time() - lastPingedTime[player.name] < 3) return;
             lastPingedTime[player.name] = os.time();
             players.get_all().forEach((thisPlayer: Player, index: number) => {

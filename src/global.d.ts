@@ -580,9 +580,9 @@ interface Player {
      * Returns weapon data from the player's saved loadout.
      * @param loadoutIndex Zero-based index (0 = first loadout, 1 = second, …).
      */
-    get_weapon_from_loadout: (loadoutIndex: number, slot: WeaponSlot) => LoadoutWeaponData;
+    get_weapon_from_loadout: (loadoutIndex: number, slot: WeaponSlot) => LoadoutWeaponData | undefined;
     /** Returns live weapon data from the character currently present in the world. */
-    get_weapon_data_from_character: (slot: WeaponSlot) => CharacterWeaponData;
+    get_weapon_data_from_character: (slot: WeaponSlot) => CharacterWeaponData | undefined;
 
     // ── Profile & Leaderboard ───────────────────────────────────
     // docs: player.get_profile_stats(), player.get_leaderboard_stats() — dot notation
@@ -691,7 +691,7 @@ declare const on_modfile_loaded: RBXScriptSignal;
 // ── Networking ────────────────────────────────────────────────────
 
 /** Fires on the server when any client calls fire_server(). [SERVER] */
-declare const on_client_event: RBXScriptSignal<(player: Player, args: unknown[]) => void>;
+declare const on_client_event: RBXScriptSignal<(player: string, args: unknown[]) => void>;
 
 /** Sends a remote event payload from this client to the server. [CLIENT] */
 declare function fire_server(...args: unknown[]): void;
