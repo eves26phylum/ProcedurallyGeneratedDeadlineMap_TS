@@ -2129,7 +2129,7 @@ __modulesFolder["ingame"] = function()
 			Log:error(`Hit was not found when doing drone spawn logic`, `Position from: {posToHitStartFrom}`)
 		end
 		adapterToUse.setProperty(drone, "Size", Vector3.new(1, 0.5, 2))
-		adapterToUse.setProperty(drone, "Anchored", true)
+		-- adapterToUse.setProperty(drone, "Anchored", true);
 		adapterToUse.setProperty(drone, "CanCollide", false)
 		adapterToUse.setProperty(drone, "Transparency", 0.5)
 		adapterToUse.setProperty(drone, "Name", player_name)
@@ -2143,7 +2143,12 @@ __modulesFolder["ingame"] = function()
 			_condition = Vector3.new(0, 2000, 0)
 		end
 		_adapterToUse.setProperty(drone, "CFrame", CFrame.new(_condition))
-		adapterToUse.setProperty(drone, "Position", Vector3.new(0, 900.662, 0))
+		local _adapterToUse_1 = adapterToUse
+		local _result_1 = hit
+		if _result_1 ~= nil then
+			_result_1 = _result_1.position
+		end
+		_adapterToUse_1.setProperty(drone, "Position", _result_1)
 		adapterToUse.setProperty(drone, "Material", Enum.Material.Glass)
 		adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100))
 		adapterToUse.addTag(drone, "glass_destructible")

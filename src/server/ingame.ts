@@ -20,12 +20,12 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
         Log.error(`Hit was not found when doing drone spawn logic`, `Position from: ${posToHitStartFrom}`);
     }
     adapterToUse.setProperty(drone, "Size", new Vector3(1, 0.5, 2));
-    adapterToUse.setProperty(drone, "Anchored", true);
+    // adapterToUse.setProperty(drone, "Anchored", true);
     adapterToUse.setProperty(drone, "CanCollide", false);
     adapterToUse.setProperty(drone, "Transparency", 0.5);
     adapterToUse.setProperty(drone, "Name", player_name);
     adapterToUse.setProperty(drone, "CFrame", new CFrame(hit?.position || new Vector3(0, 2000, 0)));
-    adapterToUse.setProperty(drone, "Position", new Vector3(0, 900.662, 0));
+    adapterToUse.setProperty(drone, "Position", hit?.position);
     adapterToUse.setProperty(drone, "Material", Enum.Material.Glass);
     adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100));
     adapterToUse.addTag(drone, "glass_destructible");
