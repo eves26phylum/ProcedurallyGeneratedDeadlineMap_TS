@@ -169,7 +169,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             return Log.warn(`Hit was not found when doing spawn logic`, `Position from: ${posToHitStartFrom}`);
         }
         
-        const hitSpawnPos = hit.position.add(new Vector3(0, 26, 0));
+        const hitSpawnPos = hit.position.add(new Vector3(0, 30, 0));
         // lastSpawnedPos[team] = hitSpawnPos;
         
         Log.info(`Registering team spawn for the following members`, ...lastSpawns[team]);
@@ -187,7 +187,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
                 thisPlayer.set_weapon("secondary", thisPlayerLoadout.secondary?.client_data?.name || "M4A1", thisPlayerLoadout.secondary?.client_data?.setup || "[]")
                 thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data?.name || "Crayon", thisPlayerLoadout.throwable1?.client_data?.setup || "[]")
                 thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data?.name || "Crayon", thisPlayerLoadout.throwable2?.client_data?.setup || "[]")
-                thisPlayer.set_position(hitSpawnPos);
+                thisPlayer.set_position(hitSpawnPos.add(new Vector3(2 * index, 0, 0)));
             }
             thisPlayer.refill_ammo();
             task.delay(3, () => {

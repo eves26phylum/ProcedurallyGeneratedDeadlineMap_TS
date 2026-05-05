@@ -2343,7 +2343,7 @@ __modulesFolder["ingame"] = function()
 				return Log:warn(`Hit was not found when doing spawn logic`, `Position from: {posToHitStartFrom}`)
 			end
 			local _position = hit.position
-			local _vector3 = Vector3.new(0, 26, 0)
+			local _vector3 = Vector3.new(0, 30, 0)
 			local hitSpawnPos = _position + _vector3
 			-- lastSpawnedPos[team] = hitSpawnPos;
 			Log:info(`Registering team spawn for the following members`, unpack(lastSpawns[team]))
@@ -2453,7 +2453,8 @@ __modulesFolder["ingame"] = function()
 						_condition_7 = "[]"
 					end
 					thisPlayer.set_weapon("throwable2", _condition_6, _condition_7)
-					thisPlayer.set_position(hitSpawnPos)
+					local _vector3_1 = Vector3.new(2 * index, 0, 0)
+					thisPlayer.set_position(hitSpawnPos + _vector3_1)
 				end
 				thisPlayer.refill_ammo()
 				task.delay(3, function()
