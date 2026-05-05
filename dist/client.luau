@@ -2370,7 +2370,9 @@ task.defer(function()
 			self.rot_y = 0
 			local _result = hit
 			if _result ~= nil then
-				_result = _result.position
+				local _position = _result.position
+				local _vector3 = Vector3.new(0, 26, 0)
+				_result = _position + _vector3
 			end
 			local _condition = _result
 			if not _condition then

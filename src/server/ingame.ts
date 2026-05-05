@@ -10,8 +10,11 @@ const Log = new Logger("team_spawner"); // log, warn, info, error
 export type lastSpawnType = {coordination: number} & Record<PlayerTeam, string[]>;
 export function createDrone(player: Player, adapterToUse: InstanceAdapter, DroneFolder: AnyInstance<Folder>, random_drone_noise: string[]) {
     const player_name = player.name;
-
     const drone = adapterToUse.newInstance("Part");
+    if (player.is_bot()) {
+        adapterToUse.setProperty(drone, "Anchored", true);
+        return drone;
+    }
     const [firstPos, secondPos] = [new Vector3(-5000, 5000, -5000), new Vector3(5000, 5000, 5000)]
     const raycast_params = query.create_raycast_params();
     const posToHitStartFrom = new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z));
@@ -24,7 +27,7 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
     adapterToUse.setProperty(drone, "CanCollide", false);
     adapterToUse.setProperty(drone, "Transparency", 0.5);
     adapterToUse.setProperty(drone, "Name", player_name);
-    adapterToUse.setProperty(drone, "CFrame", new CFrame(hit?.position || new Vector3(0, 2000, 0)));
+    adapterToUse.setProperty(drone, "CFrame", new CFrame(hit?.position.add(new Vector3(0, 26, 0)) || new Vector3(0, 2000, 0)));
     adapterToUse.setProperty(drone, "Position", hit?.position);
     adapterToUse.setProperty(drone, "Material", Enum.Material.Glass);
     adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100));

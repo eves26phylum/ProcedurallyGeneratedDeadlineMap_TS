@@ -2121,6 +2121,10 @@ __modulesFolder["ingame"] = function()
 	local function createDrone(player, adapterToUse, DroneFolder, random_drone_noise)
 		local player_name = player.name
 		local drone = adapterToUse.newInstance("Part")
+		if player.is_bot() then
+			adapterToUse.setProperty(drone, "Anchored", true)
+			return drone
+		end
 		local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
 		local raycast_params = query.create_raycast_params()
 		local posToHitStartFrom = Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z))
@@ -2136,7 +2140,9 @@ __modulesFolder["ingame"] = function()
 		local _adapterToUse = adapterToUse
 		local _result = hit
 		if _result ~= nil then
-			_result = _result.position
+			local _position = _result.position
+			local _vector3 = Vector3.new(0, 26, 0)
+			_result = _position + _vector3
 		end
 		local _condition = _result
 		if not _condition then

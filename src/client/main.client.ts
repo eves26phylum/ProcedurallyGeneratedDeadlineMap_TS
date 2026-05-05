@@ -102,7 +102,7 @@ class DroneFreecam {
         this.get_head_cframe = get_head_cframe;
         this.rot_x = 0;
         this.rot_y = 0;
-        this.cam_position = new CFrame(hit?.position || new Vector3(0, 2000, 0));
+        this.cam_position = new CFrame(hit?.position.add(new Vector3(0, 26, 0)) || new Vector3(0, 2000, 0));
         this.min_roll = -math.pi / 2 + 0.2;
         this.max_roll = math.pi / 2 - 0.2;
         this.current_velocity = Vector3.zero;
