@@ -1,13 +1,13 @@
-import { deadlineAdapter } from "shared/deadlineAdapter";
 import { AnyInstance, InstanceAdapter } from "shared/definition";
 import { droneMaterialConfig } from "shared/droneMaterialConfig";
 import { isDeadline } from "shared/isDeadline";
 import { Logger } from "shared/logger";
-import { robloxAdapter } from "shared/robloxAdapter";
 import { assign } from "shared/Util";
 import { Ping, PingNoisePlayer, PingUIItem } from "./pingfactory";
+import { adapterToUse } from "shared/adapterToUse";
+import { getWorldRoot } from "shared/getRoot";
+import { deadlineAdapter } from "shared/deadlineAdapter";
 // !deadline-ts.customFinishSector_FinishModulesEnd
-const adapterToUse: InstanceAdapter = isDeadline ? deadlineAdapter : robloxAdapter;
 const Log = new Logger("main");
 class lookListener {
     irisConnection: () => void
@@ -176,3 +176,29 @@ register_camera_mode("DroneFreecam", DroneFreecam);
 
 // -- can also use Default to overwrite default cameramode
 // register_camera_mode("Freecam", CustomFreecam)
+function getRaycastOnCharacterLook(overrideCFrame?: CFrame, distance?: number) { // function only compatible with deadline
+    const camera_cframe = overrideCFrame || framework.character.get_camera_cframe()
+    const raycast_params = query.create_raycast_params();
+    const DroneFolder = deadlineAdapter.findFirstChild(get_map_root(), "DronesFolder");
+    if (!DroneFolder) return;
+    raycast_params.filter_descendants_instances([ DroneFolder ]);
+    raycast_params.filter_type(Enum.RaycastFilterType.Exclude);
+
+    const origin = camera_cframe.Position
+    const direction = camera_cframe.LookVector.mul(distance || 1000)
+
+    const hit = query.raycast(origin, direction, raycast_params)
+
+    if (!hit) return;
+    return hit.position
+}
+const clientInputGroup = new ClientInputGroup();
+clientInputGroup.bind_user_setting(() => { // check
+    if (!dronePart || !dronePart.Parent) return;
+    const raycastPos = getRaycastOnCharacterLook()
+    if (!raycastPos) return;
+    fire_server(
+        "ping_at_position",
+        raycastPos
+    )
+}, InputType.Ended, "lean_left")

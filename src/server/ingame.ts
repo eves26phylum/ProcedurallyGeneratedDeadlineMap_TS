@@ -88,6 +88,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         defender: 5,
         attacker: 5
     }
+    const drones: Record<string, AnyInstance<BasePart>> = {}
     const lastPingedTime: Record<string, number> = {}
     const DroneFolder = adapterToUse.newInstance("Folder");
     adapterToUse.setProperty(DroneFolder, "Parent", parent);
@@ -113,21 +114,22 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             lastSpawns[team].push(player.name);
         }
         player.set_position(spectatorBoxes[team].centerBoxPosition) // replace this with the spectator box pos
-        player.set_camera_mode("Default");
+        // player.set_camera_mode("Default");
 
         lastSpawns[team].forEach((playerName: string, index: number) => { // Remove all players that left
             const thisPlayer = players.get(playerName);
             if (!thisPlayer) lastSpawns[team].remove(index);
         })
         
+        const drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team]);
+        drones[player.name] = drone;
+        player.set_custom_camera_mode("DroneFreecam");
+        task.defer(() => {
+            while (spawnedAmount === spawnedAmounts[player.name] && drone.Parent !== undefined) {task.wait(1);}
+            player.respawn();
+        });
         if (ticketsLeft[team] <= 0) {
             // SET FREE CAMERA
-            const drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team]);
-            player.set_custom_camera_mode("DroneFreecam");
-            task.defer(() => {
-                while (spawnedAmount === spawnedAmounts[player.name] && drone.Parent !== undefined) {task.wait(1);}
-                player.respawn();
-            });
             return;
         }
         const thisVoicelineStr: string = voicelines[team][math.random(0, voicelines[team].size() - 1)];
@@ -151,10 +153,13 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         lastSpawns[team].forEach((playerName: string, index: number) => {
             const thisPlayer = players.get(playerName);
             if (!thisPlayer) return;
+            thisPlayer.set_camera_mode("Default");
             thisPlayer.set_position(hitSpawnPos);
             task.delay(3, () => {
                 thisPlayer.set_health(100);
             })
+            if (!drones[thisPlayer.name]) return;
+            adapterToUse.destroy(drones[thisPlayer.name]);
         })
 
         lastSpawns[team] = [];

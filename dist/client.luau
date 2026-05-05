@@ -1055,6 +1055,28 @@ __modulesFolder["Util"] = function()
 
 end
 
+__modulesFolder["adapterToUse"] = function()
+	local script
+	script = newFakeInstance({"adapterToUse"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
+	local robloxAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "robloxAdapter").robloxAdapter
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
+	return {
+		adapterToUse = adapterToUse,
+	}
+
+end
+
 __modulesFolder["biome"] = function()
 	local script
 	script = newFakeInstance({"biome"})
@@ -2207,16 +2229,15 @@ task.defer(function()
 	script = newFakeInstance({"main"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
 	local droneMaterialConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "droneMaterialConfig").droneMaterialConfig
-	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
-	local robloxAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "robloxAdapter").robloxAdapter
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	local _pingfactory = TS.import(script, script.Parent, "pingfactory")
 	local Ping = _pingfactory.Ping
 	local PingNoisePlayer = _pingfactory.PingNoisePlayer
 	local PingUIItem = _pingfactory.PingUIItem
+	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
+	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -2224,7 +2245,6 @@ task.defer(function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
 	local Log = Logger.new("main")
 	local lookListener
 	do
@@ -2424,5 +2444,38 @@ task.defer(function()
 	-- end
 	-- -- can also use Default to overwrite default cameramode
 	-- register_camera_mode("Freecam", CustomFreecam)
+	local function getRaycastOnCharacterLook(overrideCFrame, distance)
+		local camera_cframe = overrideCFrame or framework.character.get_camera_cframe()
+		local raycast_params = query.create_raycast_params()
+		local DroneFolder = deadlineAdapter.findFirstChild(get_map_root(), "DronesFolder")
+		if not DroneFolder then
+			return nil
+		end
+		raycast_params.filter_descendants_instances({ DroneFolder })
+		raycast_params.filter_type(Enum.RaycastFilterType.Exclude)
+		local origin = camera_cframe.Position
+		local _lookVector = camera_cframe.LookVector
+		local _condition = distance
+		if not (_condition ~= 0 and _condition == _condition and _condition) then
+			_condition = 1000
+		end
+		local direction = _lookVector * _condition
+		local hit = query.raycast(origin, direction, raycast_params)
+		if not hit then
+			return nil
+		end
+		return hit.position
+	end
+	local clientInputGroup = ClientInputGroup.new()
+	clientInputGroup:bind_user_setting(function()
+		if not dronePart or not dronePart.Parent then
+			return nil
+		end
+		local raycastPos = getRaycastOnCharacterLook()
+		if not raycastPos then
+			return nil
+		end
+		fire_server("ping_at_position", raycastPos)
+	end, InputType.Ended, "lean_left")
 
 end)

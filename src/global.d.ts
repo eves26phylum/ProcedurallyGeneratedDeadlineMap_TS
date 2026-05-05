@@ -6,7 +6,7 @@ type CamelToSnake<S extends string> = S extends `${infer T}${infer U}`
 type SnakifyString<S extends string> = CamelToSnake<S> extends `_${infer T}` ? T : CamelToSnake<S>;
 
 type SnakifyKeys<T> = {
-    [K in keyof T as SnakifyString<Extract<K, string>>]: T[K];
+    [K in keyof T]: T[K];
 };
 
 type SnakeRaycastParams = SnakifyKeys<RaycastParams>;
