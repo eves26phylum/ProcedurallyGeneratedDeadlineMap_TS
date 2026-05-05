@@ -76,7 +76,7 @@ export class Ping {
 
     play(position: Vector3): void {
         task.defer(() => {
-            this.noisePlayer.play();
+            task.defer(() => this.noisePlayer.play());
             const part = this.uiItem.build(position);
             task.delay(this.lastingTime, () => {
                 this.uiItem.destroy(part);
