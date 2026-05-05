@@ -2440,7 +2440,7 @@ task.defer(function()
 			local _arg0_1 = CFrame.Angles(self.rot_y, 0, 0)
 			local full_cframe = _exp_1 * _arg0_1
 			body_gyro.CFrame = full_cframe
-			local target_velocity = full_cframe:VectorToWorldSpace(Vector3.new(-self.input.movementX * 16, self.input.movementZ * 4, -self.input.movementY * 16))
+			local target_velocity = full_cframe:VectorToWorldSpace(Vector3.new(-self.input.movementX * 32, self.input.movementZ * 8, -self.input.movementY * 32))
 			-- Lerp toward target so velocity builds and bleeds off like a real drone
 			-- Factor of 6 gives ~160ms ramp time; raise it for a snappier feel
 			self.current_velocity = self.current_velocity:Lerp(target_velocity, math.min(1, delta_time * 3))

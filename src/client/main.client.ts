@@ -124,9 +124,9 @@ class DroneFreecam {
         body_gyro.CFrame = full_cframe
 
         const target_velocity = full_cframe.VectorToWorldSpace(new Vector3(
-            -this.input.movementX * 16,
-            this.input.movementZ * 4,
-            -this.input.movementY * 16
+            -this.input.movementX * 32,
+            this.input.movementZ * 8,
+            -this.input.movementY * 32
         ))
 
         // Lerp toward target so velocity builds and bleeds off like a real drone
