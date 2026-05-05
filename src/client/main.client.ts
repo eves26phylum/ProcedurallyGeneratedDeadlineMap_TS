@@ -31,7 +31,7 @@ class lookListener {
     }
 }
 const look = new lookListener();
-const pingFactory = new Ping(new PingUIItem(adapterToUse), new PingNoisePlayer(adapterToUse), 0.25)
+const pingFactory = new Ping(new PingUIItem(adapterToUse), new PingNoisePlayer(adapterToUse), 10)
 let [body_gyro, body_velocity, dronePart]: [AnyInstance<BodyGyro>?, AnyInstance<BodyVelocity>?, AnyInstance<BasePart>?] = [];
 on_server_event.Connect((args: unknown[]) => {
     const eventType: unknown = args[0];
@@ -185,7 +185,7 @@ function getRaycastOnCharacterLook(overrideCFrame?: CFrame, distance?: number) {
     raycast_params.filter_type(Enum.RaycastFilterType.Exclude);
 
     const origin = camera_cframe.Position
-    const direction = camera_cframe.LookVector.mul(distance || 1000)
+    const direction = camera_cframe.LookVector.mul(distance || 15000)
 
     const hit = query.raycast(origin, direction, raycast_params)
 

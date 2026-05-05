@@ -1,7 +1,7 @@
 import { InstanceAdapter, AnyInstance } from "./definition";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
-const INTERIOR_DIMENSION = 9;
+const INTERIOR_DIMENSION = 18;
 const WALL_THICKNESS = 3;
 const EXTERIOR_DIMENSION = INTERIOR_DIMENSION + WALL_THICKNESS * 2;
 const INTERIOR_HALF_DIMENSION = INTERIOR_DIMENSION / 2;

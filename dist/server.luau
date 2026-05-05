@@ -1828,7 +1828,7 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	local INTERIOR_DIMENSION = 9
+	local INTERIOR_DIMENSION = 18
 	local WALL_THICKNESS = 3
 	local EXTERIOR_DIMENSION = INTERIOR_DIMENSION + WALL_THICKNESS * 2
 	local INTERIOR_HALF_DIMENSION = INTERIOR_DIMENSION / 2
@@ -2297,7 +2297,7 @@ __modulesFolder["ingame"] = function()
 				return nil
 			end
 			local thisVoicelineStr = voicelines[team][math.random(0, #voicelines[team] - 1) + 1]
-			thisSpectatorBox:setSignText(string.format(thisVoicelineStr, `{lastSpawns.coordination - #lastSpawns[team]} | {ticketsLeft[team]} waves left`))
+			thisSpectatorBox:setSignText(string.format(`{thisVoicelineStr} | {ticketsLeft[team]} waves left`, `{lastSpawns.coordination - #lastSpawns[team]}`))
 			if #lastSpawns[team] < lastSpawns.coordination then
 				return nil
 			end
@@ -2319,6 +2319,9 @@ __modulesFolder["ingame"] = function()
 			local _callback_1 = function(playerName, index)
 				local thisPlayer = players.get(playerName)
 				if not thisPlayer then
+					return nil
+				end
+				if thisPlayer.is_bot() then
 					return nil
 				end
 				thisPlayer.set_camera_mode("Default")

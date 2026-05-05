@@ -1828,7 +1828,7 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	local INTERIOR_DIMENSION = 9
+	local INTERIOR_DIMENSION = 18
 	local WALL_THICKNESS = 3
 	local EXTERIOR_DIMENSION = INTERIOR_DIMENSION + WALL_THICKNESS * 2
 	local INTERIOR_HALF_DIMENSION = INTERIOR_DIMENSION / 2
@@ -2280,7 +2280,7 @@ task.defer(function()
 		end
 	end
 	local look = lookListener.new()
-	local pingFactory = Ping.new(PingUIItem.new(adapterToUse), PingNoisePlayer.new(adapterToUse), 0.25)
+	local pingFactory = Ping.new(PingUIItem.new(adapterToUse), PingNoisePlayer.new(adapterToUse), 10)
 	local _binding = {}
 	local body_gyro = _binding[1]
 	local body_velocity = _binding[2]
@@ -2459,7 +2459,7 @@ task.defer(function()
 		local _lookVector = camera_cframe.LookVector
 		local _condition = distance
 		if not (_condition ~= 0 and _condition == _condition and _condition) then
-			_condition = 1000
+			_condition = 15000
 		end
 		local direction = _lookVector * _condition
 		local hit = query.raycast(origin, direction, raycast_params)

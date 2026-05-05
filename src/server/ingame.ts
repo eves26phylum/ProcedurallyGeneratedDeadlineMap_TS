@@ -159,7 +159,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             return;
         }
         const thisVoicelineStr: string = voicelines[team][math.random(0, voicelines[team].size() - 1)];
-        thisSpectatorBox.setSignText(string.format(thisVoicelineStr, `${lastSpawns.coordination - lastSpawns[team].size()} | ${ticketsLeft[team]} waves left`));
+        thisSpectatorBox.setSignText(string.format(`${thisVoicelineStr} | ${ticketsLeft[team]} waves left`, `${lastSpawns.coordination - lastSpawns[team].size()}`));
         if (lastSpawns[team].size() < lastSpawns.coordination) return;
         const raycast_params = query.create_raycast_params();
         const posToHitStartFrom = new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z));
@@ -179,6 +179,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         lastSpawns[team].forEach((playerName: string, index: number) => {
             const thisPlayer = players.get(playerName);
             if (!thisPlayer) return;
+            if (thisPlayer.is_bot()) return;
             thisPlayer.set_camera_mode("Default");
             const thisPlayerLoadout = playerLoadouts[thisPlayer.name];
             if (thisPlayerLoadout) {
