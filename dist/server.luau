@@ -2429,7 +2429,12 @@ __modulesFolder["ingame"] = function()
 				if not (type(pingPosition) == "vector") then
 					return player.kick()
 				end
-				if os.time() - lastPingedTime[player.name] < 3 then
+				local _condition = lastPingedTime[player.name]
+				if not (_condition ~= 0 and _condition == _condition and _condition) then
+					_condition = 0
+				end
+				local thisLastPingedTime = _condition
+				if os.time() - thisLastPingedTime < 3 then
 					return nil
 				end
 				lastPingedTime[player.name] = os.time()

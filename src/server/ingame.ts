@@ -89,7 +89,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         attacker: 5
     }
     const drones: Record<string, AnyInstance<BasePart>> = {}
-    const lastPingedTime: Record<string, number> = {}
+    const lastPingedTime: Record<string, number | undefined> = {}
     type PlayerLoadoutData = {
         primary: CharacterWeaponData | undefined,
         secondary: CharacterWeaponData | undefined,
@@ -219,7 +219,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         if (eventType === "ping_at_position") {
             const pingPosition = args[1];
             if (!typeIs(pingPosition, "vector")) return player.kick();
-            if (os.time() - lastPingedTime[player.name] < 3) return;
+            const thisLastPingedTime = lastPingedTime[player.name] || 0;
+            if (os.time() - thisLastPingedTime < 3) return;
             lastPingedTime[player.name] = os.time();
             players.get_all().forEach((thisPlayer: Player, index: number) => {
                 thisPlayer.fire_client("player_ping", player.name);
