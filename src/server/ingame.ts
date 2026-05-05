@@ -91,6 +91,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
     const drones: Record<string, AnyInstance<BasePart>> = {}
     const lastPingedTime: Record<string, number> = {}
     const DroneFolder = adapterToUse.newInstance("Folder");
+    adapterToUse.setProperty(DroneFolder, "Name", "DronesFolder");
     adapterToUse.setProperty(DroneFolder, "Parent", parent);
     // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
     let offset = new Vector3(0, 3000, 0);

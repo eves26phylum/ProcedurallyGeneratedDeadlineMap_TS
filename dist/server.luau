@@ -2212,6 +2212,7 @@ __modulesFolder["ingame"] = function()
 		local drones = {}
 		local lastPingedTime = {}
 		local DroneFolder = adapterToUse.newInstance("Folder")
+		adapterToUse.setProperty(DroneFolder, "Name", "DronesFolder")
 		adapterToUse.setProperty(DroneFolder, "Parent", parent)
 		-- const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
 		local offset = Vector3.new(0, 3000, 0)
