@@ -29,8 +29,8 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
     adapterToUse.setProperty(drone, "Material", Enum.Material.Glass);
     adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100));
     adapterToUse.addTag(drone, "glass_destructible");
-    adapterToUse.setNetworkOwner(drone, player);
     adapterToUse.setProperty(drone, "Parent", DroneFolder);
+    adapterToUse.setNetworkOwner(drone, player);
 
     const body_gyro = adapterToUse.newInstance("BodyGyro");
     adapterToUse.setProperty(body_gyro, "MaxTorque", new Vector3(math.huge, math.huge, math.huge));
