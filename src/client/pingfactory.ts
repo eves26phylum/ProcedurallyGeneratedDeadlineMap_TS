@@ -56,6 +56,7 @@ export class PingNoisePlayer {
         const newSound = sound ? sound.create() : this.adapter.newInstance("Sound");
         this.adapter.setProperty(newSound, "SoundId", this.soundId);
         this.adapter.playSound(newSound);
+        if (newSound.TimeLength === 0) task.wait(1);
         task.delay(newSound.TimeLength, () => {
             this.adapter.destroy(newSound);
         })
