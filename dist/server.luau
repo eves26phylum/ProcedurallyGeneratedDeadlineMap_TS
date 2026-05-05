@@ -1914,7 +1914,7 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 			local interiorSignPart = self.adapter.newInstance("Part", self.boxModel)
 			self.adapter.setProperty(interiorSignPart, "Name", "InteriorSign")
 			self.adapter.setProperty(interiorSignPart, "Size", Vector3.new(SIGN_WIDTH, SIGN_HEIGHT, SIGN_DEPTH))
-			self.adapter.setProperty(interiorSignPart, "CFrame", CFrame.new(center.X, center.Y, center.Z - INTERIOR_HALF_DIMENSION + SIGN_DEPTH / 2))
+			self.adapter.setProperty(interiorSignPart, "CFrame", CFrame.new(center.X, center.Y, center.Z))
 			self.adapter.setProperty(interiorSignPart, "Material", Enum.Material.Metal)
 			self.adapter.setProperty(interiorSignPart, "Color", SIGN_SURFACE_COLOR)
 			self.adapter.setProperty(interiorSignPart, "Anchored", true)
@@ -2363,7 +2363,10 @@ __modulesFolder["ingame"] = function()
 				if thisPlayerLoadout then
 					local _result = thisPlayerLoadout.primary
 					if _result ~= nil then
-						_result = _result.client_data.name
+						_result = _result.client_data
+						if _result ~= nil then
+							_result = _result.name
+						end
 					end
 					local _condition = _result
 					if not (_condition ~= "" and _condition) then
@@ -2371,48 +2374,85 @@ __modulesFolder["ingame"] = function()
 					end
 					local _result_1 = thisPlayerLoadout.primary
 					if _result_1 ~= nil then
-						_result_1 = _result_1.client_data.setup
+						_result_1 = _result_1.client_data
+						if _result_1 ~= nil then
+							_result_1 = _result_1.setup
+						end
 					end
-					thisPlayer.set_weapon("primary", _condition, _result_1)
+					local _condition_1 = _result_1
+					if not (_condition_1 ~= "" and _condition_1) then
+						_condition_1 = "[]"
+					end
+					thisPlayer.set_weapon("primary", _condition, _condition_1)
 					local _result_2 = thisPlayerLoadout.secondary
 					if _result_2 ~= nil then
-						_result_2 = _result_2.client_data.name
+						_result_2 = _result_2.client_data
+						if _result_2 ~= nil then
+							_result_2 = _result_2.name
+						end
 					end
-					local _condition_1 = _result_2
-					if not (_condition_1 ~= "" and _condition_1) then
-						_condition_1 = "M4A1"
+					local _condition_2 = _result_2
+					if not (_condition_2 ~= "" and _condition_2) then
+						_condition_2 = "M4A1"
 					end
 					local _result_3 = thisPlayerLoadout.secondary
 					if _result_3 ~= nil then
-						_result_3 = _result_3.client_data.setup
+						_result_3 = _result_3.client_data
+						if _result_3 ~= nil then
+							_result_3 = _result_3.setup
+						end
 					end
-					thisPlayer.set_weapon("secondary", _condition_1, _result_3)
+					local _condition_3 = _result_3
+					if not (_condition_3 ~= "" and _condition_3) then
+						_condition_3 = "[]"
+					end
+					thisPlayer.set_weapon("secondary", _condition_2, _condition_3)
 					local _result_4 = thisPlayerLoadout.throwable1
 					if _result_4 ~= nil then
-						_result_4 = _result_4.client_data.name
+						_result_4 = _result_4.client_data
+						if _result_4 ~= nil then
+							_result_4 = _result_4.name
+						end
 					end
-					local _condition_2 = _result_4
-					if not (_condition_2 ~= "" and _condition_2) then
-						_condition_2 = "Crayon"
+					local _condition_4 = _result_4
+					if not (_condition_4 ~= "" and _condition_4) then
+						_condition_4 = "Crayon"
 					end
 					local _result_5 = thisPlayerLoadout.throwable1
 					if _result_5 ~= nil then
-						_result_5 = _result_5.client_data.setup
+						_result_5 = _result_5.client_data
+						if _result_5 ~= nil then
+							_result_5 = _result_5.setup
+						end
 					end
-					thisPlayer.set_weapon("throwable1", _condition_2, _result_5)
+					local _condition_5 = _result_5
+					if not (_condition_5 ~= "" and _condition_5) then
+						_condition_5 = "[]"
+					end
+					thisPlayer.set_weapon("throwable1", _condition_4, _condition_5)
 					local _result_6 = thisPlayerLoadout.throwable2
 					if _result_6 ~= nil then
-						_result_6 = _result_6.client_data.name
+						_result_6 = _result_6.client_data
+						if _result_6 ~= nil then
+							_result_6 = _result_6.name
+						end
 					end
-					local _condition_3 = _result_6
-					if not (_condition_3 ~= "" and _condition_3) then
-						_condition_3 = "Crayon"
+					local _condition_6 = _result_6
+					if not (_condition_6 ~= "" and _condition_6) then
+						_condition_6 = "Crayon"
 					end
 					local _result_7 = thisPlayerLoadout.throwable2
 					if _result_7 ~= nil then
-						_result_7 = _result_7.client_data.setup
+						_result_7 = _result_7.client_data
+						if _result_7 ~= nil then
+							_result_7 = _result_7.setup
+						end
 					end
-					thisPlayer.set_weapon("throwable2", _condition_3, _result_7)
+					local _condition_7 = _result_7
+					if not (_condition_7 ~= "" and _condition_7) then
+						_condition_7 = "[]"
+					end
+					thisPlayer.set_weapon("throwable2", _condition_6, _condition_7)
 					thisPlayer.set_position(hitSpawnPos)
 				end
 				thisPlayer.refill_ammo()

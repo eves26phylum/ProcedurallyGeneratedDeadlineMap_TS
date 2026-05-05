@@ -89,7 +89,8 @@ export class SpectatorBox {
         this.adapter.setProperty(interiorSignPart, "CFrame", new CFrame(
             center.X,
             center.Y,
-            center.Z - INTERIOR_HALF_DIMENSION + SIGN_DEPTH / 2
+            // center.Z - INTERIOR_HALF_DIMENSION + SIGN_DEPTH / 2
+            center.Z
         ));
         this.adapter.setProperty(interiorSignPart, "Material", Enum.Material.Metal);
         this.adapter.setProperty(interiorSignPart, "Color", SIGN_SURFACE_COLOR);

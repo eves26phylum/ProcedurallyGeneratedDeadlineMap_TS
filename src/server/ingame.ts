@@ -183,10 +183,10 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             thisPlayer.set_camera_mode("Default");
             const thisPlayerLoadout = playerLoadouts[thisPlayer.name];
             if (thisPlayerLoadout) {
-                thisPlayer.set_weapon("primary", thisPlayerLoadout.primary?.client_data.name || "M4A1", thisPlayerLoadout.primary?.client_data.setup)
-                thisPlayer.set_weapon("secondary", thisPlayerLoadout.secondary?.client_data.name || "M4A1", thisPlayerLoadout.secondary?.client_data.setup)
-                thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data.name || "Crayon", thisPlayerLoadout.throwable1?.client_data.setup)
-                thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data.name || "Crayon", thisPlayerLoadout.throwable2?.client_data.setup)
+                thisPlayer.set_weapon("primary", thisPlayerLoadout.primary?.client_data?.name || "M4A1", thisPlayerLoadout.primary?.client_data?.setup || "[]")
+                thisPlayer.set_weapon("secondary", thisPlayerLoadout.secondary?.client_data?.name || "M4A1", thisPlayerLoadout.secondary?.client_data?.setup || "[]")
+                thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data?.name || "Crayon", thisPlayerLoadout.throwable1?.client_data?.setup || "[]")
+                thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data?.name || "Crayon", thisPlayerLoadout.throwable2?.client_data?.setup || "[]")
                 thisPlayer.set_position(hitSpawnPos);
             }
             thisPlayer.refill_ammo();
