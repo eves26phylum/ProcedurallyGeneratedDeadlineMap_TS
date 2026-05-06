@@ -98,8 +98,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         attacker: undefined
     }
     const ticketsLeft: Record<PlayerTeam, number> = {
-        defender: 10,
-        attacker: 10
+        defender: 100,
+        attacker: 100
     }
     const drones: Record<string, AnyInstance<BasePart>> = {}
     const lastPingedTime: Record<string, number | undefined> = {}
@@ -194,7 +194,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         
         Log.info(`Registering team spawn for the following members`, ...lastSpawns[team]);
 
-        ticketsLeft[team] -= 1;
+        ticketsLeft[team] -= lastSpawns[team].size();
         
         lastSpawns[team].forEach((playerName: string, index: number) => {
             const thisPlayer = players.get(playerName);
