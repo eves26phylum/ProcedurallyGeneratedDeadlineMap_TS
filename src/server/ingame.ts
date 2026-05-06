@@ -195,24 +195,27 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
                 return Log.warn(`Hit was not found when doing spawn logic`, `Position from: ${posToHitStartFrom}`);
             }
             const hitSpawnPos = hit.position.add(new Vector3(0, 26, 0));
-            if (thisPlayer.is_bot()) return;
             if (drones[thisPlayer.name]) adapterToUse.destroy(drones[thisPlayer.name]);
             thisPlayer.set_camera_mode("Default");
-            const thisPlayerLoadout = playerLoadouts[thisPlayer.name];
-            if (thisPlayerLoadout) {
-                thisPlayer.set_weapon("primary", thisPlayerLoadout.primary?.client_data?.name || "M4A1", thisPlayerLoadout.primary?.client_data?.setup || "[]")
-                thisPlayer.set_weapon("secondary", thisPlayerLoadout.secondary?.client_data?.name || "M4A1", thisPlayerLoadout.secondary?.client_data?.setup || "[]")
-                thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data?.name || "Crayon", thisPlayerLoadout.throwable1?.client_data?.setup || "[]")
-                thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data?.name || "Crayon", thisPlayerLoadout.throwable2?.client_data?.setup || "[]")
-            }
             thisPlayer.set_position(hitSpawnPos);
-            thisPlayer.refill_ammo();
             task.delay(3, () => {
                 for (let i = 0; i < 20; i++) { 
                     thisPlayer.set_health(100); 
                     task.wait(1);
                 }
             })
+            if (thisPlayer.is_bot()) return;
+            const thisPlayerLoadout = playerLoadouts[thisPlayer.name] || {
+                primary: undefined,
+                secondary: undefined,
+                throwable1: undefined,
+                throwable2: undefined
+            };
+            thisPlayer.set_weapon("primary", thisPlayerLoadout.primary?.client_data?.name || "M4A1", thisPlayerLoadout.primary?.client_data?.setup || "[]")
+            thisPlayer.set_weapon("secondary", thisPlayerLoadout.secondary?.client_data?.name || "M4A1", thisPlayerLoadout.secondary?.client_data?.setup || "[]")
+            thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data?.name || "Crayon", thisPlayerLoadout.throwable1?.client_data?.setup || "[]")
+            thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data?.name || "Crayon", thisPlayerLoadout.throwable2?.client_data?.setup || "[]")
+            thisPlayer.refill_ammo();
             task.delay(0.1, () => {
                thisPlayer.fire_client("reset_velocity");
             });

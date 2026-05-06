@@ -2458,116 +2458,119 @@ __modulesFolder["ingame"] = function()
 				local _position = hit.position
 				local _vector3_1 = Vector3.new(0, 26, 0)
 				local hitSpawnPos = _position + _vector3_1
-				if thisPlayer.is_bot() then
-					return nil
-				end
 				if drones[thisPlayer.name] then
 					adapterToUse.destroy(drones[thisPlayer.name])
 				end
 				thisPlayer.set_camera_mode("Default")
-				local thisPlayerLoadout = playerLoadouts[thisPlayer.name]
-				if thisPlayerLoadout then
-					local _result = thisPlayerLoadout.primary
-					if _result ~= nil then
-						_result = _result.client_data
-						if _result ~= nil then
-							_result = _result.name
-						end
-					end
-					local _condition_1 = _result
-					if not (_condition_1 ~= "" and _condition_1) then
-						_condition_1 = "M4A1"
-					end
-					local _result_1 = thisPlayerLoadout.primary
-					if _result_1 ~= nil then
-						_result_1 = _result_1.client_data
-						if _result_1 ~= nil then
-							_result_1 = _result_1.setup
-						end
-					end
-					local _condition_2 = _result_1
-					if not (_condition_2 ~= "" and _condition_2) then
-						_condition_2 = "[]"
-					end
-					thisPlayer.set_weapon("primary", _condition_1, _condition_2)
-					local _result_2 = thisPlayerLoadout.secondary
-					if _result_2 ~= nil then
-						_result_2 = _result_2.client_data
-						if _result_2 ~= nil then
-							_result_2 = _result_2.name
-						end
-					end
-					local _condition_3 = _result_2
-					if not (_condition_3 ~= "" and _condition_3) then
-						_condition_3 = "M4A1"
-					end
-					local _result_3 = thisPlayerLoadout.secondary
-					if _result_3 ~= nil then
-						_result_3 = _result_3.client_data
-						if _result_3 ~= nil then
-							_result_3 = _result_3.setup
-						end
-					end
-					local _condition_4 = _result_3
-					if not (_condition_4 ~= "" and _condition_4) then
-						_condition_4 = "[]"
-					end
-					thisPlayer.set_weapon("secondary", _condition_3, _condition_4)
-					local _result_4 = thisPlayerLoadout.throwable1
-					if _result_4 ~= nil then
-						_result_4 = _result_4.client_data
-						if _result_4 ~= nil then
-							_result_4 = _result_4.name
-						end
-					end
-					local _condition_5 = _result_4
-					if not (_condition_5 ~= "" and _condition_5) then
-						_condition_5 = "Crayon"
-					end
-					local _result_5 = thisPlayerLoadout.throwable1
-					if _result_5 ~= nil then
-						_result_5 = _result_5.client_data
-						if _result_5 ~= nil then
-							_result_5 = _result_5.setup
-						end
-					end
-					local _condition_6 = _result_5
-					if not (_condition_6 ~= "" and _condition_6) then
-						_condition_6 = "[]"
-					end
-					thisPlayer.set_weapon("throwable1", _condition_5, _condition_6)
-					local _result_6 = thisPlayerLoadout.throwable2
-					if _result_6 ~= nil then
-						_result_6 = _result_6.client_data
-						if _result_6 ~= nil then
-							_result_6 = _result_6.name
-						end
-					end
-					local _condition_7 = _result_6
-					if not (_condition_7 ~= "" and _condition_7) then
-						_condition_7 = "Crayon"
-					end
-					local _result_7 = thisPlayerLoadout.throwable2
-					if _result_7 ~= nil then
-						_result_7 = _result_7.client_data
-						if _result_7 ~= nil then
-							_result_7 = _result_7.setup
-						end
-					end
-					local _condition_8 = _result_7
-					if not (_condition_8 ~= "" and _condition_8) then
-						_condition_8 = "[]"
-					end
-					thisPlayer.set_weapon("throwable2", _condition_7, _condition_8)
-				end
 				thisPlayer.set_position(hitSpawnPos)
-				thisPlayer.refill_ammo()
 				task.delay(3, function()
 					for i = 0, 19 do
 						thisPlayer.set_health(100)
 						task.wait(1)
 					end
 				end)
+				if thisPlayer.is_bot() then
+					return nil
+				end
+				local thisPlayerLoadout = playerLoadouts[thisPlayer.name] or {
+					primary = nil,
+					secondary = nil,
+					throwable1 = nil,
+					throwable2 = nil,
+				}
+				local _result = thisPlayerLoadout.primary
+				if _result ~= nil then
+					_result = _result.client_data
+					if _result ~= nil then
+						_result = _result.name
+					end
+				end
+				local _condition_1 = _result
+				if not (_condition_1 ~= "" and _condition_1) then
+					_condition_1 = "M4A1"
+				end
+				local _result_1 = thisPlayerLoadout.primary
+				if _result_1 ~= nil then
+					_result_1 = _result_1.client_data
+					if _result_1 ~= nil then
+						_result_1 = _result_1.setup
+					end
+				end
+				local _condition_2 = _result_1
+				if not (_condition_2 ~= "" and _condition_2) then
+					_condition_2 = "[]"
+				end
+				thisPlayer.set_weapon("primary", _condition_1, _condition_2)
+				local _result_2 = thisPlayerLoadout.secondary
+				if _result_2 ~= nil then
+					_result_2 = _result_2.client_data
+					if _result_2 ~= nil then
+						_result_2 = _result_2.name
+					end
+				end
+				local _condition_3 = _result_2
+				if not (_condition_3 ~= "" and _condition_3) then
+					_condition_3 = "M4A1"
+				end
+				local _result_3 = thisPlayerLoadout.secondary
+				if _result_3 ~= nil then
+					_result_3 = _result_3.client_data
+					if _result_3 ~= nil then
+						_result_3 = _result_3.setup
+					end
+				end
+				local _condition_4 = _result_3
+				if not (_condition_4 ~= "" and _condition_4) then
+					_condition_4 = "[]"
+				end
+				thisPlayer.set_weapon("secondary", _condition_3, _condition_4)
+				local _result_4 = thisPlayerLoadout.throwable1
+				if _result_4 ~= nil then
+					_result_4 = _result_4.client_data
+					if _result_4 ~= nil then
+						_result_4 = _result_4.name
+					end
+				end
+				local _condition_5 = _result_4
+				if not (_condition_5 ~= "" and _condition_5) then
+					_condition_5 = "Crayon"
+				end
+				local _result_5 = thisPlayerLoadout.throwable1
+				if _result_5 ~= nil then
+					_result_5 = _result_5.client_data
+					if _result_5 ~= nil then
+						_result_5 = _result_5.setup
+					end
+				end
+				local _condition_6 = _result_5
+				if not (_condition_6 ~= "" and _condition_6) then
+					_condition_6 = "[]"
+				end
+				thisPlayer.set_weapon("throwable1", _condition_5, _condition_6)
+				local _result_6 = thisPlayerLoadout.throwable2
+				if _result_6 ~= nil then
+					_result_6 = _result_6.client_data
+					if _result_6 ~= nil then
+						_result_6 = _result_6.name
+					end
+				end
+				local _condition_7 = _result_6
+				if not (_condition_7 ~= "" and _condition_7) then
+					_condition_7 = "Crayon"
+				end
+				local _result_7 = thisPlayerLoadout.throwable2
+				if _result_7 ~= nil then
+					_result_7 = _result_7.client_data
+					if _result_7 ~= nil then
+						_result_7 = _result_7.setup
+					end
+				end
+				local _condition_8 = _result_7
+				if not (_condition_8 ~= "" and _condition_8) then
+					_condition_8 = "[]"
+				end
+				thisPlayer.set_weapon("throwable2", _condition_7, _condition_8)
+				thisPlayer.refill_ammo()
 				task.delay(0.1, function()
 					thisPlayer.fire_client("reset_velocity")
 				end)
