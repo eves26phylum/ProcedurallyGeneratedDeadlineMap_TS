@@ -102,7 +102,14 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         throwable1: CharacterWeaponData | undefined,
         throwable2: CharacterWeaponData | undefined
     }
+    type TeamState = {
+        voiceline?: string
+    }
     const playerLoadouts: Record<string, PlayerLoadoutData | undefined> = {}
+    const tempState: Record<PlayerTeam, TeamState> = {
+        defender: {},
+        attacker: {}
+    }
     const DroneFolder = adapterToUse.newInstance("Folder");
     adapterToUse.setProperty(DroneFolder, "Name", "DronesFolder");
     adapterToUse.setProperty(DroneFolder, "Parent", parent);
@@ -167,7 +174,9 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         });
         const thisVoicelineStr: string = voicelines[team][math.random(0, voicelines[team].size() - 1)];
         const coordAmount = math.min(lastSpawns.coordination, players.get_all().size());
-        thisSpectatorBox.setSignText(string.format(`${thisVoicelineStr} | ${ticketsLeft[team]} waves left`, `${coordAmount - lastSpawns[team].size()}`));
+        const teamVoiceline = tempState[team].voiceline || string.format(`${thisVoicelineStr} | ${ticketsLeft[team]} waves left`, `${coordAmount - lastSpawns[team].size()}`);
+        tempState[team].voiceline = teamVoiceline;
+        thisSpectatorBox.setSignText(teamVoiceline);
         if (lastSpawns[team].size() < coordAmount) return;
         const raycast_params = query.create_raycast_params();
         const posToHitStartFrom = new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z));
@@ -210,6 +219,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         })
 
         lastSpawns[team] = [];
+        delete tempState[team].voiceline;
         thisSpectatorBox.setSignText(`Good luck on your mission.`);
         // Log.info(`Player ${player.name} is arriving`);
         // Spawn this guy at a spectator box at Y level -200. You must separate spectator boxes for each team. Each wall in a spectator box is 3 studs thick (prevents penetration for rifles). When a spectator box spawns, it will spawn to the left of the last spectator box. Each spectator box is transparent and glass. The inside is filled with no collide water. There is a metal sign bolted to the middle of one of the walls that will say (if defender) `The mission will start when ${playersLeft} more SYNO arrive.`. If they're attacker, they will say `You will protect the homeland! ${playersLeft} players left until you will spawn`. The text resets in the HERE logic.
