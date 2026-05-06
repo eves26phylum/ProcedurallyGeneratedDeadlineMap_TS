@@ -213,7 +213,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
                     task.wait(1);
                 }
             })
-            task.delay(0.3, () => {
+            task.delay(0.1, () => {
                thisPlayer.fire_client("reset_velocity");
             });
         })

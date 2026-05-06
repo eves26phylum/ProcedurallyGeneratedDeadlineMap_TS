@@ -2568,7 +2568,7 @@ __modulesFolder["ingame"] = function()
 						task.wait(1)
 					end
 				end)
-				task.delay(0.3, function()
+				task.delay(0.1, function()
 					thisPlayer.fire_client("reset_velocity")
 				end)
 			end
