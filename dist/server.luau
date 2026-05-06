@@ -2349,14 +2349,6 @@ __modulesFolder["ingame"] = function()
 			end
 			local raycast_params = query.create_raycast_params()
 			local posToHitStartFrom = Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z))
-			local hit = query.raycast(posToHitStartFrom, Vector3.new(0, -15000, 0), raycast_params)
-			if not hit then
-				thisSpectatorBox:setSignText("We couldn't find a place to spawn. This is a mapping error, and please report it to the map developers.")
-				return Log:warn(`Hit was not found when doing spawn logic`, `Position from: {posToHitStartFrom}`)
-			end
-			local _position = hit.position
-			local _vector3 = Vector3.new(0, 30, 0)
-			local hitSpawnPos = _position + _vector3
 			-- lastSpawnedPos[team] = hitSpawnPos;
 			Log:info(`Registering team spawn for the following members`, unpack(lastSpawns[team]))
 			ticketsLeft[team] -= 1
@@ -2367,6 +2359,15 @@ __modulesFolder["ingame"] = function()
 				if not thisPlayer then
 					return nil
 				end
+				local _vector3 = Vector3.new(4 * index, 0, 0)
+				local hit = query.raycast(posToHitStartFrom + _vector3, Vector3.new(0, -15000, 0), raycast_params)
+				if not hit then
+					thisSpectatorBox:setSignText("We couldn't find a place to spawn. This is a mapping error, and please report it to the map developers.")
+					return Log:warn(`Hit was not found when doing spawn logic`, `Position from: {posToHitStartFrom}`)
+				end
+				local _position = hit.position
+				local _vector3_1 = Vector3.new(0, 26, 0)
+				local hitSpawnPos = _position + _vector3_1
 				if thisPlayer.is_bot() then
 					return nil
 				end
@@ -2469,8 +2470,7 @@ __modulesFolder["ingame"] = function()
 					end
 					thisPlayer.set_weapon("throwable2", _condition_6, _condition_7)
 				end
-				local _vector3_1 = Vector3.new(2 * index, 0, 0)
-				thisPlayer.set_position(hitSpawnPos + _vector3_1)
+				thisPlayer.set_position(hitSpawnPos)
 				thisPlayer.refill_ammo()
 				task.delay(3, function()
 					thisPlayer.set_health(100)
