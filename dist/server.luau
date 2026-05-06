@@ -2339,8 +2339,9 @@ __modulesFolder["ingame"] = function()
 				end
 			end)
 			local thisVoicelineStr = voicelines[team][math.random(0, #voicelines[team] - 1) + 1]
-			thisSpectatorBox:setSignText(string.format(`{thisVoicelineStr} | {ticketsLeft[team]} waves left`, `{lastSpawns.coordination - #lastSpawns[team]}`))
-			if #lastSpawns[team] < lastSpawns.coordination then
+			local coordAmount = math.min(lastSpawns.coordination, #players.get_all())
+			thisSpectatorBox:setSignText(string.format(`{thisVoicelineStr} | {ticketsLeft[team]} waves left`, `{coordAmount - #lastSpawns[team]}`))
+			if #lastSpawns[team] < coordAmount then
 				return nil
 			end
 			local raycast_params = query.create_raycast_params()

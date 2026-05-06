@@ -163,8 +163,9 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             if (spawnedAmount === spawnedAmounts[player.name]) player.set_camera_mode("Default");
         });
         const thisVoicelineStr: string = voicelines[team][math.random(0, voicelines[team].size() - 1)];
-        thisSpectatorBox.setSignText(string.format(`${thisVoicelineStr} | ${ticketsLeft[team]} waves left`, `${lastSpawns.coordination - lastSpawns[team].size()}`));
-        if (lastSpawns[team].size() < lastSpawns.coordination) return;
+        const coordAmount = math.min(lastSpawns.coordination, players.get_all().size());
+        thisSpectatorBox.setSignText(string.format(`${thisVoicelineStr} | ${ticketsLeft[team]} waves left`, `${coordAmount - lastSpawns[team].size()}`));
+        if (lastSpawns[team].size() < coordAmount) return;
         const raycast_params = query.create_raycast_params();
         const posToHitStartFrom = new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z));
         const hit = query.raycast(posToHitStartFrom, new Vector3(0, -15000, 0), raycast_params)
