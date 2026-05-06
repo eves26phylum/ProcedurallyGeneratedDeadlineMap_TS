@@ -4,8 +4,9 @@ import { isDeadline } from "shared/isDeadline";
 import { SpectatorBox } from "shared/spectatorBoxBuilder";
 import { voicelines } from "shared/voicelines";
 import { random_drone_noise } from "shared/randomDroneNoise";
+import { generateId } from "shared/generateId";
+import { alphabetArray } from "shared/alphabetArray";
 // !deadline-ts.customFinishSector_FinishModulesEnd
-
 const Log = new Logger("team_spawner"); // log, warn, info, error
 export type lastSpawnType = {coordination: number} & Record<PlayerTeam, string[]>;
 export function createDrone(player: Player, adapterToUse: InstanceAdapter, DroneFolder: AnyInstance<Folder>, random_drone_noise: string[]) {
@@ -22,11 +23,12 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
     if (!hit) {
         Log.error(`Hit was not found when doing drone spawn logic`, `Position from: ${posToHitStartFrom}`);
     }
+    const generatedName = player_name + generateId(26, alphabetArray);
     adapterToUse.setProperty(drone, "Size", new Vector3(1, 0.5, 2));
     // adapterToUse.setProperty(drone, "Anchored", true);
     adapterToUse.setProperty(drone, "CanCollide", false);
     adapterToUse.setProperty(drone, "Transparency", 0.5);
-    adapterToUse.setProperty(drone, "Name", player_name);
+    adapterToUse.setProperty(drone, "Name", generatedName);
     adapterToUse.setProperty(drone, "CFrame", new CFrame(hit?.position.add(new Vector3(0, 26, 0)) || new Vector3(0, 2000, 0)));
     adapterToUse.setProperty(drone, "Position", hit?.position);
     adapterToUse.setProperty(drone, "Material", Enum.Material.Glass);
@@ -58,7 +60,7 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
     adapterToUse.setProperty(drone_noise, "Parent", drone);
     adapterToUse.playSound(drone_noise);
 
-    player.fire_client("send_drone_info", player.name);
+    player.fire_client("send_drone_info", generatedName);
     return drone;
 }
 export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
@@ -202,6 +204,9 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
                     task.wait(1);
                 }
             })
+            task.delay(0.3, () => {
+               thisPlayer.fire_client("reset_velocity");
+            });
         })
 
         lastSpawns[team] = [];

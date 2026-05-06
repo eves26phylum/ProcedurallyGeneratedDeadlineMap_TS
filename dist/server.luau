@@ -1077,6 +1077,24 @@ __modulesFolder["adapterToUse"] = function()
 
 end
 
+__modulesFolder["alphabetArray"] = function()
+	local script
+	script = newFakeInstance({"alphabetArray"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local alphabetArray = string.split("abcdefghijklmnopqrstuvwxyz", "")
+	return {
+		alphabetArray = alphabetArray,
+	}
+
+end
+
 __modulesFolder["biome"] = function()
 	local script
 	script = newFakeInstance({"biome"})
@@ -1546,6 +1564,64 @@ __modulesFolder["droneMaterialConfig"] = function()
 	}
 	return {
 		droneMaterialConfig = droneMaterialConfig,
+	}
+
+end
+
+__modulesFolder["generateId"] = function()
+	local script
+	script = newFakeInstance({"generateId"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local getRandomItemInArray = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRandomItemInArray").getRandomItemInArray
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local function generateId(length, charMap)
+		local result = ""
+		do
+			local i = 0
+			local _shouldIncrement = false
+			while true do
+				if _shouldIncrement then
+					i += 1
+				else
+					_shouldIncrement = true
+				end
+				if not (i < length) then
+					break
+				end
+				result = result .. getRandomItemInArray(charMap)
+			end
+		end
+		return result
+	end
+	return {
+		generateId = generateId,
+	}
+
+end
+
+__modulesFolder["getRandomItemInArray"] = function()
+	local script
+	script = newFakeInstance({"getRandomItemInArray"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function getRandomItemInArray(array)
+		return array[math.random(0, #array - 1) + 1]
+	end
+	return {
+		getRandomItemInArray = getRandomItemInArray,
 	}
 
 end
@@ -2144,6 +2220,8 @@ __modulesFolder["ingame"] = function()
 	local SpectatorBox = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "spectatorBoxBuilder").SpectatorBox
 	local voicelines = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "voicelines").voicelines
 	local random_drone_noise = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "randomDroneNoise").random_drone_noise
+	local generateId = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "generateId").generateId
+	local alphabetArray = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "alphabetArray").alphabetArray
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -2166,11 +2244,12 @@ __modulesFolder["ingame"] = function()
 		if not hit then
 			Log:error(`Hit was not found when doing drone spawn logic`, `Position from: {posToHitStartFrom}`)
 		end
+		local generatedName = player_name .. generateId(26, alphabetArray)
 		adapterToUse.setProperty(drone, "Size", Vector3.new(1, 0.5, 2))
 		-- adapterToUse.setProperty(drone, "Anchored", true);
 		adapterToUse.setProperty(drone, "CanCollide", false)
 		adapterToUse.setProperty(drone, "Transparency", 0.5)
-		adapterToUse.setProperty(drone, "Name", player_name)
+		adapterToUse.setProperty(drone, "Name", generatedName)
 		local _adapterToUse = adapterToUse
 		local _result = hit
 		if _result ~= nil then
@@ -2214,7 +2293,7 @@ __modulesFolder["ingame"] = function()
 		adapterToUse.setProperty(drone_noise, "RollOffMaxDistance", 74)
 		adapterToUse.setProperty(drone_noise, "Parent", drone)
 		adapterToUse.playSound(drone_noise)
-		player.fire_client("send_drone_info", player.name)
+		player.fire_client("send_drone_info", generatedName)
 		return drone
 	end
 	local function kickStart(adapterToUse, parent)
@@ -2478,6 +2557,9 @@ __modulesFolder["ingame"] = function()
 						thisPlayer.set_health(100)
 						task.wait(1)
 					end
+				end)
+				task.delay(0.3, function()
+					thisPlayer.fire_client("reset_velocity")
 				end)
 			end
 			for _k, _v in _exp_2 do

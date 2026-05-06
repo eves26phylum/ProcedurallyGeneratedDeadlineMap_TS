@@ -181,7 +181,7 @@ type WrappedInstance<T extends Instance = Instance> = {
     // docs: dot notation throughout instance examples
     is_in_workspace: () => boolean;
     find_first_child: (childName: string, recursive?: boolean) => WrappedInstance | undefined;
-    is_a: (childName: string) => boolean;
+    is_a: <C extends keyof Instances>(childName: C) => this is WrappedInstance<Instances[C]>;
     is_descendant_of: (instance: WrappedInstance) => boolean;
 
 } & StripRobloxBrands<InstanceProperties<T>>
@@ -619,6 +619,8 @@ declare namespace spawning {
      * @returns The bot's assigned display name.
      */
     function bot(): string;
+    /** i'd start watching out if i were you */
+    function monster(): string;
 }
 
 /**

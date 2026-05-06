@@ -1077,6 +1077,24 @@ __modulesFolder["adapterToUse"] = function()
 
 end
 
+__modulesFolder["alphabetArray"] = function()
+	local script
+	script = newFakeInstance({"alphabetArray"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local alphabetArray = string.split("abcdefghijklmnopqrstuvwxyz", "")
+	return {
+		alphabetArray = alphabetArray,
+	}
+
+end
+
 __modulesFolder["biome"] = function()
 	local script
 	script = newFakeInstance({"biome"})
@@ -1546,6 +1564,64 @@ __modulesFolder["droneMaterialConfig"] = function()
 	}
 	return {
 		droneMaterialConfig = droneMaterialConfig,
+	}
+
+end
+
+__modulesFolder["generateId"] = function()
+	local script
+	script = newFakeInstance({"generateId"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local getRandomItemInArray = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRandomItemInArray").getRandomItemInArray
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local function generateId(length, charMap)
+		local result = ""
+		do
+			local i = 0
+			local _shouldIncrement = false
+			while true do
+				if _shouldIncrement then
+					i += 1
+				else
+					_shouldIncrement = true
+				end
+				if not (i < length) then
+					break
+				end
+				result = result .. getRandomItemInArray(charMap)
+			end
+		end
+		return result
+	end
+	return {
+		generateId = generateId,
+	}
+
+end
+
+__modulesFolder["getRandomItemInArray"] = function()
+	local script
+	script = newFakeInstance({"getRandomItemInArray"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function getRandomItemInArray(array)
+		return array[math.random(0, #array - 1) + 1]
+	end
+	return {
+		getRandomItemInArray = getRandomItemInArray,
 	}
 
 end
@@ -2382,6 +2458,17 @@ task.defer(function()
 			body_velocity = bodyVelocityCanidate
 			dronePart = drone
 			dronePart.CanCollide = true
+		end
+		if eventType == "reset_velocity" then
+			local thisPlayerCharacter = get_chars_root().find_first_child("StarterCharacter")
+			if not thisPlayerCharacter then
+				return nil
+			end
+			local thisHumanoidRootPart = thisPlayerCharacter.find_first_child("humanoid_root_part")
+			local _arg0_1 = thisHumanoidRootPart and thisHumanoidRootPart.is_a("BasePart")
+			assert(_arg0_1, "Humanoid Root Part is not a BasePart...")
+			thisHumanoidRootPart.AssemblyLinearVelocity = Vector3.zero
+			thisHumanoidRootPart.AssemblyAngularVelocity = Vector3.zero
 		end
 	end)
 	local DroneFreecam
