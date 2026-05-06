@@ -6,10 +6,13 @@ import { voicelines } from "shared/voicelines";
 import { random_drone_noise } from "shared/randomDroneNoise";
 import { generateId } from "shared/generateId";
 import { alphabetArray } from "shared/alphabetArray";
+import { droneMaterialConfig } from "shared/droneMaterialConfig";
+import { assign } from "shared/Util";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 const Log = new Logger("team_spawner"); // log, warn, info, error
+const droneNames: Record<string, string | undefined> = {};
 export type lastSpawnType = {coordination: number} & Record<PlayerTeam, string[]>;
-export function createDrone(player: Player, adapterToUse: InstanceAdapter, DroneFolder: AnyInstance<Folder>, random_drone_noise: string[]) {
+export function createDrone(player: Player, adapterToUse: InstanceAdapter, DroneFolder: AnyInstance<Folder>, random_drone_noise: string[], customProperties: Partial<InstanceProperties<Part>>) {
     const player_name = player.name;
     const drone = adapterToUse.newInstance("Part");
     if (player.is_bot()) {
@@ -31,11 +34,15 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
     adapterToUse.setProperty(drone, "Name", generatedName);
     adapterToUse.setProperty(drone, "CFrame", new CFrame(hit?.position.add(new Vector3(0, 26, 0)) || new Vector3(0, 2000, 0)));
     adapterToUse.setProperty(drone, "Position", hit?.position);
-    adapterToUse.setProperty(drone, "Material", Enum.Material.Glass);
-    adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100));
+    // adapterToUse.setProperty(drone, "Material", Enum.Material.Glass);
+    // adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100));
+    const clonedNormal = assign({}, droneMaterialConfig.normal);
+    const appliedNormal = assign(clonedNormal, customProperties);
+    assign(drone, appliedNormal, adapterToUse.setProperty);
     adapterToUse.addTag(drone, "glass_destructible");
     adapterToUse.setProperty(drone, "Parent", DroneFolder);
     adapterToUse.setNetworkOwner(drone, player);
+    droneNames[player_name] = generatedName;
 
     const body_gyro = adapterToUse.newInstance("BodyGyro");
     adapterToUse.setProperty(body_gyro, "MaxTorque", new Vector3(math.huge, math.huge, math.huge));
@@ -142,7 +149,10 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             if (!thisPlayer) lastSpawns[team].remove(index);
         })
         if (drones[player.name]) adapterToUse.destroy(drones[player.name]);
-        const drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team]);
+        const customProps: Partial<InstanceProperties<Part>> = ticketsLeft[team] <= 0 ? {
+            Color: Color3.fromRGB(255, 0, 0)
+        } : {};
+        const drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team], customProps);
         drones[player.name] = drone;
         const thisLoadout = playerLoadouts[player.name] || {
             primary: undefined,
@@ -253,7 +263,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             if (os.time() - thisLastPingedTime < 3) return;
             lastPingedTime[player.name] = os.time();
             players.get_all().forEach((thisPlayer: Player, index: number) => {
-                thisPlayer.fire_client("player_ping", player.name);
+                thisPlayer.fire_client("player_ping", droneNames[player.name] || "fucking dog");
                 if (thisPlayer.get_team() !== player.get_team()) return;
                 thisPlayer.fire_client("team_ping", pingPosition);
             })

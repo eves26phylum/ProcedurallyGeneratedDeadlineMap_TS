@@ -2222,6 +2222,8 @@ __modulesFolder["ingame"] = function()
 	local random_drone_noise = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "randomDroneNoise").random_drone_noise
 	local generateId = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "generateId").generateId
 	local alphabetArray = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "alphabetArray").alphabetArray
+	local droneMaterialConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "droneMaterialConfig").droneMaterialConfig
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -2230,7 +2232,8 @@ __modulesFolder["ingame"] = function()
 	local old_game = nil
 	local __modulesFolder = nil
 	local Log = Logger.new("team_spawner")
-	local function createDrone(player, adapterToUse, DroneFolder, random_drone_noise)
+	local droneNames = {}
+	local function createDrone(player, adapterToUse, DroneFolder, random_drone_noise, customProperties)
 		local player_name = player.name
 		local drone = adapterToUse.newInstance("Part")
 		if player.is_bot() then
@@ -2268,11 +2271,15 @@ __modulesFolder["ingame"] = function()
 			_result_1 = _result_1.position
 		end
 		_adapterToUse_1.setProperty(drone, "Position", _result_1)
-		adapterToUse.setProperty(drone, "Material", Enum.Material.Glass)
-		adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100))
+		-- adapterToUse.setProperty(drone, "Material", Enum.Material.Glass);
+		-- adapterToUse.setProperty(drone, "Color", Color3.fromRGB(100, 100, 100));
+		local clonedNormal = assign({}, droneMaterialConfig.normal)
+		local appliedNormal = assign(clonedNormal, customProperties)
+		assign(drone, appliedNormal, adapterToUse.setProperty)
 		adapterToUse.addTag(drone, "glass_destructible")
 		adapterToUse.setProperty(drone, "Parent", DroneFolder)
 		adapterToUse.setNetworkOwner(drone, player)
+		droneNames[player_name] = generatedName
 		local body_gyro = adapterToUse.newInstance("BodyGyro")
 		adapterToUse.setProperty(body_gyro, "MaxTorque", Vector3.new(math.huge, math.huge, math.huge))
 		adapterToUse.setProperty(body_gyro, "CFrame", drone.CFrame)
@@ -2389,7 +2396,10 @@ __modulesFolder["ingame"] = function()
 			if drones[player.name] then
 				adapterToUse.destroy(drones[player.name])
 			end
-			local drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team])
+			local customProps = if ticketsLeft[team] <= 0 then {
+				Color = Color3.fromRGB(255, 0, 0),
+			} else {}
+			local drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team], customProps)
 			drones[player.name] = drone
 			local thisLoadout = playerLoadouts[player.name] or {
 				primary = nil,
@@ -2637,7 +2647,12 @@ __modulesFolder["ingame"] = function()
 				local _exp = players.get_all()
 				-- ▼ ReadonlyArray.forEach ▼
 				local _callback = function(thisPlayer, index)
-					thisPlayer.fire_client("player_ping", player.name)
+					local _thisPlayer = thisPlayer
+					local _condition_1 = droneNames[player.name]
+					if not (_condition_1 ~= "" and _condition_1) then
+						_condition_1 = "fucking dog"
+					end
+					_thisPlayer.fire_client("player_ping", _condition_1)
 					if thisPlayer.get_team() ~= player.get_team() then
 						return nil
 					end
