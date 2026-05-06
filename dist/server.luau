@@ -2333,8 +2333,8 @@ __modulesFolder["ingame"] = function()
 			attacker = nil,
 		}
 		local ticketsLeft = {
-			defender = 10,
-			attacker = 10,
+			defender = 100,
+			attacker = 100,
 		}
 		local drones = {}
 		local lastPingedTime = {}
@@ -2451,7 +2451,7 @@ __modulesFolder["ingame"] = function()
 			local posToHitStartFrom = Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z))
 			-- lastSpawnedPos[team] = hitSpawnPos;
 			Log:info(`Registering team spawn for the following members`, unpack(lastSpawns[team]))
-			ticketsLeft[team] -= 1
+			ticketsLeft[team] -= #lastSpawns[team]
 			local _exp_2 = lastSpawns[team]
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback_1 = function(playerName, index)
