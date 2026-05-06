@@ -76,6 +76,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
     sharedvars.plr_base_weight = 1.7
     sharedvars.sv_gravity = 20
     sharedvars.plr_recoil = 0.5
+    sharedvars.ac_sound_kill = false
     sharedvars.ff_field_voicelines = true
     map.set_time(10)
     const lastSpawns: lastSpawnType = {
@@ -196,7 +197,10 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             thisPlayer.set_position(hitSpawnPos);
             thisPlayer.refill_ammo();
             task.delay(3, () => {
-                thisPlayer.set_health(100);
+                for (let i = 0; i < 20; i++) { 
+                    thisPlayer.set_health(100); 
+                    task.wait(1);
+                }
             })
         })
 

@@ -2234,6 +2234,7 @@ __modulesFolder["ingame"] = function()
 		sharedvars.plr_base_weight = 1.7
 		sharedvars.sv_gravity = 20
 		sharedvars.plr_recoil = 0.5
+		sharedvars.ac_sound_kill = false
 		sharedvars.ff_field_voicelines = true
 		map.set_time(10)
 		local lastSpawns = {
@@ -2473,7 +2474,10 @@ __modulesFolder["ingame"] = function()
 				thisPlayer.set_position(hitSpawnPos)
 				thisPlayer.refill_ammo()
 				task.delay(3, function()
-					thisPlayer.set_health(100)
+					for i = 0, 19 do
+						thisPlayer.set_health(100)
+						task.wait(1)
+					end
 				end)
 			end
 			for _k, _v in _exp_2 do
