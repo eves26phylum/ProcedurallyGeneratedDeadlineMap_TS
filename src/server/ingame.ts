@@ -131,7 +131,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             const thisPlayer = players.get(playerName);
             if (!thisPlayer) lastSpawns[team].remove(index);
         })
-        
+        if (drones[player.name]) adapterToUse.destroy(drones[player.name]);
         const drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team]);
         drones[player.name] = drone;
         const thisLoadout = playerLoadouts[player.name] || {

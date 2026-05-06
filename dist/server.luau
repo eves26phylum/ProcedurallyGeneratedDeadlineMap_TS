@@ -2302,6 +2302,9 @@ __modulesFolder["ingame"] = function()
 				_callback(_v, _k - 1, _exp_1)
 			end
 			-- ▲ ReadonlyArray.forEach ▲
+			if drones[player.name] then
+				adapterToUse.destroy(drones[player.name])
+			end
 			local drone = createDrone(player, adapterToUse, DroneFolder, random_drone_noise[team])
 			drones[player.name] = drone
 			local thisLoadout = playerLoadouts[player.name] or {
