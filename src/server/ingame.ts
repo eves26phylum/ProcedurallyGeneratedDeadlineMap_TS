@@ -168,13 +168,6 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         if (lastSpawns[team].size() < coordAmount) return;
         const raycast_params = query.create_raycast_params();
         const posToHitStartFrom = new Vector3(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z));
-        const hit = query.raycast(posToHitStartFrom, new Vector3(0, -15000, 0), raycast_params)
-        if (!hit) {
-            thisSpectatorBox.setSignText("We couldn't find a place to spawn. This is a mapping error, and please report it to the map developers.");
-            return Log.warn(`Hit was not found when doing spawn logic`, `Position from: ${posToHitStartFrom}`);
-        }
-        
-        const hitSpawnPos = hit.position.add(new Vector3(0, 30, 0));
         // lastSpawnedPos[team] = hitSpawnPos;
         
         Log.info(`Registering team spawn for the following members`, ...lastSpawns[team]);
@@ -184,6 +177,12 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         lastSpawns[team].forEach((playerName: string, index: number) => {
             const thisPlayer = players.get(playerName);
             if (!thisPlayer) return;
+            const hit = query.raycast(posToHitStartFrom.add(new Vector3(4 * index, 0, 0)), new Vector3(0, -15000, 0), raycast_params)
+            if (!hit) {
+                thisSpectatorBox.setSignText("We couldn't find a place to spawn. This is a mapping error, and please report it to the map developers.");
+                return Log.warn(`Hit was not found when doing spawn logic`, `Position from: ${posToHitStartFrom}`);
+            }
+            const hitSpawnPos = hit.position.add(new Vector3(0, 26, 0));
             if (thisPlayer.is_bot()) return;
             if (drones[thisPlayer.name]) adapterToUse.destroy(drones[thisPlayer.name]);
             thisPlayer.set_camera_mode("Default");
@@ -194,7 +193,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
                 thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data?.name || "Crayon", thisPlayerLoadout.throwable1?.client_data?.setup || "[]")
                 thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data?.name || "Crayon", thisPlayerLoadout.throwable2?.client_data?.setup || "[]")
             }
-            thisPlayer.set_position(hitSpawnPos.add(new Vector3(2 * index, 0, 0)));
+            thisPlayer.set_position(hitSpawnPos);
             thisPlayer.refill_ammo();
             task.delay(3, () => {
                 thisPlayer.set_health(100);
