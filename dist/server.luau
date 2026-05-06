@@ -2333,8 +2333,8 @@ __modulesFolder["ingame"] = function()
 			attacker = nil,
 		}
 		local ticketsLeft = {
-			defender = 5,
-			attacker = 5,
+			defender = 10,
+			attacker = 10,
 		}
 		local drones = {}
 		local lastPingedTime = {}

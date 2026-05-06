@@ -98,8 +98,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         attacker: undefined
     }
     const ticketsLeft: Record<PlayerTeam, number> = {
-        defender: 5,
-        attacker: 5
+        defender: 10,
+        attacker: 10
     }
     const drones: Record<string, AnyInstance<BasePart>> = {}
     const lastPingedTime: Record<string, number | undefined> = {}
