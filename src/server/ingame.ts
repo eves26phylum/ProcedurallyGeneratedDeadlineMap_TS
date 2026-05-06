@@ -158,6 +158,10 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             // SET FREE CAMERA
             return;
         }
+        task.defer(() => {
+            while (drone.Parent !== undefined) {task.wait(1);}
+            if (spawnedAmount === spawnedAmounts[player.name]) player.set_camera_mode("Default");
+        });
         const thisVoicelineStr: string = voicelines[team][math.random(0, voicelines[team].size() - 1)];
         thisSpectatorBox.setSignText(string.format(`${thisVoicelineStr} | ${ticketsLeft[team]} waves left`, `${lastSpawns.coordination - lastSpawns[team].size()}`));
         if (lastSpawns[team].size() < lastSpawns.coordination) return;
@@ -180,6 +184,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             const thisPlayer = players.get(playerName);
             if (!thisPlayer) return;
             if (thisPlayer.is_bot()) return;
+            if (drones[thisPlayer.name]) adapterToUse.destroy(drones[thisPlayer.name]);
             thisPlayer.set_camera_mode("Default");
             const thisPlayerLoadout = playerLoadouts[thisPlayer.name];
             if (thisPlayerLoadout) {
@@ -187,14 +192,12 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
                 thisPlayer.set_weapon("secondary", thisPlayerLoadout.secondary?.client_data?.name || "M4A1", thisPlayerLoadout.secondary?.client_data?.setup || "[]")
                 thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data?.name || "Crayon", thisPlayerLoadout.throwable1?.client_data?.setup || "[]")
                 thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data?.name || "Crayon", thisPlayerLoadout.throwable2?.client_data?.setup || "[]")
-                thisPlayer.set_position(hitSpawnPos.add(new Vector3(2 * index, 0, 0)));
             }
+            thisPlayer.set_position(hitSpawnPos.add(new Vector3(2 * index, 0, 0)));
             thisPlayer.refill_ammo();
             task.delay(3, () => {
                 thisPlayer.set_health(100);
             })
-            if (!drones[thisPlayer.name]) return;
-            adapterToUse.destroy(drones[thisPlayer.name]);
         })
 
         lastSpawns[team] = [];

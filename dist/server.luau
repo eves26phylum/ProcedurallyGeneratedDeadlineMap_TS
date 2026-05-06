@@ -2330,6 +2330,14 @@ __modulesFolder["ingame"] = function()
 				-- SET FREE CAMERA
 				return nil
 			end
+			task.defer(function()
+				while drone.Parent ~= nil do
+					task.wait(1)
+				end
+				if spawnedAmount == spawnedAmounts[player.name] then
+					player.set_camera_mode("Default")
+				end
+			end)
 			local thisVoicelineStr = voicelines[team][math.random(0, #voicelines[team] - 1) + 1]
 			thisSpectatorBox:setSignText(string.format(`{thisVoicelineStr} | {ticketsLeft[team]} waves left`, `{lastSpawns.coordination - #lastSpawns[team]}`))
 			if #lastSpawns[team] < lastSpawns.coordination then
@@ -2357,6 +2365,9 @@ __modulesFolder["ingame"] = function()
 				end
 				if thisPlayer.is_bot() then
 					return nil
+				end
+				if drones[thisPlayer.name] then
+					adapterToUse.destroy(drones[thisPlayer.name])
 				end
 				thisPlayer.set_camera_mode("Default")
 				local thisPlayerLoadout = playerLoadouts[thisPlayer.name]
@@ -2453,17 +2464,13 @@ __modulesFolder["ingame"] = function()
 						_condition_7 = "[]"
 					end
 					thisPlayer.set_weapon("throwable2", _condition_6, _condition_7)
-					local _vector3_1 = Vector3.new(2 * index, 0, 0)
-					thisPlayer.set_position(hitSpawnPos + _vector3_1)
 				end
+				local _vector3_1 = Vector3.new(2 * index, 0, 0)
+				thisPlayer.set_position(hitSpawnPos + _vector3_1)
 				thisPlayer.refill_ammo()
 				task.delay(3, function()
 					thisPlayer.set_health(100)
 				end)
-				if not drones[thisPlayer.name] then
-					return nil
-				end
-				adapterToUse.destroy(drones[thisPlayer.name])
 			end
 			for _k, _v in _exp_2 do
 				_callback_1(_v, _k - 1, _exp_2)
