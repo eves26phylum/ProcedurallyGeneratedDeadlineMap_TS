@@ -104,10 +104,12 @@ on_server_event.Connect((args: unknown[]) => {
     if (eventType === "biomeLoadingStatus_1") {
         const percentage: number | unknown = args[1];
         assert(typeIs(percentage, "number"), "percentage is not a number");
+        look.setStatus1(percentage);
     }
     if (eventType === "biomeLoadingStatus_2") {
         const percentage: number | unknown = args[1];
         assert(typeIs(percentage, "number"), "percentage is not a number");
+        look.setStatus2(percentage);
     }
 })
 

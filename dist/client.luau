@@ -2687,11 +2687,13 @@ task.defer(function()
 			local percentage = args[2]
 			local _arg0_1 = type(percentage) == "number"
 			assert(_arg0_1, "percentage is not a number")
+			look:setStatus1(percentage)
 		end
 		if eventType == "biomeLoadingStatus_2" then
 			local percentage = args[2]
 			local _arg0_1 = type(percentage) == "number"
 			assert(_arg0_1, "percentage is not a number")
+			look:setStatus2(percentage)
 		end
 	end)
 	local DroneFreecam
