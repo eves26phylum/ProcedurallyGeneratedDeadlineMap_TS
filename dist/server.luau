@@ -3102,7 +3102,17 @@ __modulesFolder["map_generator"] = function()
 					end)
 					self.count += 1
 					if self.count % 1000 == 0 then
-						print(self.count / self.total)
+						if isDeadline then
+							local _exp = players.get_all()
+							-- ▼ ReadonlyArray.forEach ▼
+							local _callback = function(player, index)
+								player.fire_client("biomeLoadingStatus_1", self.count / self.total)
+							end
+							for _k, _v in _exp do
+								_callback(_v, _k - 1, _exp)
+							end
+							-- ▲ ReadonlyArray.forEach ▲
+						end
 					end
 					return { WedgeA, WedgeB }
 				end
@@ -3110,7 +3120,7 @@ __modulesFolder["map_generator"] = function()
 				self.EgoMoose = EgoMoose
 				self.parent = parent
 				self.resolution = resolution
-				self.total = self.resolution.X * self.resolution.Y
+				self.total = self.resolution.X * self.resolution.Y * 2
 				self.count = 0
 			end
 		end
@@ -3118,7 +3128,23 @@ __modulesFolder["map_generator"] = function()
 			-- work on this later
 			-- prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
 			local newTriangleFunc = CustomTriangleFunc.new(adapterToUse, EgoMoose, wedgesFolder, RESOLUTION)
+			local total = RESOLUTION.X * RESOLUTION.Y
+			local count = 0
 			local createTerrainDefault = createTerrain.new(function(thisData)
+				count += 1
+				if count % 1000 == 0 then
+					if isDeadline then
+						local _exp = players.get_all()
+						-- ▼ ReadonlyArray.forEach ▼
+						local _callback = function(player, index)
+							player.fire_client("biomeLoadingStatus_2", count / total)
+						end
+						for _k, _v in _exp do
+							_callback(_v, _k - 1, _exp)
+						end
+						-- ▲ ReadonlyArray.forEach ▲
+					end
+				end
 				local _self = thisData._self
 				standardBox:executeAllModifiers(thisData._self, thisData)
 			end, EgoMoose, adapterToUse, wedgesFolder, newTriangleFunc.materialise)

@@ -12,6 +12,8 @@ const Log = new Logger("main");
 class lookListener {
     irisConnection: () => void
     private text: string
+    private status1?: number
+    private status2?: number
     windowSize: IrisState<Vector2>
     constructor() {
         this.windowSize = iris.State(new Vector2(500, 100));
@@ -20,11 +22,23 @@ class lookListener {
     }
     private renderThing() {
         iris.Window(["BIOME STATUS (DRAGGABLE WINDOW)"], {size: this.windowSize});
+        if (this.status1) {
+            iris.Text([`Building terrain heightmap... ${this.status1 * 100}%`]);
+        }
+        if (this.status2) {
+            iris.Text([`Building structures... ${this.status2 * 100}%`]);
+        }
         iris.Text([this.text]);
         iris.End();
     }
     setText(text: string) {
         this.text = text;
+    }
+    setStatus1(number: number) {
+        this.status1 = number;
+    }
+    setStatus2(number: number) {
+        this.status2 = number;
     }
     disable() {
         this.irisConnection();
@@ -86,6 +100,14 @@ on_server_event.Connect((args: unknown[]) => {
         assert(thisHumanoidRootPart && thisHumanoidRootPart.is_a("BasePart"), "Humanoid Root Part is not a BasePart...")
         thisHumanoidRootPart.AssemblyLinearVelocity = Vector3.zero;
         thisHumanoidRootPart.AssemblyAngularVelocity = Vector3.zero;
+    }
+    if (eventType === "biomeLoadingStatus_1") {
+        const percentage: number | unknown = args[1];
+        assert(typeIs(percentage, "number"), "percentage is not a number");
+    }
+    if (eventType === "biomeLoadingStatus_2") {
+        const percentage: number | unknown = args[1];
+        assert(typeIs(percentage, "number"), "percentage is not a number");
     }
 })
 

@@ -194,7 +194,7 @@ class CustomTriangleFunc {
         this.EgoMoose = EgoMoose;
         this.parent = parent;
         this.resolution = resolution;
-        this.total = this.resolution.X * this.resolution.Y;
+        this.total = this.resolution.X * this.resolution.Y * 2;
         this.count = 0;
     }
 
@@ -213,7 +213,11 @@ class CustomTriangleFunc {
         assign<AnyInstance<WedgePart>>(WedgeB, BData, (item, key, value) => thisThing.adapter.setProperty(item, key, value));
         this.count++;
         if (this.count % 1000 === 0) {
-            print(this.count/this.total);
+            if (isDeadline) {
+                players.get_all().forEach((player: Player, index: number) => {
+                    player.fire_client("biomeLoadingStatus_1", this.count/this.total)
+                });
+            }
         }
         return [WedgeA, WedgeB];
     }
@@ -221,8 +225,18 @@ class CustomTriangleFunc {
 function generate() {
     // work on this later
     // prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
-    const newTriangleFunc = new CustomTriangleFunc(adapterToUse, EgoMoose, wedgesFolder, RESOLUTION)
+    const newTriangleFunc = new CustomTriangleFunc(adapterToUse, EgoMoose, wedgesFolder, RESOLUTION);
+    const total = RESOLUTION.X * RESOLUTION.Y;
+    let count = 0;
     const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
+        count++;
+        if (count % 1000 === 0) {
+            if (isDeadline) {
+                players.get_all().forEach((player: Player, index: number) => {
+                    player.fire_client("biomeLoadingStatus_2", count/total)
+                });
+            }
+        }
         const _self = thisData._self;
         standardBox.executeAllModifiers(thisData._self, thisData);
     }, EgoMoose, adapterToUse, wedgesFolder, newTriangleFunc.materialise);

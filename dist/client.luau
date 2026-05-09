@@ -2583,11 +2583,25 @@ task.defer(function()
 			iris.Window({ "BIOME STATUS (DRAGGABLE WINDOW)" }, {
 				size = self.windowSize,
 			})
+			local _value = self.status1
+			if _value ~= 0 and _value == _value and _value then
+				iris.Text({ `Building terrain heightmap... {self.status1 * 100}%` })
+			end
+			local _value_1 = self.status2
+			if _value_1 ~= 0 and _value_1 == _value_1 and _value_1 then
+				iris.Text({ `Building structures... {self.status2 * 100}%` })
+			end
 			iris.Text({ self.text })
 			iris.End()
 		end
 		function lookListener:setText(text)
 			self.text = text
+		end
+		function lookListener:setStatus1(number)
+			self.status1 = number
+		end
+		function lookListener:setStatus2(number)
+			self.status2 = number
 		end
 		function lookListener:disable()
 			self.irisConnection()
@@ -2668,6 +2682,16 @@ task.defer(function()
 			assert(_arg0_1, "Humanoid Root Part is not a BasePart...")
 			thisHumanoidRootPart.AssemblyLinearVelocity = Vector3.zero
 			thisHumanoidRootPart.AssemblyAngularVelocity = Vector3.zero
+		end
+		if eventType == "biomeLoadingStatus_1" then
+			local percentage = args[2]
+			local _arg0_1 = type(percentage) == "number"
+			assert(_arg0_1, "percentage is not a number")
+		end
+		if eventType == "biomeLoadingStatus_2" then
+			local percentage = args[2]
+			local _arg0_1 = type(percentage) == "number"
+			assert(_arg0_1, "percentage is not a number")
 		end
 	end)
 	local DroneFreecam
