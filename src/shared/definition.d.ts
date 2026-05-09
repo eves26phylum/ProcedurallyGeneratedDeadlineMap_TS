@@ -15,3 +15,9 @@ export interface InstanceAdapter<T extends AnyInstance = AnyInstance> {
     playSound(this: void, target: T): void;
     setNetworkOwner(this: void, target: AnyInstance<BasePart>, player: Player): void;
 }
+export interface terrainGenerationObject<CellType> {
+    operateOnData?: (cell: CellType) => void;
+    EgoMoose: EgoMooseFiles;
+    adapter: InstanceAdapter;
+    parent: AnyInstance;
+}

@@ -1,21 +1,19 @@
 import { EgoMoose } from "../shared/EgoMoose";
 import { createTerrain, WedgeCell } from "../shared/createTerrainFromVerticesUsingAdapter";
 import { PerlinNoise } from "shared/PerlinNoise";
-import { AnyInstance, InstanceAdapter } from "shared/definition";
 import { biomeBox } from "shared/biomeAndStructureRegistrySystem";
-import { assign } from "shared/Util";
-import { Biome, biomeClaimLand, ensureBiomeData, useBiomeData } from "shared/biome";
-import humanConfig from "shared/humanConfig";
 import { translateTerrainOrientationForStructureBonding } from "shared/translateTerrainForStructureBonding";
-import { NuristanBuildings } from "shared/NuristanBuildings";
+import { NuristanBuildings } from "shared/biomes/NuristanBuildings";
 import { isDeadline } from "shared/isDeadline";
-import { RoomTypeHandler, DoorwayDataType, ALL_WALL_FACES } from "shared/NuristanBuildings";
-import { RoomFaceData } from "shared/ProceduralRoomGeneration";
 import { Logger } from "shared/logger";
-import { Tree } from "shared/Tree";
-import { kickStart } from "./ingame";
+import { Tree } from "shared/biomes/Tree";
+import { NuristanStandardBiome } from "shared/biomes/nuristanStandardBiome";
+import { SniperWindowRoomHandler } from "shared/nuristanHandler/sniperWindow";
+import { LivingRoomHandler } from "shared/nuristanHandler/livingRoom";
 import { getWorldRoot } from "shared/getRoot";
 import { adapterToUse } from "shared/adapterToUse";
+import { AnyInstance, EgoMooseFiles, InstanceAdapter } from "shared/definition";
+import { assign } from "shared/Util";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 // The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 
@@ -74,57 +72,6 @@ Think of it like this:
 └─────────────────────────────────────────────┘
 */
 export function startMapGenerator() {
-class SniperWindowRoomHandler implements RoomTypeHandler {
-    readonly priority = 10;
-    private readonly buildings: NuristanBuildings;
-    private readonly sniperWindowDoorway: DoorwayDataType;
-
-    constructor(buildings: NuristanBuildings, sniperWindowDoorway: DoorwayDataType) {
-        this.buildings = buildings;
-        this.sniperWindowDoorway = sniperWindowDoorway;
-    }
-
-    private static hasExteriorFace(faceData: RoomFaceData): boolean {
-        for (const face of ALL_WALL_FACES) {
-            if (faceData[face].state === "exteriorWall") return true;
-        }
-        return false;
-    }
-
-    tryGenerate(roomCFrame: CFrame, faceData: RoomFaceData): boolean {
-        if (!SniperWindowRoomHandler.hasExteriorFace(faceData)) return false;
-        const roomSize = this.buildings.config.roomProps.RoomSize;
-        this.buildings.instantiateRoomShell(roomCFrame);
-        for (const face of ALL_WALL_FACES) {
-            const faceDatum = faceData[face];
-            if (faceDatum.state === "empty") continue;
-            if (faceDatum.state === "exteriorWall") {
-                this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face, { doorway: this.sniperWindowDoorway });
-                continue;
-            }
-            if (faceDatum.state === "doorway") {
-                this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face);
-                continue;
-            }
-            this.buildings.makeWallWithoutDoorway(roomCFrame, roomSize, face);
-        }
-        return true;
-    }
-}
-
-class LivingRoomHandler implements RoomTypeHandler {
-    readonly priority = 0;
-    private readonly buildings: NuristanBuildings;
-
-    constructor(buildings: NuristanBuildings) {
-        this.buildings = buildings;
-    }
-
-    tryGenerate(roomCFrame: CFrame, faceData: RoomFaceData): boolean {
-        this.buildings.createStandardRoom(roomCFrame, faceData);
-        return true;
-    }
-}
 const worldRoot = getWorldRoot();
 const Log = new Logger("map_generator");
 const workspace = worldRoot;
@@ -154,44 +101,6 @@ const wedgesFolder = adapterToUse.newInstance("Folder");
 adapterToUse.setProperty(wedgesFolder, "Name", "Wedges");
 adapterToUse.setProperty(wedgesFolder, "Parent", workspace);
 const standardBox = new biomeBox();
-interface NuristanStandardBiomeConfig {
-    desert: () => Partial<InstanceProperties<WedgePart>>
-    grass: () => Partial<InstanceProperties<WedgePart>>
-}
-class NuristanStandardBiome implements Biome {
-    config: NuristanStandardBiomeConfig
-    parent: AnyInstance
-    priority: number
-    name: string
-    adapter: InstanceAdapter
-    constructor(adapterToUse: InstanceAdapter, config: NuristanStandardBiomeConfig, parent: AnyInstance) {
-        this.priority = 100;
-        this.config = config;
-        this.parent = parent;
-        this.name = "nsb";
-        this.adapter = adapterToUse;
-    }
-    
-    private getColourAndMaterialFromHeight(height: number): Partial<InstanceProperties<WedgePart>> {
-        if (height < humanConfig.grassDeepness) return this.config.grass();
-        return this.config.desert();
-    }
-    generate(yourSelf: createTerrain, yourCell: WedgeCell) {
-        if (useBiomeData(yourCell)) return;
-        const operateOnThisTriangleInstance = (data: WedgeCell, triangle: AnyInstance) => {
-            const height = data.data.averageHeight;
-            const propMap: Partial<InstanceProperties<WedgePart>> = this.getColourAndMaterialFromHeight(height);
-            assign(triangle, propMap, (a, b, c) => {this.adapter.setProperty(a, b, c);});
-        }
-        operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][0]);
-        operateOnThisTriangleInstance(yourCell, yourCell.triangles[0][1]);
-        operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][0]);
-        operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1]);
-        ensureBiomeData(yourCell);
-        biomeClaimLand(this, yourCell);
-    }
-}
-
 const translateTerrain = new translateTerrainOrientationForStructureBonding({
     orientationSubtraction: new Vector3(0, 0, -90) 
 });
@@ -267,13 +176,56 @@ standardBox.registerModifier(new Tree(adapterToUse, {
     },
     treesPerTriangle: 4
 }, wedgesFolder))
+class CustomTriangleFunc {
+    private adapter: InstanceAdapter;
+    private EgoMoose: EgoMooseFiles;
+    private parent: AnyInstance;
+    private resolution: Vector2;
+    private total: number;
+    private count: number;
+
+    constructor(
+        adapter: InstanceAdapter,
+        EgoMoose: EgoMooseFiles,
+        parent: AnyInstance,
+        resolution: Vector2
+    ) {
+        this.adapter = adapter;
+        this.EgoMoose = EgoMoose;
+        this.parent = parent;
+        this.resolution = resolution;
+        this.total = this.resolution.X * this.resolution.Y;
+        this.count = 0;
+    }
+
+    materialise = (thisThing: createTerrain, a: Vector3, b: Vector3, c: Vector3): [AnyInstance<WedgePart>, AnyInstance<WedgePart>] => { // self-less function
+        // when given to createTerrain, it calls self:materialiseTriangle (our custom function set in its constructor)
+        // then it becomes materialiseTriangle(self, a, b, c)
+        // but roblox-ts for some god forsaken reason does not recognise this
+        const [AData, BData] = thisThing.EgoMoose.draw3dTriangle(a, b, c);
+        const WedgeA = thisThing.adapter.newInstance("WedgePart");
+        const WedgeB = thisThing.adapter.newInstance("WedgePart");
+        thisThing.adapter.setProperty(WedgeA, "Anchored", true);
+        thisThing.adapter.setProperty(WedgeB, "Anchored", true);
+        thisThing.adapter.setProperty(WedgeA, "Parent", thisThing.parent);
+        thisThing.adapter.setProperty(WedgeB, "Parent", thisThing.parent);
+        assign<AnyInstance<WedgePart>>(WedgeA, AData, (item, key, value) => thisThing.adapter.setProperty(item, key, value));
+        assign<AnyInstance<WedgePart>>(WedgeB, BData, (item, key, value) => thisThing.adapter.setProperty(item, key, value));
+        this.count++;
+        if (this.count % 1000 === 0) {
+            print(this.count/this.total);
+        }
+        return [WedgeA, WedgeB];
+    }
+}
 function generate() {
     // work on this later
     // prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
+    const newTriangleFunc = new CustomTriangleFunc(adapterToUse, EgoMoose, wedgesFolder, RESOLUTION)
     const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
         const _self = thisData._self;
         standardBox.executeAllModifiers(thisData._self, thisData);
-    }, EgoMoose, adapterToUse, wedgesFolder);
+    }, EgoMoose, adapterToUse, wedgesFolder, newTriangleFunc.materialise);
     const triangles = createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);
 }
 if (isDeadline) {
@@ -300,10 +252,3 @@ if (isDeadline) {
     })
 }
 }
-// const [success, result] = pcall(generate);
-// warn(success, result);
-// function a(b: WrappedInstance){
-//     b.find_first_child("")
-// }
-// a(create_instance("Part"));
-// time.wait(5);

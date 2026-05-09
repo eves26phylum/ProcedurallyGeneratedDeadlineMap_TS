@@ -1,4 +1,4 @@
-import { AnyInstance, EgoMooseFiles, InstanceAdapter } from "./definition";
+import { AnyInstance, EgoMooseFiles, InstanceAdapter, terrainGenerationObject } from "./definition";
 import { assign } from "./Util";
 import { returnFunctionWithIdentity } from "./selfProp";
 
@@ -23,20 +23,24 @@ export interface WedgeCell {
     _self: createTerrain
 }
 
-export class createTerrain {
+export class createTerrain implements terrainGenerationObject<WedgeCell> {
     operateOnData?: (cell: WedgeCell) => void;
     EgoMoose: EgoMooseFiles;
     adapter: InstanceAdapter;
     parent: AnyInstance;
+    customMaterialise?: (self: createTerrain, a: Vector3, b: Vector3, c: Vector3) => [AnyInstance<WedgePart>, AnyInstance<WedgePart>];
+
 
     constructor(
         operateOnData: ((cell: WedgeCell) => void) | undefined,
         EgoMoose: EgoMooseFiles,
         adapter: InstanceAdapter,
         parent: AnyInstance,
-        materialiseTriangle?: (a: Vector3, b: Vector3, c: Vector3) => [AnyInstance<WedgePart>, AnyInstance<WedgePart>],
+        materialiseTriangle?: (thisThing: createTerrain, a: Vector3, b: Vector3, c: Vector3) => [AnyInstance<WedgePart>, AnyInstance<WedgePart>],
     ) {
-        this.materialiseTriangle = materialiseTriangle || this.materialiseTriangle;
+        if (materialiseTriangle) {
+            this.customMaterialise = materialiseTriangle;
+        }
         this.adapter = adapter;
         this.operateOnData = operateOnData;
         this.EgoMoose = EgoMoose;
@@ -44,6 +48,9 @@ export class createTerrain {
     }
 
     materialiseTriangle(a: Vector3, b: Vector3, c: Vector3): [AnyInstance<WedgePart>, AnyInstance<WedgePart>] {
+        if (this.customMaterialise) {
+            return this.customMaterialise(this, a, b, c);
+        }
         const [AData, BData] = this.EgoMoose.draw3dTriangle(a, b, c);
         const WedgeA = this.adapter.newInstance("WedgePart");
         const WedgeB = this.adapter.newInstance("WedgePart"); // should evaluate to AnyInstance<WedgePart>, but evaluates to AnyInstance<Instance>

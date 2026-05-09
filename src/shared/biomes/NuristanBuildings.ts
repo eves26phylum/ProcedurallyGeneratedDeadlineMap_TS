@@ -1,15 +1,15 @@
-import { Biome } from "./biome";
-import { AnyInstance, InstanceAdapter } from "./definition";
-import { assign } from "./Util";
-import humanConfig from "./humanConfig";
-import { triangleVerticesTrio, WedgeCell } from "./createTerrainFromVerticesUsingAdapter";
-import { createTerrain } from "./createTerrainFromVerticesUsingAdapter";
-import { translateTerrainOrientationForStructureBonding } from "./translateTerrainForStructureBonding";
-import { EgoMoose } from "./EgoMoose";
-import { ProceduralRoomGrid, RoomGenerationConfig, RoomFaceData, WallFace } from "./ProceduralRoomGeneration";
-import { DepthFirstMazeSearch } from "./DepthFirstMazeSearch";
-import { fisherYatesShuffle } from "./Util";
-import { ensureStructureData, structureClaimLand, useStructureData } from "./structure";
+import { Biome } from "../biome";
+import { AnyInstance, InstanceAdapter } from "../definition";
+import { assign } from "../Util";
+import humanConfig from "../humanConfig";
+import { triangleVerticesTrio, WedgeCell } from "../createTerrainFromVerticesUsingAdapter";
+import { createTerrain } from "../createTerrainFromVerticesUsingAdapter";
+import { translateTerrainOrientationForStructureBonding } from "../translateTerrainForStructureBonding";
+import { EgoMoose } from "../EgoMoose";
+import { ProceduralRoomGrid, RoomGenerationConfig, RoomFaceData, WallFace } from "../ProceduralRoomGeneration";
+import { DepthFirstMazeSearch } from "../DepthFirstMazeSearch";
+import { fisherYatesShuffle } from "../Util";
+import { ensureStructureData, structureClaimLand, useStructureData } from "../structure";
 
 // !deadline-ts.customFinishSector_FinishModulesEnd
 // The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.

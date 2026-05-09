@@ -8,6 +8,7 @@ import { generateId } from "shared/generateId";
 import { alphabetArray } from "shared/alphabetArray";
 import { droneMaterialConfig } from "shared/droneMaterialConfig";
 import { assign } from "shared/Util";
+import { PingSystem } from "./pingSystem";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 const Log = new Logger("team_spawner"); // log, warn, info, error
 const droneNames: Record<string, string | undefined> = {};
@@ -102,7 +103,6 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         attacker: 100
     }
     const drones: Record<string, AnyInstance<BasePart>> = {}
-    const lastPingedTime: Record<string, number | undefined> = {}
     type PlayerLoadoutData = {
         primary: CharacterWeaponData | undefined,
         secondary: CharacterWeaponData | undefined,
@@ -117,6 +117,9 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         defender: {},
         attacker: {}
     }
+    const pingSystem = new PingSystem({
+        pingCooldownSeconds: 3
+    });
     const DroneFolder = adapterToUse.newInstance("Folder");
     adapterToUse.setProperty(DroneFolder, "Name", "DronesFolder");
     adapterToUse.setProperty(DroneFolder, "Parent", parent);
@@ -256,17 +259,11 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
         if (!player) return;
         const eventType = args[0];
         if (!typeIs(eventType, "string")) return player.kick();
+
         if (eventType === "ping_at_position") {
             const pingPosition = args[1];
             if (!typeIs(pingPosition, "vector")) return player.kick();
-            const thisLastPingedTime = lastPingedTime[player.name] || 0;
-            if (os.time() - thisLastPingedTime < 3) return;
-            lastPingedTime[player.name] = os.time();
-            players.get_all().forEach((thisPlayer: Player, index: number) => {
-                thisPlayer.fire_client("player_ping", droneNames[player.name] || "fucking dog");
-                if (thisPlayer.get_team() !== player.get_team()) return;
-                thisPlayer.fire_client("team_ping", pingPosition);
-            })
+            pingSystem.handlePlayerPing(player, pingPosition, droneNames[player.name] || "fucking dog");
         }
     })
 }

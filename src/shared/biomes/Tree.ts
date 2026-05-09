@@ -1,9 +1,9 @@
-import { Biome } from "./biome";
-import { createTerrain, WedgeCell } from "./createTerrainFromVerticesUsingAdapter";
-import { AnyInstance, InstanceAdapter } from "./definition";
-import { EgoMoose } from "./EgoMoose";
-import { ensureStructureData, structureClaimLand, useStructureData } from "./structure";
-import { assign } from "./Util";
+import { Biome } from "../biome";
+import { createTerrain, WedgeCell } from "../createTerrainFromVerticesUsingAdapter";
+import { AnyInstance, InstanceAdapter } from "../definition";
+import { EgoMoose } from "../EgoMoose";
+import { ensureStructureData, structureClaimLand, useStructureData } from "../structure";
+import { assign } from "../Util";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 
 export interface TreeConfig {

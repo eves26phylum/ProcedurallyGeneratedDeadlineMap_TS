@@ -74,6 +74,9 @@ local require = function(_ref)
 	}
 end
 
+__modulesFolder["biomes"] = __modulesFolder["biomes"] or {}
+__modulesFolder["nuristanHandler"] = __modulesFolder["nuristanHandler"] or {}
+
 __modulesFolder["DepthFirstMazeSearch"] = function()
 	local script
 	script = newFakeInstance({"DepthFirstMazeSearch"})
@@ -257,9 +260,525 @@ __modulesFolder["EgoMoose"] = function()
 
 end
 
-__modulesFolder["NuristanBuildings"] = function()
+__modulesFolder["PerlinNoise"] = function()
 	local script
-	script = newFakeInstance({"NuristanBuildings"})
+	script = newFakeInstance({"PerlinNoise"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function FUCKROBLOX(a)
+		-- fuck roblox basically fucks roblox and also avoids integer noise
+		if math.floor(a) == a then
+			return a + 0.001
+		end
+		return a
+	end
+	local PerlinNoise
+	do
+		PerlinNoise = setmetatable({}, {
+			__tostring = function()
+				return "PerlinNoise"
+			end,
+		})
+		PerlinNoise.__index = PerlinNoise
+		function PerlinNoise.new(...)
+			local self = setmetatable({}, PerlinNoise)
+			return self:constructor(...) or self
+		end
+		function PerlinNoise:constructor()
+		end
+		function PerlinNoise:generate(scale, resolution, offset, exaggeratedness, lacunarity, persistence, octaves, POWER)
+			local resolvedOffset = offset or Vector2.new(0, 0)
+			local noiseMap = {}
+			local minRaw = math.huge
+			local maxRaw = -math.huge
+			do
+				local x = 0
+				local _shouldIncrement = false
+				while true do
+					if _shouldIncrement then
+						x += 1
+					else
+						_shouldIncrement = true
+					end
+					if not (x <= resolution.X) then
+						break
+					end
+					do
+						local y = 0
+						local _shouldIncrement_1 = false
+						while true do
+							if _shouldIncrement_1 then
+								y += 1
+							else
+								_shouldIncrement_1 = true
+							end
+							if not (y <= resolution.Y) then
+								break
+							end
+							local offsetX = x + resolvedOffset.X
+							local offsetY = y + resolvedOffset.Y
+							local frequency = 1
+							local amplitude = 1
+							local noiseHeight = 0
+							do
+								local i = 0
+								local _shouldIncrement_2 = false
+								while true do
+									if _shouldIncrement_2 then
+										i += 1
+									else
+										_shouldIncrement_2 = true
+									end
+									if not (i < octaves) then
+										break
+									end
+									local sampleX = (offsetX / scale) * frequency
+									local sampleY = (offsetY / scale) * frequency
+									local computedNoise = math.noise(FUCKROBLOX(sampleX), FUCKROBLOX(sampleY))
+									local clampedNoise = computedNoise / 2 + 0.5
+									noiseHeight += clampedNoise * amplitude
+									amplitude *= persistence
+									frequency *= lacunarity
+								end
+							end
+							local endHeight = (noiseHeight ^ POWER) * exaggeratedness
+							if endHeight < minRaw then
+								minRaw = endHeight
+							end
+							if endHeight > maxRaw then
+								maxRaw = endHeight
+							end
+							table.insert(noiseMap, endHeight)
+						end
+					end
+				end
+			end
+			return noiseMap
+		end
+	end
+	return {
+		PerlinNoise = PerlinNoise,
+	}
+
+end
+
+__modulesFolder["ProceduralRoomGeneration"] = function()
+	local script
+	script = newFakeInstance({"ProceduralRoomGeneration"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local mazePassageKey = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "DepthFirstMazeSearch").mazePassageKey
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
+	local EXIT_ROOM_CELL_TYPE = "__exitRoom__"
+	local ProceduralRoomGrid
+	do
+		ProceduralRoomGrid = setmetatable({}, {
+			__tostring = function()
+				return "ProceduralRoomGrid"
+			end,
+		})
+		ProceduralRoomGrid.__index = ProceduralRoomGrid
+		function ProceduralRoomGrid.new(...)
+			local self = setmetatable({}, ProceduralRoomGrid)
+			return self:constructor(...) or self
+		end
+		function ProceduralRoomGrid:constructor(generationConfig, registeredRoomTypeNames, mazeStrategy, shuffleFunction)
+			self.shuffleFunction = shuffleFunction
+			self.roomGrid = self:buildRoomGrid(generationConfig, registeredRoomTypeNames)
+			local passages = mazeStrategy:generatePassages(function(gridColumn, gridRow)
+				return self:hasRoom(gridColumn, gridRow)
+			end, 0, 0)
+			local mergedWalls = self:generateMergedWalls(passages, generationConfig.mergeWallChance)
+			self.roomFaceDataMap = self:computeAllRoomFaceData(passages, mergedWalls)
+		end
+		function ProceduralRoomGrid:hasRoomInGrid(roomGrid, gridColumn, gridRow)
+			local _result = roomGrid[gridColumn + 1]
+			if _result ~= nil then
+				_result = _result[gridRow + 1]
+			end
+			return not not (_result ~= "" and _result)
+		end
+		function ProceduralRoomGrid:hasRoom(gridColumn, gridRow)
+			return ProceduralRoomGrid:hasRoomInGrid(self.roomGrid, gridColumn, gridRow)
+		end
+		function ProceduralRoomGrid:forEachRoom(callback)
+			for gridColumn = 0, #self.roomGrid - 1 do
+				local roomRow = self.roomGrid[gridColumn + 1]
+				if not roomRow then
+					continue
+				end
+				for gridRow = 0, #roomRow - 1 do
+					if not self:hasRoom(gridColumn, gridRow) then
+						continue
+					end
+					local _roomFaceDataMap = self.roomFaceDataMap
+					local _arg0 = `{gridColumn},{gridRow}`
+					local faceData = _roomFaceDataMap[_arg0]
+					if not faceData then
+						continue
+					end
+					callback(gridColumn, gridRow, faceData, self.roomGrid[gridColumn + 1][gridRow + 1])
+				end
+			end
+		end
+		function ProceduralRoomGrid:buildRoomGrid(generationConfig, registeredRoomTypeNames)
+			local roomGrid = {}
+			local targetRoomCount = generationConfig.minRooms + math.floor(math.random() * (generationConfig.maxRooms - generationConfig.minRooms + 1))
+			roomGrid[1] = {}
+			roomGrid[1][1] = EXIT_ROOM_CELL_TYPE
+			local occupiedCells = { { 0, 0 } }
+			local growthDirections = { { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 } }
+			while #occupiedCells < targetRoomCount do
+				local _binding = occupiedCells[math.floor(math.random() * #occupiedCells) + 1]
+				local sourceColumn = _binding[1]
+				local sourceRow = _binding[2]
+				local _binding_1 = self.shuffleFunction(growthDirections)[1]
+				local gridColumnDelta = _binding_1[1]
+				local gridRowDelta = _binding_1[2]
+				local neighborColumn = sourceColumn + gridColumnDelta
+				local neighborRow = sourceRow + gridRowDelta
+				if neighborColumn < 0 or neighborRow < 0 then
+					continue
+				end
+				if ProceduralRoomGrid:hasRoomInGrid(roomGrid, neighborColumn, neighborRow) then
+					continue
+				end
+				if not roomGrid[neighborColumn + 1] then
+					roomGrid[neighborColumn + 1] = {}
+				end
+				local assignedRoomType = registeredRoomTypeNames[math.floor(math.random() * #registeredRoomTypeNames) + 1]
+				roomGrid[neighborColumn + 1][neighborRow + 1] = assignedRoomType
+				local _arg0 = { neighborColumn, neighborRow }
+				table.insert(occupiedCells, _arg0)
+			end
+			return roomGrid
+		end
+		function ProceduralRoomGrid:collectMergedWallsForCell(passages, mergedWalls, mergeWallChance, gridColumn, gridRow)
+			local mergeCheckDirections = { { 0, 1 }, { 1, 0 } }
+			for _, _binding in mergeCheckDirections do
+				local gridColumnDelta = _binding[1]
+				local gridRowDelta = _binding[2]
+				local neighborColumn = gridColumn + gridColumnDelta
+				local neighborRow = gridRow + gridRowDelta
+				if not self:hasRoom(neighborColumn, neighborRow) then
+					continue
+				end
+				local sharedWallKey = mazePassageKey(gridColumn, gridRow, neighborColumn, neighborRow)
+				if passages[sharedWallKey] ~= nil then
+					continue
+				end
+				if math.random() >= mergeWallChance then
+					continue
+				end
+				mergedWalls[sharedWallKey] = true
+			end
+		end
+		function ProceduralRoomGrid:generateMergedWalls(passages, mergeWallChance)
+			local mergedWalls = {}
+			for gridColumn = 0, #self.roomGrid - 1 do
+				local roomRow = self.roomGrid[gridColumn + 1]
+				if not roomRow then
+					continue
+				end
+				for gridRow = 0, #roomRow - 1 do
+					if not self:hasRoom(gridColumn, gridRow) then
+						continue
+					end
+					self:collectMergedWallsForCell(passages, mergedWalls, mergeWallChance, gridColumn, gridRow)
+				end
+			end
+			return mergedWalls
+		end
+		function ProceduralRoomGrid:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, gridColumnDelta, gridRowDelta, thisFace)
+			local neighborColumn = gridColumn + gridColumnDelta
+			local neighborRow = gridRow + gridRowDelta
+			local neighborExists = self:hasRoom(neighborColumn, neighborRow)
+			local sharedWallKey = mazePassageKey(gridColumn, gridRow, neighborColumn, neighborRow)
+			if neighborExists and mergedWalls[sharedWallKey] ~= nil then
+				return {
+					state = "empty",
+				}
+			end
+			if neighborExists and passages[sharedWallKey] ~= nil then
+				return {
+					state = "doorway",
+				}
+			end
+			if neighborExists then
+				return {
+					state = "interiorWall",
+				}
+			end
+			if self.roomGrid[gridColumn + 1][gridRow + 1] == EXIT_ROOM_CELL_TYPE and thisFace == "north" then
+				return {
+					state = "doorway",
+				}
+			end
+			return {
+				state = "exteriorWall",
+			}
+		end
+		function ProceduralRoomGrid:computeFaceDataForCell(passages, mergedWalls, gridColumn, gridRow)
+			return {
+				north = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, 0, -1, "north"),
+				south = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, 0, 1, "south"),
+				east = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, 1, 0, "east"),
+				west = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, -1, 0, "west"),
+			}
+		end
+		function ProceduralRoomGrid:computeAllRoomFaceData(passages, mergedWalls)
+			local allRoomFaceData = {}
+			for gridColumn = 0, #self.roomGrid - 1 do
+				local roomRow = self.roomGrid[gridColumn + 1]
+				if roomRow == nil then
+					continue
+				end
+				for gridRow = 0, #roomRow - 1 do
+					if not self:hasRoom(gridColumn, gridRow) then
+						continue
+					end
+					local _arg0 = `{gridColumn},{gridRow}`
+					local _arg1 = self:computeFaceDataForCell(passages, mergedWalls, gridColumn, gridRow)
+					allRoomFaceData[_arg0] = _arg1
+				end
+			end
+			return allRoomFaceData
+		end
+	end
+	return {
+		ProceduralRoomGrid = ProceduralRoomGrid,
+	}
+
+end
+
+__modulesFolder["Util"] = function()
+	local script
+	script = newFakeInstance({"Util"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function assign(a, b, optionalFunc)
+		if optionalFunc == nil then
+			optionalFunc = function(a, index, value)
+				a[index] = value
+			end
+		end
+		local _a = a
+		assert(_a, "A is missing")
+		local _b = b
+		assert(_b, "B is missing")
+		for index, value in pairs(b) do
+			optionalFunc(a, index, value)
+		end
+		return a
+	end
+	local function fisherYatesShuffle(inputArray)
+		local _array = {}
+		local _length = #_array
+		table.move(inputArray, 1, #inputArray, _length + 1, _array)
+		local result = _array
+		for currentIndex = #result - 1, 1, -1 do
+			local randomSwapIndex = math.floor(math.random() * (currentIndex + 1))
+			local elementAtCurrentIndex = result[currentIndex + 1]
+			result[currentIndex + 1] = result[randomSwapIndex + 1]
+			result[randomSwapIndex + 1] = elementAtCurrentIndex
+		end
+		return result
+	end
+	return {
+		assign = assign,
+		fisherYatesShuffle = fisherYatesShuffle,
+	}
+
+end
+
+__modulesFolder["adapterToUse"] = function()
+	local script
+	script = newFakeInstance({"adapterToUse"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
+	local robloxAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "robloxAdapter").robloxAdapter
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
+	return {
+		adapterToUse = adapterToUse,
+	}
+
+end
+
+__modulesFolder["alphabetArray"] = function()
+	local script
+	script = newFakeInstance({"alphabetArray"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local alphabetArray = string.split("abcdefghijklmnopqrstuvwxyz", "")
+	return {
+		alphabetArray = alphabetArray,
+	}
+
+end
+
+__modulesFolder["biome"] = function()
+	local script
+	script = newFakeInstance({"biome"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local biomeExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeExtension").biomeExtension
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local function useBiomeData(yourCell)
+		local data = biomeExtension:get(yourCell)
+		if not data then
+			return nil
+		end
+		return data
+	end
+	local function biomeClaimLand(thisBiome, yourCell)
+		local data = biomeExtension:get(yourCell)
+		if not data then
+			return nil
+		end
+		local _whoClaimedThis = data.whoClaimedThis
+		local _name = thisBiome.name
+		table.insert(_whoClaimedThis, _name)
+	end
+	-- If a cell might not have biome data yet but you want to guarantee it does by the time this function exits, getOrInit handles that without a separate has() check followed by a set()
+	local function ensureBiomeData(yourCell)
+		return biomeExtension:getOrInit(yourCell, function()
+			return {
+				whoClaimedThis = {},
+			}
+		end)
+	end
+	return {
+		useBiomeData = useBiomeData,
+		biomeClaimLand = biomeClaimLand,
+		ensureBiomeData = ensureBiomeData,
+	}
+
+end
+
+__modulesFolder["biomeAndStructureRegistrySystem"] = function()
+	local script
+	script = newFakeInstance({"biomeAndStructureRegistrySystem"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local thisLogger = Logger.new("biome_box")
+	local biomeBox
+	do
+		biomeBox = setmetatable({}, {
+			__tostring = function()
+				return "biomeBox"
+			end,
+		})
+		biomeBox.__index = biomeBox
+		function biomeBox.new(...)
+			local self = setmetatable({}, biomeBox)
+			return self:constructor(...) or self
+		end
+		function biomeBox:constructor()
+			self.modifiers = {}
+		end
+		function biomeBox:executeAllModifiers(yourSelf, yourCell)
+			local _exp = self.modifiers
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(modifier, index)
+				modifier:generate(yourSelf, yourCell)
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+		end
+		function biomeBox:registerModifier(yourObject)
+			thisLogger:warn(`Registered modifier '{yourObject.name}'.`)
+			local _modifiers = self.modifiers
+			local _yourObject = yourObject
+			table.insert(_modifiers, _yourObject)
+			table.sort(self.modifiers, function(a, b)
+				return a.priority > b.priority
+			end)
+		end
+	end
+	return {
+		biomeBox = biomeBox,
+	}
+
+end
+
+__modulesFolder["biomeExtension"] = function()
+	local script
+	script = newFakeInstance({"biomeExtension"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local createCellExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "cellExtension").createCellExtension
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local biomeExtension = createCellExtension()
+	local structureExtension = createCellExtension()
+	-- idk structure data goes here
+	-- omg typescript is so new to me wtf is a weak map ohh okay i understand oh my gosh im stuck in a pizza traffic
+	-- export const structureExtension = createCellExtension<WedgeCell, StructureData>();
+	return {
+		biomeExtension = biomeExtension,
+		structureExtension = structureExtension,
+	}
+
+end
+
+__modulesFolder["biomes"]["NuristanBuildings"] = function()
+	local script
+	script = newFakeInstance({"biomes", "NuristanBuildings"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
@@ -591,313 +1110,9 @@ __modulesFolder["NuristanBuildings"] = function()
 
 end
 
-__modulesFolder["PerlinNoise"] = function()
+__modulesFolder["biomes"]["Tree"] = function()
 	local script
-	script = newFakeInstance({"PerlinNoise"})
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local function FUCKROBLOX(a)
-		-- fuck roblox basically fucks roblox and also avoids integer noise
-		if math.floor(a) == a then
-			return a + 0.001
-		end
-		return a
-	end
-	local PerlinNoise
-	do
-		PerlinNoise = setmetatable({}, {
-			__tostring = function()
-				return "PerlinNoise"
-			end,
-		})
-		PerlinNoise.__index = PerlinNoise
-		function PerlinNoise.new(...)
-			local self = setmetatable({}, PerlinNoise)
-			return self:constructor(...) or self
-		end
-		function PerlinNoise:constructor()
-		end
-		function PerlinNoise:generate(scale, resolution, offset, exaggeratedness, lacunarity, persistence, octaves, POWER)
-			local resolvedOffset = offset or Vector2.new(0, 0)
-			local noiseMap = {}
-			local minRaw = math.huge
-			local maxRaw = -math.huge
-			do
-				local x = 0
-				local _shouldIncrement = false
-				while true do
-					if _shouldIncrement then
-						x += 1
-					else
-						_shouldIncrement = true
-					end
-					if not (x <= resolution.X) then
-						break
-					end
-					do
-						local y = 0
-						local _shouldIncrement_1 = false
-						while true do
-							if _shouldIncrement_1 then
-								y += 1
-							else
-								_shouldIncrement_1 = true
-							end
-							if not (y <= resolution.Y) then
-								break
-							end
-							local offsetX = x + resolvedOffset.X
-							local offsetY = y + resolvedOffset.Y
-							local frequency = 1
-							local amplitude = 1
-							local noiseHeight = 0
-							do
-								local i = 0
-								local _shouldIncrement_2 = false
-								while true do
-									if _shouldIncrement_2 then
-										i += 1
-									else
-										_shouldIncrement_2 = true
-									end
-									if not (i < octaves) then
-										break
-									end
-									local sampleX = (offsetX / scale) * frequency
-									local sampleY = (offsetY / scale) * frequency
-									local computedNoise = math.noise(FUCKROBLOX(sampleX), FUCKROBLOX(sampleY))
-									local clampedNoise = computedNoise / 2 + 0.5
-									noiseHeight += clampedNoise * amplitude
-									amplitude *= persistence
-									frequency *= lacunarity
-								end
-							end
-							local endHeight = (noiseHeight ^ POWER) * exaggeratedness
-							if endHeight < minRaw then
-								minRaw = endHeight
-							end
-							if endHeight > maxRaw then
-								maxRaw = endHeight
-							end
-							table.insert(noiseMap, endHeight)
-						end
-					end
-				end
-			end
-			return noiseMap
-		end
-	end
-	return {
-		PerlinNoise = PerlinNoise,
-	}
-
-end
-
-__modulesFolder["ProceduralRoomGeneration"] = function()
-	local script
-	script = newFakeInstance({"ProceduralRoomGeneration"})
-	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local mazePassageKey = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "DepthFirstMazeSearch").mazePassageKey
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
-	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
-	local EXIT_ROOM_CELL_TYPE = "__exitRoom__"
-	local ProceduralRoomGrid
-	do
-		ProceduralRoomGrid = setmetatable({}, {
-			__tostring = function()
-				return "ProceduralRoomGrid"
-			end,
-		})
-		ProceduralRoomGrid.__index = ProceduralRoomGrid
-		function ProceduralRoomGrid.new(...)
-			local self = setmetatable({}, ProceduralRoomGrid)
-			return self:constructor(...) or self
-		end
-		function ProceduralRoomGrid:constructor(generationConfig, registeredRoomTypeNames, mazeStrategy, shuffleFunction)
-			self.shuffleFunction = shuffleFunction
-			self.roomGrid = self:buildRoomGrid(generationConfig, registeredRoomTypeNames)
-			local passages = mazeStrategy:generatePassages(function(gridColumn, gridRow)
-				return self:hasRoom(gridColumn, gridRow)
-			end, 0, 0)
-			local mergedWalls = self:generateMergedWalls(passages, generationConfig.mergeWallChance)
-			self.roomFaceDataMap = self:computeAllRoomFaceData(passages, mergedWalls)
-		end
-		function ProceduralRoomGrid:hasRoomInGrid(roomGrid, gridColumn, gridRow)
-			local _result = roomGrid[gridColumn + 1]
-			if _result ~= nil then
-				_result = _result[gridRow + 1]
-			end
-			return not not (_result ~= "" and _result)
-		end
-		function ProceduralRoomGrid:hasRoom(gridColumn, gridRow)
-			return ProceduralRoomGrid:hasRoomInGrid(self.roomGrid, gridColumn, gridRow)
-		end
-		function ProceduralRoomGrid:forEachRoom(callback)
-			for gridColumn = 0, #self.roomGrid - 1 do
-				local roomRow = self.roomGrid[gridColumn + 1]
-				if not roomRow then
-					continue
-				end
-				for gridRow = 0, #roomRow - 1 do
-					if not self:hasRoom(gridColumn, gridRow) then
-						continue
-					end
-					local _roomFaceDataMap = self.roomFaceDataMap
-					local _arg0 = `{gridColumn},{gridRow}`
-					local faceData = _roomFaceDataMap[_arg0]
-					if not faceData then
-						continue
-					end
-					callback(gridColumn, gridRow, faceData, self.roomGrid[gridColumn + 1][gridRow + 1])
-				end
-			end
-		end
-		function ProceduralRoomGrid:buildRoomGrid(generationConfig, registeredRoomTypeNames)
-			local roomGrid = {}
-			local targetRoomCount = generationConfig.minRooms + math.floor(math.random() * (generationConfig.maxRooms - generationConfig.minRooms + 1))
-			roomGrid[1] = {}
-			roomGrid[1][1] = EXIT_ROOM_CELL_TYPE
-			local occupiedCells = { { 0, 0 } }
-			local growthDirections = { { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 } }
-			while #occupiedCells < targetRoomCount do
-				local _binding = occupiedCells[math.floor(math.random() * #occupiedCells) + 1]
-				local sourceColumn = _binding[1]
-				local sourceRow = _binding[2]
-				local _binding_1 = self.shuffleFunction(growthDirections)[1]
-				local gridColumnDelta = _binding_1[1]
-				local gridRowDelta = _binding_1[2]
-				local neighborColumn = sourceColumn + gridColumnDelta
-				local neighborRow = sourceRow + gridRowDelta
-				if neighborColumn < 0 or neighborRow < 0 then
-					continue
-				end
-				if ProceduralRoomGrid:hasRoomInGrid(roomGrid, neighborColumn, neighborRow) then
-					continue
-				end
-				if not roomGrid[neighborColumn + 1] then
-					roomGrid[neighborColumn + 1] = {}
-				end
-				local assignedRoomType = registeredRoomTypeNames[math.floor(math.random() * #registeredRoomTypeNames) + 1]
-				roomGrid[neighborColumn + 1][neighborRow + 1] = assignedRoomType
-				local _arg0 = { neighborColumn, neighborRow }
-				table.insert(occupiedCells, _arg0)
-			end
-			return roomGrid
-		end
-		function ProceduralRoomGrid:collectMergedWallsForCell(passages, mergedWalls, mergeWallChance, gridColumn, gridRow)
-			local mergeCheckDirections = { { 0, 1 }, { 1, 0 } }
-			for _, _binding in mergeCheckDirections do
-				local gridColumnDelta = _binding[1]
-				local gridRowDelta = _binding[2]
-				local neighborColumn = gridColumn + gridColumnDelta
-				local neighborRow = gridRow + gridRowDelta
-				if not self:hasRoom(neighborColumn, neighborRow) then
-					continue
-				end
-				local sharedWallKey = mazePassageKey(gridColumn, gridRow, neighborColumn, neighborRow)
-				if passages[sharedWallKey] ~= nil then
-					continue
-				end
-				if math.random() >= mergeWallChance then
-					continue
-				end
-				mergedWalls[sharedWallKey] = true
-			end
-		end
-		function ProceduralRoomGrid:generateMergedWalls(passages, mergeWallChance)
-			local mergedWalls = {}
-			for gridColumn = 0, #self.roomGrid - 1 do
-				local roomRow = self.roomGrid[gridColumn + 1]
-				if not roomRow then
-					continue
-				end
-				for gridRow = 0, #roomRow - 1 do
-					if not self:hasRoom(gridColumn, gridRow) then
-						continue
-					end
-					self:collectMergedWallsForCell(passages, mergedWalls, mergeWallChance, gridColumn, gridRow)
-				end
-			end
-			return mergedWalls
-		end
-		function ProceduralRoomGrid:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, gridColumnDelta, gridRowDelta, thisFace)
-			local neighborColumn = gridColumn + gridColumnDelta
-			local neighborRow = gridRow + gridRowDelta
-			local neighborExists = self:hasRoom(neighborColumn, neighborRow)
-			local sharedWallKey = mazePassageKey(gridColumn, gridRow, neighborColumn, neighborRow)
-			if neighborExists and mergedWalls[sharedWallKey] ~= nil then
-				return {
-					state = "empty",
-				}
-			end
-			if neighborExists and passages[sharedWallKey] ~= nil then
-				return {
-					state = "doorway",
-				}
-			end
-			if neighborExists then
-				return {
-					state = "interiorWall",
-				}
-			end
-			if self.roomGrid[gridColumn + 1][gridRow + 1] == EXIT_ROOM_CELL_TYPE and thisFace == "north" then
-				return {
-					state = "doorway",
-				}
-			end
-			return {
-				state = "exteriorWall",
-			}
-		end
-		function ProceduralRoomGrid:computeFaceDataForCell(passages, mergedWalls, gridColumn, gridRow)
-			return {
-				north = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, 0, -1, "north"),
-				south = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, 0, 1, "south"),
-				east = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, 1, 0, "east"),
-				west = self:computeSingleFaceData(passages, mergedWalls, gridColumn, gridRow, -1, 0, "west"),
-			}
-		end
-		function ProceduralRoomGrid:computeAllRoomFaceData(passages, mergedWalls)
-			local allRoomFaceData = {}
-			for gridColumn = 0, #self.roomGrid - 1 do
-				local roomRow = self.roomGrid[gridColumn + 1]
-				if roomRow == nil then
-					continue
-				end
-				for gridRow = 0, #roomRow - 1 do
-					if not self:hasRoom(gridColumn, gridRow) then
-						continue
-					end
-					local _arg0 = `{gridColumn},{gridRow}`
-					local _arg1 = self:computeFaceDataForCell(passages, mergedWalls, gridColumn, gridRow)
-					allRoomFaceData[_arg0] = _arg1
-				end
-			end
-			return allRoomFaceData
-		end
-	end
-	return {
-		ProceduralRoomGrid = ProceduralRoomGrid,
-	}
-
-end
-
-__modulesFolder["Tree"] = function()
-	local script
-	script = newFakeInstance({"Tree"})
+	script = newFakeInstance({"biomes", "Tree"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
@@ -1009,60 +1224,17 @@ __modulesFolder["Tree"] = function()
 
 end
 
-__modulesFolder["Util"] = function()
+__modulesFolder["biomes"]["nuristanStandardBiome"] = function()
 	local script
-	script = newFakeInstance({"Util"})
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local function assign(a, b, optionalFunc)
-		if optionalFunc == nil then
-			optionalFunc = function(a, index, value)
-				a[index] = value
-			end
-		end
-		local _a = a
-		assert(_a, "A is missing")
-		local _b = b
-		assert(_b, "B is missing")
-		for index, value in pairs(b) do
-			optionalFunc(a, index, value)
-		end
-		return a
-	end
-	local function fisherYatesShuffle(inputArray)
-		local _array = {}
-		local _length = #_array
-		table.move(inputArray, 1, #inputArray, _length + 1, _array)
-		local result = _array
-		for currentIndex = #result - 1, 1, -1 do
-			local randomSwapIndex = math.floor(math.random() * (currentIndex + 1))
-			local elementAtCurrentIndex = result[currentIndex + 1]
-			result[currentIndex + 1] = result[randomSwapIndex + 1]
-			result[randomSwapIndex + 1] = elementAtCurrentIndex
-		end
-		return result
-	end
-	return {
-		assign = assign,
-		fisherYatesShuffle = fisherYatesShuffle,
-	}
-
-end
-
-__modulesFolder["adapterToUse"] = function()
-	local script
-	script = newFakeInstance({"adapterToUse"})
+	script = newFakeInstance({"biomes", "nuristanStandardBiome"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
-	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
-	local robloxAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "robloxAdapter").robloxAdapter
+	local useBiomeData = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome").useBiomeData
+	local humanConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "humanConfig").default
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	local _biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome")
+	local ensureBiomeData = _biome.ensureBiomeData
+	local biomeClaimLand = _biome.biomeClaimLand
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -1070,153 +1242,52 @@ __modulesFolder["adapterToUse"] = function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
-	return {
-		adapterToUse = adapterToUse,
-	}
-
-end
-
-__modulesFolder["alphabetArray"] = function()
-	local script
-	script = newFakeInstance({"alphabetArray"})
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local alphabetArray = string.split("abcdefghijklmnopqrstuvwxyz", "")
-	return {
-		alphabetArray = alphabetArray,
-	}
-
-end
-
-__modulesFolder["biome"] = function()
-	local script
-	script = newFakeInstance({"biome"})
-	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local biomeExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeExtension").biomeExtension
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
-	local function useBiomeData(yourCell)
-		local data = biomeExtension:get(yourCell)
-		if not data then
-			return nil
-		end
-		return data
-	end
-	local function biomeClaimLand(thisBiome, yourCell)
-		local data = biomeExtension:get(yourCell)
-		if not data then
-			return nil
-		end
-		local _whoClaimedThis = data.whoClaimedThis
-		local _name = thisBiome.name
-		table.insert(_whoClaimedThis, _name)
-	end
-	-- If a cell might not have biome data yet but you want to guarantee it does by the time this function exits, getOrInit handles that without a separate has() check followed by a set()
-	local function ensureBiomeData(yourCell)
-		return biomeExtension:getOrInit(yourCell, function()
-			return {
-				whoClaimedThis = {},
-			}
-		end)
-	end
-	return {
-		useBiomeData = useBiomeData,
-		biomeClaimLand = biomeClaimLand,
-		ensureBiomeData = ensureBiomeData,
-	}
-
-end
-
-__modulesFolder["biomeAndStructureRegistrySystem"] = function()
-	local script
-	script = newFakeInstance({"biomeAndStructureRegistrySystem"})
-	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
-	local thisLogger = Logger.new("biome_box")
-	local biomeBox
+	local NuristanStandardBiome
 	do
-		biomeBox = setmetatable({}, {
+		NuristanStandardBiome = setmetatable({}, {
 			__tostring = function()
-				return "biomeBox"
+				return "NuristanStandardBiome"
 			end,
 		})
-		biomeBox.__index = biomeBox
-		function biomeBox.new(...)
-			local self = setmetatable({}, biomeBox)
+		NuristanStandardBiome.__index = NuristanStandardBiome
+		function NuristanStandardBiome.new(...)
+			local self = setmetatable({}, NuristanStandardBiome)
 			return self:constructor(...) or self
 		end
-		function biomeBox:constructor()
-			self.modifiers = {}
+		function NuristanStandardBiome:constructor(adapterToUse, config, parent)
+			self.priority = 100
+			self.config = config
+			self.parent = parent
+			self.name = "nsb"
+			self.adapter = adapterToUse
 		end
-		function biomeBox:executeAllModifiers(yourSelf, yourCell)
-			local _exp = self.modifiers
-			-- ▼ ReadonlyArray.forEach ▼
-			local _callback = function(modifier, index)
-				modifier:generate(yourSelf, yourCell)
+		function NuristanStandardBiome:getColourAndMaterialFromHeight(height)
+			if height < humanConfig.grassDeepness then
+				return self.config.grass()
 			end
-			for _k, _v in _exp do
-				_callback(_v, _k - 1, _exp)
-			end
-			-- ▲ ReadonlyArray.forEach ▲
+			return self.config.desert()
 		end
-		function biomeBox:registerModifier(yourObject)
-			thisLogger:warn(`Registered modifier '{yourObject.name}'.`)
-			local _modifiers = self.modifiers
-			local _yourObject = yourObject
-			table.insert(_modifiers, _yourObject)
-			table.sort(self.modifiers, function(a, b)
-				return a.priority > b.priority
-			end)
+		function NuristanStandardBiome:generate(yourSelf, yourCell)
+			if useBiomeData(yourCell) then
+				return nil
+			end
+			local operateOnThisTriangleInstance = function(data, triangle)
+				local height = data.data.averageHeight
+				local propMap = self:getColourAndMaterialFromHeight(height)
+				assign(triangle, propMap, function(a, b, c)
+					self.adapter.setProperty(a, b, c)
+				end)
+			end
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1])
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][2])
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][1])
+			operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][2])
+			ensureBiomeData(yourCell)
+			biomeClaimLand(self, yourCell)
 		end
 	end
 	return {
-		biomeBox = biomeBox,
-	}
-
-end
-
-__modulesFolder["biomeExtension"] = function()
-	local script
-	script = newFakeInstance({"biomeExtension"})
-	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local createCellExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "cellExtension").createCellExtension
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
-	local biomeExtension = createCellExtension()
-	local structureExtension = createCellExtension()
-	-- idk structure data goes here
-	-- omg typescript is so new to me wtf is a weak map ohh okay i understand oh my gosh im stuck in a pizza traffic
-	-- export const structureExtension = createCellExtension<WedgeCell, StructureData>();
-	return {
-		biomeExtension = biomeExtension,
-		structureExtension = structureExtension,
+		NuristanStandardBiome = NuristanStandardBiome,
 	}
 
 end
@@ -1303,13 +1374,18 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 			return self:constructor(...) or self
 		end
 		function createTerrain:constructor(operateOnData, EgoMoose, adapter, parent, materialiseTriangle)
-			self.materialiseTriangle = materialiseTriangle or self.materialiseTriangle
+			if materialiseTriangle then
+				self.customMaterialise = materialiseTriangle
+			end
 			self.adapter = adapter
 			self.operateOnData = operateOnData
 			self.EgoMoose = EgoMoose
 			self.parent = parent
 		end
 		function createTerrain:materialiseTriangle(a, b, c)
+			if self.customMaterialise then
+				return self.customMaterialise(self, a, b, c)
+			end
 			local _binding = self.EgoMoose.draw3dTriangle(a, b, c)
 			local AData = _binding[1]
 			local BData = _binding[2]
@@ -1784,6 +1860,114 @@ __modulesFolder["logger"] = function()
 
 end
 
+__modulesFolder["nuristanHandler"]["livingRoom"] = function()
+	local script
+	script = newFakeInstance({"nuristanHandler", "livingRoom"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local LivingRoomHandler
+	do
+		LivingRoomHandler = setmetatable({}, {
+			__tostring = function()
+				return "LivingRoomHandler"
+			end,
+		})
+		LivingRoomHandler.__index = LivingRoomHandler
+		function LivingRoomHandler.new(...)
+			local self = setmetatable({}, LivingRoomHandler)
+			return self:constructor(...) or self
+		end
+		function LivingRoomHandler:constructor(buildings)
+			self.priority = 0
+			self.buildings = buildings
+		end
+		function LivingRoomHandler:tryGenerate(roomCFrame, faceData)
+			self.buildings:createStandardRoom(roomCFrame, faceData)
+			return true
+		end
+	end
+	return {
+		LivingRoomHandler = LivingRoomHandler,
+	}
+
+end
+
+__modulesFolder["nuristanHandler"]["sniperWindow"] = function()
+	local script
+	script = newFakeInstance({"nuristanHandler", "sniperWindow"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local ALL_WALL_FACES = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomes", "NuristanBuildings").ALL_WALL_FACES
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local SniperWindowRoomHandler
+	do
+		SniperWindowRoomHandler = setmetatable({}, {
+			__tostring = function()
+				return "SniperWindowRoomHandler"
+			end,
+		})
+		SniperWindowRoomHandler.__index = SniperWindowRoomHandler
+		function SniperWindowRoomHandler.new(...)
+			local self = setmetatable({}, SniperWindowRoomHandler)
+			return self:constructor(...) or self
+		end
+		function SniperWindowRoomHandler:constructor(buildings, sniperWindowDoorway)
+			self.priority = 10
+			self.buildings = buildings
+			self.sniperWindowDoorway = sniperWindowDoorway
+		end
+		function SniperWindowRoomHandler:hasExteriorFace(faceData)
+			for _, face in ALL_WALL_FACES do
+				if faceData[face].state == "exteriorWall" then
+					return true
+				end
+			end
+			return false
+		end
+		function SniperWindowRoomHandler:tryGenerate(roomCFrame, faceData)
+			if not SniperWindowRoomHandler:hasExteriorFace(faceData) then
+				return false
+			end
+			local roomSize = self.buildings.config.roomProps.RoomSize
+			self.buildings:instantiateRoomShell(roomCFrame)
+			for _, face in ALL_WALL_FACES do
+				local faceDatum = faceData[face]
+				if faceDatum.state == "empty" then
+					continue
+				end
+				if faceDatum.state == "exteriorWall" then
+					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face, {
+						doorway = self.sniperWindowDoorway,
+					})
+					continue
+				end
+				if faceDatum.state == "doorway" then
+					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face)
+					continue
+				end
+				self.buildings:makeWallWithoutDoorway(roomCFrame, roomSize, face)
+			end
+			return true
+		end
+	end
+	return {
+		SniperWindowRoomHandler = SniperWindowRoomHandler,
+	}
+
+end
+
 __modulesFolder["randomDroneNoise"] = function()
 	local script
 	script = newFakeInstance({"randomDroneNoise"})
@@ -2126,6 +2310,21 @@ __modulesFolder["tagsService"] = function()
 
 end
 
+__modulesFolder["terrainProgressInterface"] = function()
+	local script
+	script = newFakeInstance({"terrainProgressInterface"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	return nil
+
+end
+
 __modulesFolder["translateTerrainForStructureBonding"] = function()
 	local script
 	script = newFakeInstance({"translateTerrainForStructureBonding"})
@@ -2224,6 +2423,7 @@ __modulesFolder["ingame"] = function()
 	local alphabetArray = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "alphabetArray").alphabetArray
 	local droneMaterialConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "droneMaterialConfig").droneMaterialConfig
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	local PingSystem = TS.import(script, game:GetService("ServerScriptService"), "TS", "pingSystem").PingSystem
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -2337,12 +2537,14 @@ __modulesFolder["ingame"] = function()
 			attacker = 100,
 		}
 		local drones = {}
-		local lastPingedTime = {}
 		local playerLoadouts = {}
 		local tempState = {
 			defender = {},
 			attacker = {},
 		}
+		local pingSystem = PingSystem.new({
+			pingCooldownSeconds = 3,
+		})
 		local DroneFolder = adapterToUse.newInstance("Folder")
 		adapterToUse.setProperty(DroneFolder, "Name", "DronesFolder")
 		adapterToUse.setProperty(DroneFolder, "Parent", parent)
@@ -2635,39 +2837,48 @@ __modulesFolder["ingame"] = function()
 				if not (type(pingPosition) == "vector") then
 					return player.kick()
 				end
-				local _condition = lastPingedTime[player.name]
-				if not (_condition ~= 0 and _condition == _condition and _condition) then
-					_condition = 0
+				local _condition = droneNames[player.name]
+				if not (_condition ~= "" and _condition) then
+					_condition = "fucking dog"
 				end
-				local thisLastPingedTime = _condition
-				if os.time() - thisLastPingedTime < 3 then
-					return nil
-				end
-				lastPingedTime[player.name] = os.time()
-				local _exp = players.get_all()
-				-- ▼ ReadonlyArray.forEach ▼
-				local _callback = function(thisPlayer, index)
-					local _thisPlayer = thisPlayer
-					local _condition_1 = droneNames[player.name]
-					if not (_condition_1 ~= "" and _condition_1) then
-						_condition_1 = "fucking dog"
-					end
-					_thisPlayer.fire_client("player_ping", _condition_1)
-					if thisPlayer.get_team() ~= player.get_team() then
-						return nil
-					end
-					thisPlayer.fire_client("team_ping", pingPosition)
-				end
-				for _k, _v in _exp do
-					_callback(_v, _k - 1, _exp)
-				end
-				-- ▲ ReadonlyArray.forEach ▲
+				pingSystem:handlePlayerPing(player, pingPosition, _condition)
 			end
 		end)
 	end
 	return {
 		createDrone = createDrone,
 		kickStart = kickStart,
+	}
+
+end
+
+__modulesFolder["loadPeoplesRepublicOfGermetistan"] = function()
+	local script
+	script = newFakeInstance({"loadPeoplesRepublicOfGermetistan"})
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	local function loadPeoplesRepublicOfGermetistan()
+		if not isDeadline then
+			return nil
+		end
+		--[[
+		 
+			    碜ꕗ罬受Ⓛ燣朷脄ﯙㆤፋ뮭䂒䈊唵啕諾࠲雘뱧壚蛯ꢠ䵃쨪畬ばヘ⼤쑎ﱢ鬟蕴荽뮁垦䔢ኈ軅趝㗕ዼ鍖渗꧒ﻨ㨭谉뚝ﯼ⌶ണ답쿧鱳켹콁䡖랺懭㪄﹠梽↻긶뒔첨慿쮒틌虬䙝␳됵໮鵭綶퓰敩描궽跪옖姏괮ⲷ㖶鐚穚撵섆囵땭඲쇙옿똚쁤节ꅵ駡﫠ⱨ쿍巿뎟₴勃퀳ࠝ髽制㢳泯༐穤叇殝묺ờ叓틑阮讻皾哳髧퇕뵳佷ﮫࠑ묻瞵睷泟褖Œ퉿㓩㾗◷뼫뀪飴齌𢡊퐤ﶇ䧺祁ାỘ᷉ꨝ삖﹟ࢋ̩ፐᆠ캤ౖ৖✳㋞艜疷短湿ड嶺潴ꖼ宂搈榺幼덽쾞軮鴯㾵晍ﶺ﫵硲✶蠜굝彟ﾕ⏘֛㘶吢䡒ㆂ㾃䅭⢇朣븩葶샅ꮞ뷋晚柦౸ﶎ慮晰噭ᢜﯤ杷筏锓쑢ꊾ圍즿삦╗ꪊ昩﹠햢ꋙ쏻䇅뷬ퟗສ⻩௧▵꓏㮾꬯뭳璻檄笏龏꿸캚얲ﵨ凩솏﹎ﰓꎢ勺잦仯垧ꘃ캊痖⥗惄稁啞ꤪꭃ诤ܿ﫛䌵舢ᥰ䕜ě겾ᕰ薦ȣ꬏⑽뾋띎忼烹佻⸐謫๵ᵙ輸￾沴ᄎ嶣ﶮ쀾칥ඹ肳䩹춹ꇼ厞峺齷髀쬝✢쓹꟪꣄㰛굓卖㲃蝔鬢䓃쬻䮕鵧䅥嵊敟㔱ᩜ焇硩ಅᓚ㚲剖珹컬Ꞑ絔瓧쪵佮뿵묓篎핯㺼寿痸碿ꩤ쟜闛澡䖲捇힥ﱌ挒讈ᶲṛ谨橙ླྀ众쀋ᖛ麪쯁ﭦ숚룺律꠫袅탅년䚨᠙ᏻᑗ偱ড়м藤犮턩휸䄓꼼쪕ﵕ㟴烉䨓ㅾ蝯⭰裘䞜捞⼋氼ꌺ﬏걔罱醿ꑏ䅾Եꊢቔɤᮬ鞜咒⎗耬쮑ǲᲙ肝눜뤜锡䊆䠥ᧀ㮰곟Ჰ蹂먂깑됲ꏻᢔ蟒㪪᲻硱ꓟ褴ࡕ셺氜嗂ꡘ㳊鴞ୀ핔୚ꄩ華땿Ⲏ딪쾝恒행㊭素꛵쁔黇⣓㌏젤䝋搸遇ä篓껀柸뀰抓쵣폜⦬⏢ḵὃጬꁽ勆񫨤ᚸ流鲛㚁밬䝦턲꓉酿ࢦ곽䣔굝戱뺼邬痂눺辩宔ݢ降쒼㰧웽根꫉讹ٽ䍖ヿ蕙࿍ﭬ믇脔ꌃᡗ噭ṣ⵺摴ᙤ球猘밠㾞⎟芉뀺䜾譖ꌺᦶᝉ刺翅閼꿡貟뼄蘆⦆铡Ȱ겕抸ﲠಿ蟁騠㩞춳ᄋ⫾招栘瞤ⵞ鎬佫曇筏豻ԍ痘ꉣⷉ냙伲改幺蛍冽볗ꇠ豲庳궩힁鼖赥㥋㛵㻆쒳뚓䛹䂄Ⳳ岓뒁싁ᄢ䙽놘⹮鮷ᤌ㔫鑊㬑᱊댍٩婁傔光뗥憸Ջ胨❍㦞ฆ⥮芠ᱠ村⠀ꔨ∰융􎁸赜덂㫠ﺘ蛍㎡툆屁菭䙹⛗놸霷▴䰌䜎⧰喻쇌ᔄ쉈톛飙駐끽넄鬠䄨鏧昕⯯딍픪פּ⊑飰竂ờ䴅쑪ಳ䗱Ꞩ率誣뢐菣⢛崾샄戮犛廏⪚຅⢹㷍夾㲾偎唳텤韷䔘ꡐ궉⧷䒠᛿᳕┠ι檟蚬탙ᘊᤤ䉍᥏隒뛻ސ恲菷멏械黖ఀ䄪꒤ࠕᶤ윅씾虏〚혙엕늮猪鱱骘첺媹瀳喳㉽凹⹼沔לּㄽ덵毸黎Ố䈱ⵡ碏涟忛饞똻㢑铨ᘮⶮ쎜嚦ᕊ⻛萡쒟ꅂᴈ䗭섎欙﹆縜슌灆땦鿺䍏䊯该㖻艐ჳ涞閾綌様鳯愐؅ﻜ죘佒Ꮒ钠ꦡ술̉ன诅ୠ蔸⌎躺ㄿ룰룁မ岌澘㰀咡㗳㸶눥ᱦ좼讒鹀絞겧﵌葎狱汲뒑瀸豄던㩲䊨貓⚡⳯⮆椛챂玓぀㴦௉ປᣵ㵯⦞ㆱ練ᩯᷓᇦ颭겂욁ʦ눩橦輶蝮մ߉竝宙ꄰ盚⭡㥀髌✶쟝泼ϡ行⎑輸ᭃ谬ꭍ凰븉ᥕ鑚呹搓먘ｂ⚷ᰱ释궈藓ᎎ拴䧚ꣂά䟺扡랇밇巸䫘룙ィ⿃浖⤈娩䱣℅烇⒔ԇᚸ듃య䃓ᢖ顈붌뿶츀뱙䆤뻢祖株ਕ㶡ಊ㯒᝷鮢ᇳ劍씭㣟겄⚵Ꮲ堬助팰쏩㈈숸耘⢕娢㖞䓊ᶥᄂ㖪ꑴ㔖麁繉┇ቃ⭱忓胅鳒얿檂Ⴎ瓒ꮳ㕀⧁肰ꭔ剥፳쟹틂༿熆哅찗顸꣇䶑哊憪퉁専絬岫䥣팡鰕㲉╊⛮䥤⨬ࡍષ䑍꫱䬤㍀戉麅賂눋浹ᮼ徿ꛏ淂拜뺐ᚷ斅♑綧亃缂懤᰻꼮淳銴䕙婗⻮뎉藑ℸⲬⒼ╍槍푊尳缜솴枇姸ẇ脖ཊ䚒쑝擦퀼橄ꠅ䋂をЕ㩘ꨄ눳術ͼ䠵뮄ᮙ턧ꖒ㟱꒫騙以㊽鑰챬터愡靈␓䭨⭳睃뱖珆ꈭ뎖㋨汙䆪ẳ獎ꨈ튵螟ꦩ暃蜄彶驉꘿㷂氾銁翀蜭蒢ฒ꥟쏸㫽쮈寱챿ￌ洚
+		    
+		]]
+		load_modfile("eJylV39sU9f1vyTBceNnN4EE+9kxpBNLu61AkkIKVTVVVeeG+r0IMpbYvGdY2obvqKBNQ8oqdWwwcDDYLyTETvximx+FdIN9u4FXpkUiEoiOxY2dNdUS/JNWbhep0v7oOi2MCbad+/wjNvV7DSOy9e6595zP55xzzznPQUhWt7ph7eq6OoT+YGi9IbuuNrSUzKhhf8uS0syGbEZdJDO0NQ7unW19ttTwZWljz629jerGFlnPrS4stzW2lBp6WmS16sbBBtmOVvXzbbVtDbLB2cY/thrAZO+Q4eeCgqF1meH64Cxoz81d/93Qs58gtPf63K1Sw9AzCB2a/VI2OLNs7w8QemRTx2uduzoe3VPT0tH5xou7dr5U89qOmuff6Nrd0dW9c093+6sIEd0duzt3tXd3bN/d3okWAVLSfzTpP5f0DyX380m/K+k/sCrpP5j0n0z6z9Qk/YfhkfQfSfp5QQs+HtgdyaodwJb+XwiLAykTUO6vEaDOpAxWCdYnMzLeglx1t3ftbn8JIfmrb3SlvFuCZAhpul58s33Pno7unS8/tWZN/br69eueeHLd2ic2iBytXV9f/5Uj2AWb9U82NlQiSFIxgj+DQW0oh2cjvimEdsDF3KrdBKuevctmWmfmDHj9jmFuZnBWbRic++Rnd3tPlRPEYqK+727Z+fPfVw311Mm/wKYlV6qK3j5mKf5g1aKi2cP7QcXter3s19cOqi7p3sfn7wvnJbXnDqTPO76rL7tzdLtqhHsPn4+v+M6a54jFsv1oUenBj/5O/BOjovp3x6ZO7+OsV6emA86KddYpV2DEegFVXqkqq0OL5Ac/+ttDNYIiGXBFXAEbrL4VcIWmAiPclKsPJH2/i7dOX/xw+U97LhCLKw51HVn6wuyz//7tfmy0EQ5do/2uwD7OZQ25+JGAs0p5zbmh/FOeXPqfd5rAyx0nIsT54/+n6qjEPButU1NW7t08g4dUmyJEw8s7S5WdZ0FlXUplX+iqNTEaXHEH6qt4aQyFFNo2slJWc/nO7KeQfVR058q1T26/9ePquxN7zt7+1W8+vOPlW/91+O1deL+qZMfcldtvoUWy9R9jR9el/ExjEouI7dMdsh5bjChqWQ94TxfAC+bhFZueqsvB+2bCGrj6+dioK4iF0MWxREaoGBnlLxP7FFdQcQncBDyF5HKu0SnXOEETrzzKlf1VN/RwyUoT7NPYqTF+3yXrFIdv6ZIrcIjYR5xjXi8LbDyjOvsPrFR/cezIkb+kT0F+BTWiohJUAmQbrJec2HdUkiOXgCzLkeXQAfIcmYCdshy5HJUhQobgekglGcA7sKzfHLCOQroCrlHuM7Qyo/sYlIfSOqocu3hxpN+JNAhVwXpsHFXCqFg8yp0eC0DVVAtaoSn6tLV/LI61KuiRz53ocWBS5THViTKtfSCm9cBUnsf0tCjTMw/IJEdLZDiQRwDke9OuwGf4sDDic/cgYpPNY9PcKawj4h41H0MTLOvHoH1Sxtlu3iTi2xa4+cqcmzaBvCxHZtEypMmRfwim2rys/UjUrV1iMb68kKx1wrI6j6lblOnNB2L6CcS8PCfG/Wg5qsmLuQZ9Q1Yw/4VZD837bLvHgRSjAxhX5jD0AVZtHmMteux/ZHQWZHQD47dzGLwgP54jn4KJsDpHPotWozoZthdJ+f9/xZW84hav4YyfvwSGBimG9x6U4QIwrJViuPygDL+HwZog2YQ6Xs2zEQsq/mLb+DDjTWgYd6QtXu2Jk6xPa2bHe0+MewUNddiiY+JxLcnyTbDZTzLeqGU5XnqGzVG9vNeh4IxyXrOtqdeBnxaNZTlLNvXaPD7GxLO2k0b5QIT3RizyXJO0gcLBESJGfbGYLm6btxkMNSuUSjsRHEqzDQZpWkFQlFFJteVhuAVLgOgnTeFtOZ4OBilugqAcYOVQZ1EoAKUo+HIiMMc12/jceI1cs0I64P6Yhs0zodIGXEGD7UZ5JtexuJc3JbRMDEcOKfBVu9lEwcwVBMJI0ZuY2ZnQsH2xBOMDmyBBKOTO6E2T52YVK++1Dev11Sr7RCKRmPB6wh7dTQXEagyz8YhF8aeo+WGKo7iQg+Mom10+wMRiLnKbXs/yLeYF2NIqmg6F4GoouT3NWT48vlBOVTPRZJf3RRioUK2JKfdEoBb/HNUlIB++ap/ZmIas0NkWChkkQk0ZT5aStvvwBAeQYHKD97pPaLCe1gwAQSqkpAgVHaTHBcU+hk8wGtYZxdXioLKu+haccZqYzLpauXAzVbMyfVH5LnxslPs8MT2zdWv4ns4e0EIxLWF4j94MbZ9f25letjs4keoelOjnwhYuLa7DnFamFUroZi7bhCHarsSfoUIdCEXtwQ5rGf5GfhzCjHBGtWaf+kNPQq+L5TW7glAQ822elb7a4H2Madic72EQBgX+3MjYT1ITwpSgqaHCIAMJC6mLxQtghTgjDo66MT+48LjB8d4QGVyMb5j1xDwAVKE18z42siUcZsi8i5KeQH1erKfj2fj4/UzqnIRO6+Jy8WxytJFwOIxEs1g6ckKojJMmoSzvK4btwmkbzEJzkzBAPSYLyQ6bGPU9bymeMbHqWPqwGm8d0+uiEeaYrayC8THGgfSRAqayKWpmjzb1AoduBXQHyXrdW5mhMHbaK2E5QJrMJzbH3Wz8A+H6CCOR+sIbQ4wsq01R8L4JGVWUWlR5AIJkE7oY/0ImtxwxkcqtiIXTE45i9EnaqMIfcUf6YmG3h7wHXfhK2LjZMKMvw+rN8I5tVikIWinhTExjIQVwxySUBQcWuNjFtMMML0DTGJaYSL2Mv/bOALxZQaS+4vpQ96ZoKu2TChU9oQyKO9IXd5uiEfNSjcUtON+shCa1E+LgrlgsUqnTMMPpMgjCOIAYKJVaIjWeRModpRECNaqkdDUWnoF+SSUHEkMrceWIX9OAxZzSxb9qghCudNKrszVAKcGAsKtUUmUTc8f59LXSwuBLDz9xhlTFzBeYeKjHTZFUymGq0kFcAuLAfWxcq0lj0yGcFTyJJUom7klkKiwITQq3RE2q8UskM0BiCZ6F+UiyC215G7xfv6bPbcJi3L6QFrdlhSZRfadOg38CYeT0Uhw7ry5t85K0RVlaVy7us4mF0SE4LKwkvCVNac3USlwzfxzBtGeHWfjnwx6HgRYPSthlRpLEXWTm0DxqRKgFQsLx1DCSBBU6WKoEsjPqfohTA3zhCUg1u4QbmdEnpZI38aSrmhlO5TK9lHDMbNEw2DVhIZdIJBNLaCtz6jp3Q7xWc8aiLbOW2xcy6GxZQaoes3NOqgjStYef4typqWaDhwRfdppJpj89wmw+koF/wIct9jiEog4SqV/D+PeTOv3LiFvxzH//zG0aag==")
+		map.set_map("template_map")
+	end
+	return {
+		loadPeoplesRepublicOfGermetistan = loadPeoplesRepublicOfGermetistan,
 	}
 
 end
@@ -2681,20 +2892,17 @@ __modulesFolder["map_generator"] = function()
 	local createTerrain = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "createTerrainFromVerticesUsingAdapter").createTerrain
 	local PerlinNoise = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "PerlinNoise").PerlinNoise
 	local biomeBox = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeAndStructureRegistrySystem").biomeBox
-	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
-	local _biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome")
-	local biomeClaimLand = _biome.biomeClaimLand
-	local ensureBiomeData = _biome.ensureBiomeData
-	local useBiomeData = _biome.useBiomeData
-	local humanConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "humanConfig").default
 	local translateTerrainOrientationForStructureBonding = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "translateTerrainForStructureBonding").translateTerrainOrientationForStructureBonding
-	local NuristanBuildings = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "NuristanBuildings").NuristanBuildings
+	local NuristanBuildings = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomes", "NuristanBuildings").NuristanBuildings
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
-	local ALL_WALL_FACES = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "NuristanBuildings").ALL_WALL_FACES
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
-	local Tree = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Tree").Tree
+	local Tree = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomes", "Tree").Tree
+	local NuristanStandardBiome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomes", "nuristanStandardBiome").NuristanStandardBiome
+	local SniperWindowRoomHandler = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "nuristanHandler", "sniperWindow").SniperWindowRoomHandler
+	local LivingRoomHandler = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "nuristanHandler", "livingRoom").LivingRoomHandler
 	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
 	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -2760,78 +2968,6 @@ __modulesFolder["map_generator"] = function()
 	
 	]]
 	local function startMapGenerator()
-		local SniperWindowRoomHandler
-		do
-			SniperWindowRoomHandler = setmetatable({}, {
-				__tostring = function()
-					return "SniperWindowRoomHandler"
-				end,
-			})
-			SniperWindowRoomHandler.__index = SniperWindowRoomHandler
-			function SniperWindowRoomHandler.new(...)
-				local self = setmetatable({}, SniperWindowRoomHandler)
-				return self:constructor(...) or self
-			end
-			function SniperWindowRoomHandler:constructor(buildings, sniperWindowDoorway)
-				self.priority = 10
-				self.buildings = buildings
-				self.sniperWindowDoorway = sniperWindowDoorway
-			end
-			function SniperWindowRoomHandler:hasExteriorFace(faceData)
-				for _, face in ALL_WALL_FACES do
-					if faceData[face].state == "exteriorWall" then
-						return true
-					end
-				end
-				return false
-			end
-			function SniperWindowRoomHandler:tryGenerate(roomCFrame, faceData)
-				if not SniperWindowRoomHandler:hasExteriorFace(faceData) then
-					return false
-				end
-				local roomSize = self.buildings.config.roomProps.RoomSize
-				self.buildings:instantiateRoomShell(roomCFrame)
-				for _, face in ALL_WALL_FACES do
-					local faceDatum = faceData[face]
-					if faceDatum.state == "empty" then
-						continue
-					end
-					if faceDatum.state == "exteriorWall" then
-						self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face, {
-							doorway = self.sniperWindowDoorway,
-						})
-						continue
-					end
-					if faceDatum.state == "doorway" then
-						self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face)
-						continue
-					end
-					self.buildings:makeWallWithoutDoorway(roomCFrame, roomSize, face)
-				end
-				return true
-			end
-		end
-		local LivingRoomHandler
-		do
-			LivingRoomHandler = setmetatable({}, {
-				__tostring = function()
-					return "LivingRoomHandler"
-				end,
-			})
-			LivingRoomHandler.__index = LivingRoomHandler
-			function LivingRoomHandler.new(...)
-				local self = setmetatable({}, LivingRoomHandler)
-				return self:constructor(...) or self
-			end
-			function LivingRoomHandler:constructor(buildings)
-				self.priority = 0
-				self.buildings = buildings
-			end
-			function LivingRoomHandler:tryGenerate(roomCFrame, faceData)
-				self.buildings:createStandardRoom(roomCFrame, faceData)
-				return true
-			end
-		end
 		local worldRoot = getWorldRoot()
 		local Log = Logger.new("map_generator")
 		local workspace = worldRoot
@@ -2859,50 +2995,6 @@ __modulesFolder["map_generator"] = function()
 		adapterToUse.setProperty(wedgesFolder, "Name", "Wedges")
 		adapterToUse.setProperty(wedgesFolder, "Parent", workspace)
 		local standardBox = biomeBox.new()
-		local NuristanStandardBiome
-		do
-			NuristanStandardBiome = setmetatable({}, {
-				__tostring = function()
-					return "NuristanStandardBiome"
-				end,
-			})
-			NuristanStandardBiome.__index = NuristanStandardBiome
-			function NuristanStandardBiome.new(...)
-				local self = setmetatable({}, NuristanStandardBiome)
-				return self:constructor(...) or self
-			end
-			function NuristanStandardBiome:constructor(adapterToUse, config, parent)
-				self.priority = 100
-				self.config = config
-				self.parent = parent
-				self.name = "nsb"
-				self.adapter = adapterToUse
-			end
-			function NuristanStandardBiome:getColourAndMaterialFromHeight(height)
-				if height < humanConfig.grassDeepness then
-					return self.config.grass()
-				end
-				return self.config.desert()
-			end
-			function NuristanStandardBiome:generate(yourSelf, yourCell)
-				if useBiomeData(yourCell) then
-					return nil
-				end
-				local operateOnThisTriangleInstance = function(data, triangle)
-					local height = data.data.averageHeight
-					local propMap = self:getColourAndMaterialFromHeight(height)
-					assign(triangle, propMap, function(a, b, c)
-						self.adapter.setProperty(a, b, c)
-					end)
-				end
-				operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][1])
-				operateOnThisTriangleInstance(yourCell, yourCell.triangles[1][2])
-				operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][1])
-				operateOnThisTriangleInstance(yourCell, yourCell.triangles[2][2])
-				ensureBiomeData(yourCell)
-				biomeClaimLand(self, yourCell)
-			end
-		end
 		local translateTerrain = translateTerrainOrientationForStructureBonding.new({
 			orientationSubtraction = Vector3.new(0, 0, -90),
 		})
@@ -2976,13 +3068,60 @@ __modulesFolder["map_generator"] = function()
 			},
 			treesPerTriangle = 4,
 		}, wedgesFolder))
+		local CustomTriangleFunc
+		do
+			CustomTriangleFunc = setmetatable({}, {
+				__tostring = function()
+					return "CustomTriangleFunc"
+				end,
+			})
+			CustomTriangleFunc.__index = CustomTriangleFunc
+			function CustomTriangleFunc.new(...)
+				local self = setmetatable({}, CustomTriangleFunc)
+				return self:constructor(...) or self
+			end
+			function CustomTriangleFunc:constructor(adapter, EgoMoose, parent, resolution)
+				self.materialise = function(thisThing, a, b, c)
+					-- when given to createTerrain, it calls self:materialiseTriangle (our custom function set in its constructor)
+					-- then it becomes materialiseTriangle(self, a, b, c)
+					-- but roblox-ts for some god forsaken reason does not recognise this
+					local _binding = thisThing.EgoMoose.draw3dTriangle(a, b, c)
+					local AData = _binding[1]
+					local BData = _binding[2]
+					local WedgeA = thisThing.adapter.newInstance("WedgePart")
+					local WedgeB = thisThing.adapter.newInstance("WedgePart")
+					thisThing.adapter.setProperty(WedgeA, "Anchored", true)
+					thisThing.adapter.setProperty(WedgeB, "Anchored", true)
+					thisThing.adapter.setProperty(WedgeA, "Parent", thisThing.parent)
+					thisThing.adapter.setProperty(WedgeB, "Parent", thisThing.parent)
+					assign(WedgeA, AData, function(item, key, value)
+						return thisThing.adapter.setProperty(item, key, value)
+					end)
+					assign(WedgeB, BData, function(item, key, value)
+						return thisThing.adapter.setProperty(item, key, value)
+					end)
+					self.count += 1
+					if self.count % 1000 == 0 then
+						print(self.count / self.total)
+					end
+					return { WedgeA, WedgeB }
+				end
+				self.adapter = adapter
+				self.EgoMoose = EgoMoose
+				self.parent = parent
+				self.resolution = resolution
+				self.total = self.resolution.X * self.resolution.Y
+				self.count = 0
+			end
+		end
 		local function generate()
 			-- work on this later
 			-- prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
+			local newTriangleFunc = CustomTriangleFunc.new(adapterToUse, EgoMoose, wedgesFolder, RESOLUTION)
 			local createTerrainDefault = createTerrain.new(function(thisData)
 				local _self = thisData._self
 				standardBox:executeAllModifiers(thisData._self, thisData)
-			end, EgoMoose, adapterToUse, wedgesFolder)
+			end, EgoMoose, adapterToUse, wedgesFolder, newTriangleFunc.materialise)
 			local triangles = createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
 		end
 		if isDeadline then
@@ -3019,15 +3158,84 @@ __modulesFolder["map_generator"] = function()
 			end)
 		end
 	end
-	-- const [success, result] = pcall(generate);
-	-- warn(success, result);
-	-- function a(b: WrappedInstance){
-	--     b.find_first_child("")
-	-- }
-	-- a(create_instance("Part"));
-	-- time.wait(5);
 	return {
 		startMapGenerator = startMapGenerator,
+	}
+
+end
+
+__modulesFolder["pingSystem"] = function()
+	local script
+	script = newFakeInstance({"pingSystem"})
+	local require = old_require
+	local old_require = nil
+	local newFakeInstance = nil
+	local game = old_game
+	local old_game = nil
+	local __modulesFolder = nil
+	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	-- export class RateLimit 
+	local PingSystem
+	do
+		PingSystem = setmetatable({}, {
+			__tostring = function()
+				return "PingSystem"
+			end,
+		})
+		PingSystem.__index = PingSystem
+		function PingSystem.new(...)
+			local self = setmetatable({}, PingSystem)
+			return self:constructor(...) or self
+		end
+		function PingSystem:constructor(config)
+			self.config = config
+			self.lastPingedTimeByPlayerName = {}
+		end
+		function PingSystem:handlePlayerPing(player, pingPosition, playerDroneName)
+			local _condition = self.lastPingedTimeByPlayerName[player.name]
+			if _condition == nil then
+				_condition = 0
+			end
+			local lastPingTime = _condition
+			if os.time() - lastPingTime < self.config.pingCooldownSeconds then
+				return nil
+			end
+			self.lastPingedTimeByPlayerName[player.name] = os.time()
+			local playerTeam = player.get_team()
+			local _exp = players.get_all()
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(targetPlayer)
+				targetPlayer.fire_client("player_ping", playerDroneName)
+				if targetPlayer.get_team() ~= playerTeam then
+					return nil
+				end
+				targetPlayer.fire_client("team_ping", pingPosition)
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+		end
+	end
+	-- const player = players.get(playerName);
+	-- if (!player) return;
+	-- const eventType = args[0];
+	-- if (!typeIs(eventType, "string")) return player.kick();
+	-- if (eventType === "ping_at_position") {
+	--     const pingPosition = args[1];
+	--     if (!typeIs(pingPosition, "vector")) return player.kick();
+	--     const thisLastPingedTime = lastPingedTime[player.name] || 0;
+	--     if (os.time() - thisLastPingedTime < 3) return;
+	--     lastPingedTime[player.name] = os.time();
+	--     players.get_all().forEach((thisPlayer: Player, index: number) => {
+	--         thisPlayer.fire_client("player_ping", droneNames[player.name] || "fucking dog");
+	--         if (thisPlayer.get_team() !== player.get_team()) return;
+	--         thisPlayer.fire_client("team_ping", pingPosition);
+	--     })
+	-- }
+	return {
+		PingSystem = PingSystem,
 	}
 
 end
@@ -3041,7 +3249,7 @@ task.defer(function()
 	local kickStart = TS.import(script, game:GetService("ServerScriptService"), "TS", "ingame").kickStart
 	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
 	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
-	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	local loadPeoplesRepublicOfGermetistan = TS.import(script, game:GetService("ServerScriptService"), "TS", "loadPeoplesRepublicOfGermetistan").loadPeoplesRepublicOfGermetistan
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local require = old_require
 	local old_require = nil
@@ -3049,15 +3257,7 @@ task.defer(function()
 	local game = old_game
 	local old_game = nil
 	local __modulesFolder = nil
-	if isDeadline then
-		--[[
-		 
-			    碜ꕗ罬受Ⓛ燣朷脄ﯙㆤፋ뮭䂒䈊唵啕諾࠲雘뱧壚蛯ꢠ䵃쨪畬ばヘ⼤쑎ﱢ鬟蕴荽뮁垦䔢ኈ軅趝㗕ዼ鍖渗꧒ﻨ㨭谉뚝ﯼ⌶ണ답쿧鱳켹콁䡖랺懭㪄﹠梽↻긶뒔첨慿쮒틌虬䙝␳됵໮鵭綶퓰敩描궽跪옖姏괮ⲷ㖶鐚穚撵섆囵땭඲쇙옿똚쁤节ꅵ駡﫠ⱨ쿍巿뎟₴勃퀳ࠝ髽制㢳泯༐穤叇殝묺ờ叓틑阮讻皾哳髧퇕뵳佷ﮫࠑ묻瞵睷泟褖Œ퉿㓩㾗◷뼫뀪飴齌𢡊퐤ﶇ䧺祁ାỘ᷉ꨝ삖﹟ࢋ̩ፐᆠ캤ౖ৖✳㋞艜疷短湿ड嶺潴ꖼ宂搈榺幼덽쾞軮鴯㾵晍ﶺ﫵硲✶蠜굝彟ﾕ⏘֛㘶吢䡒ㆂ㾃䅭⢇朣븩葶샅ꮞ뷋晚柦౸ﶎ慮晰噭ᢜﯤ杷筏锓쑢ꊾ圍즿삦╗ꪊ昩﹠햢ꋙ쏻䇅뷬ퟗສ⻩௧▵꓏㮾꬯뭳璻檄笏龏꿸캚얲ﵨ凩솏﹎ﰓꎢ勺잦仯垧ꘃ캊痖⥗惄稁啞ꤪꭃ诤ܿ﫛䌵舢ᥰ䕜ě겾ᕰ薦ȣ꬏⑽뾋띎忼烹佻⸐謫๵ᵙ輸￾沴ᄎ嶣ﶮ쀾칥ඹ肳䩹춹ꇼ厞峺齷髀쬝✢쓹꟪꣄㰛굓卖㲃蝔鬢䓃쬻䮕鵧䅥嵊敟㔱ᩜ焇硩ಅᓚ㚲剖珹컬Ꞑ絔瓧쪵佮뿵묓篎핯㺼寿痸碿ꩤ쟜闛澡䖲捇힥ﱌ挒讈ᶲṛ谨橙ླྀ众쀋ᖛ麪쯁ﭦ숚룺律꠫袅탅년䚨᠙ᏻᑗ偱ড়м藤犮턩휸䄓꼼쪕ﵕ㟴烉䨓ㅾ蝯⭰裘䞜捞⼋氼ꌺ﬏걔罱醿ꑏ䅾Եꊢቔɤᮬ鞜咒⎗耬쮑ǲᲙ肝눜뤜锡䊆䠥ᧀ㮰곟Ჰ蹂먂깑됲ꏻᢔ蟒㪪᲻硱ꓟ褴ࡕ셺氜嗂ꡘ㳊鴞ୀ핔୚ꄩ華땿Ⲏ딪쾝恒행㊭素꛵쁔黇⣓㌏젤䝋搸遇ä篓껀柸뀰抓쵣폜⦬⏢ḵὃጬꁽ勆񫨤ᚸ流鲛㚁밬䝦턲꓉酿ࢦ곽䣔굝戱뺼邬痂눺辩宔ݢ降쒼㰧웽根꫉讹ٽ䍖ヿ蕙࿍ﭬ믇脔ꌃᡗ噭ṣ⵺摴ᙤ球猘밠㾞⎟芉뀺䜾譖ꌺᦶᝉ刺翅閼꿡貟뼄蘆⦆铡Ȱ겕抸ﲠಿ蟁騠㩞춳ᄋ⫾招栘瞤ⵞ鎬佫曇筏豻ԍ痘ꉣⷉ냙伲改幺蛍冽볗ꇠ豲庳궩힁鼖赥㥋㛵㻆쒳뚓䛹䂄Ⳳ岓뒁싁ᄢ䙽놘⹮鮷ᤌ㔫鑊㬑᱊댍٩婁傔光뗥憸Ջ胨❍㦞ฆ⥮芠ᱠ村⠀ꔨ∰융􎁸赜덂㫠ﺘ蛍㎡툆屁菭䙹⛗놸霷▴䰌䜎⧰喻쇌ᔄ쉈톛飙駐끽넄鬠䄨鏧昕⯯딍픪פּ⊑飰竂ờ䴅쑪ಳ䗱Ꞩ率誣뢐菣⢛崾샄戮犛廏⪚຅⢹㷍夾㲾偎唳텤韷䔘ꡐ궉⧷䒠᛿᳕┠ι檟蚬탙ᘊᤤ䉍᥏隒뛻ސ恲菷멏械黖ఀ䄪꒤ࠕᶤ윅씾虏〚혙엕늮猪鱱骘첺媹瀳喳㉽凹⹼沔לּㄽ덵毸黎Ố䈱ⵡ碏涟忛饞똻㢑铨ᘮⶮ쎜嚦ᕊ⻛萡쒟ꅂᴈ䗭섎欙﹆縜슌灆땦鿺䍏䊯该㖻艐ჳ涞閾綌様鳯愐؅ﻜ죘佒Ꮒ钠ꦡ술̉ன诅ୠ蔸⌎躺ㄿ룰룁မ岌澘㰀咡㗳㸶눥ᱦ좼讒鹀絞겧﵌葎狱汲뒑瀸豄던㩲䊨貓⚡⳯⮆椛챂玓぀㴦௉ປᣵ㵯⦞ㆱ練ᩯᷓᇦ颭겂욁ʦ눩橦輶蝮մ߉竝宙ꄰ盚⭡㥀髌✶쟝泼ϡ行⎑輸ᭃ谬ꭍ凰븉ᥕ鑚呹搓먘ｂ⚷ᰱ释궈藓ᎎ拴䧚ꣂά䟺扡랇밇巸䫘룙ィ⿃浖⤈娩䱣℅烇⒔ԇᚸ듃య䃓ᢖ顈붌뿶츀뱙䆤뻢祖株ਕ㶡ಊ㯒᝷鮢ᇳ劍씭㣟겄⚵Ꮲ堬助팰쏩㈈숸耘⢕娢㖞䓊ᶥᄂ㖪ꑴ㔖麁繉┇ቃ⭱忓胅鳒얿檂Ⴎ瓒ꮳ㕀⧁肰ꭔ剥፳쟹틂༿熆哅찗顸꣇䶑哊憪퉁専絬岫䥣팡鰕㲉╊⛮䥤⨬ࡍષ䑍꫱䬤㍀戉麅賂눋浹ᮼ徿ꛏ淂拜뺐ᚷ斅♑綧亃缂懤᰻꼮淳銴䕙婗⻮뎉藑ℸⲬⒼ╍槍푊尳缜솴枇姸ẇ脖ཊ䚒쑝擦퀼橄ꠅ䋂をЕ㩘ꨄ눳術ͼ䠵뮄ᮙ턧ꖒ㟱꒫騙以㊽鑰챬터愡靈␓䭨⭳睃뱖珆ꈭ뎖㋨汙䆪ẳ獎ꨈ튵螟ꦩ暃蜄彶驉꘿㷂氾銁翀蜭蒢ฒ꥟쏸㫽쮈寱챿ￌ洚
-		    
-		]]
-		load_modfile("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")
-		map.set_map("template_map")
-	end
+	loadPeoplesRepublicOfGermetistan()
 	kickStart(adapterToUse, getWorldRoot())
 	startMapGenerator()
 
