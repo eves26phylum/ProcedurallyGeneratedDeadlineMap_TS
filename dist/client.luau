@@ -1565,16 +1565,16 @@ __modulesFolder["deadlineAdapter"] = function()
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local wagesCounter = 0
+	-- let wagesCounter = 0;
 	local deadlineAdapter = {}
 	do
 		local _container = deadlineAdapter
 		local function newInstance(className, Parent)
-			if wagesCounter > 1000 then
-				wagesCounter = 0
-				task.wait(0.05)
-			end
-			wagesCounter += 1
+			-- if (wagesCounter > 1000) {
+			--     wagesCounter = 0;
+			--     task.wait(0.05);
+			-- }
+			-- wagesCounter++;
 			local thisInstance = create_instance(className)
 			if Parent then
 				thisInstance.Parent = Parent

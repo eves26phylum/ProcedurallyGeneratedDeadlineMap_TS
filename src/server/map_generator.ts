@@ -218,6 +218,7 @@ class CustomTriangleFunc {
                     player.fire_client("biomeLoadingStatus_1", this.count/this.total)
                 });
             }
+            task.wait(0.05);
         }
         return [WedgeA, WedgeB];
     }
@@ -230,12 +231,13 @@ function generate() {
     let count = 0;
     const createTerrainDefault = new createTerrain((thisData: WedgeCell) => {
         count++;
-        if (count % 1000 === 0) {
+        if (count % 250 === 0) {
             if (isDeadline) {
                 players.get_all().forEach((player: Player, index: number) => {
-                    player.fire_client("biomeLoadingStatus_2", count/total)
+                    player.fire_client("biomeLoadingStatus_2", count/total);
                 });
             }
+            task.wait(0.05);
         }
         const _self = thisData._self;
         standardBox.executeAllModifiers(thisData._self, thisData);

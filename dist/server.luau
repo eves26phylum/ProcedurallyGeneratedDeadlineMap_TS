@@ -1565,16 +1565,16 @@ __modulesFolder["deadlineAdapter"] = function()
 	local __modulesFolder = nil
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local wagesCounter = 0
+	-- let wagesCounter = 0;
 	local deadlineAdapter = {}
 	do
 		local _container = deadlineAdapter
 		local function newInstance(className, Parent)
-			if wagesCounter > 1000 then
-				wagesCounter = 0
-				task.wait(0.05)
-			end
-			wagesCounter += 1
+			-- if (wagesCounter > 1000) {
+			--     wagesCounter = 0;
+			--     task.wait(0.05);
+			-- }
+			-- wagesCounter++;
 			local thisInstance = create_instance(className)
 			if Parent then
 				thisInstance.Parent = Parent
@@ -3113,6 +3113,7 @@ __modulesFolder["map_generator"] = function()
 							end
 							-- ▲ ReadonlyArray.forEach ▲
 						end
+						task.wait(0.05)
 					end
 					return { WedgeA, WedgeB }
 				end
@@ -3132,7 +3133,7 @@ __modulesFolder["map_generator"] = function()
 			local count = 0
 			local createTerrainDefault = createTerrain.new(function(thisData)
 				count += 1
-				if count % 1000 == 0 then
+				if count % 250 == 0 then
 					if isDeadline then
 						local _exp = players.get_all()
 						-- ▼ ReadonlyArray.forEach ▼
@@ -3144,6 +3145,7 @@ __modulesFolder["map_generator"] = function()
 						end
 						-- ▲ ReadonlyArray.forEach ▲
 					end
+					task.wait(0.05)
 				end
 				local _self = thisData._self
 				standardBox:executeAllModifiers(thisData._self, thisData)
