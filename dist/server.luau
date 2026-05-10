@@ -2699,7 +2699,7 @@ __modulesFolder["ingame"] = function()
 				end
 				local _condition_1 = _result
 				if not (_condition_1 ~= "" and _condition_1) then
-					_condition_1 = "M4A1"
+					_condition_1 = "nothing"
 				end
 				local _result_1 = thisPlayerLoadout.primary
 				if _result_1 ~= nil then
@@ -2722,7 +2722,7 @@ __modulesFolder["ingame"] = function()
 				end
 				local _condition_3 = _result_2
 				if not (_condition_3 ~= "" and _condition_3) then
-					_condition_3 = "M4A1"
+					_condition_3 = "nothing"
 				end
 				local _result_3 = thisPlayerLoadout.secondary
 				if _result_3 ~= nil then
@@ -2745,7 +2745,7 @@ __modulesFolder["ingame"] = function()
 				end
 				local _condition_5 = _result_4
 				if not (_condition_5 ~= "" and _condition_5) then
-					_condition_5 = "Crayon"
+					_condition_5 = "nothing"
 				end
 				local _result_5 = thisPlayerLoadout.throwable1
 				if _result_5 ~= nil then
@@ -2768,7 +2768,7 @@ __modulesFolder["ingame"] = function()
 				end
 				local _condition_7 = _result_6
 				if not (_condition_7 ~= "" and _condition_7) then
-					_condition_7 = "Crayon"
+					_condition_7 = "nothing"
 				end
 				local _result_7 = thisPlayerLoadout.throwable2
 				if _result_7 ~= nil then
