@@ -2738,50 +2738,22 @@ __modulesFolder["ingame"] = function()
 				thisPlayer.set_weapon("secondary", _condition_3, _condition_4)
 				local _result_4 = thisPlayerLoadout.throwable1
 				if _result_4 ~= nil then
-					_result_4 = _result_4.client_data
-					if _result_4 ~= nil then
-						_result_4 = _result_4.name
-					end
+					_result_4 = _result_4.name
 				end
 				local _condition_5 = _result_4
 				if not (_condition_5 ~= "" and _condition_5) then
 					_condition_5 = "nothing"
 				end
-				local _result_5 = thisPlayerLoadout.throwable1
+				thisPlayer.set_weapon("throwable1", _condition_5, "[]")
+				local _result_5 = thisPlayerLoadout.throwable2
 				if _result_5 ~= nil then
-					_result_5 = _result_5.client_data
-					if _result_5 ~= nil then
-						_result_5 = _result_5.setup
-					end
+					_result_5 = _result_5.name
 				end
 				local _condition_6 = _result_5
 				if not (_condition_6 ~= "" and _condition_6) then
-					_condition_6 = "[]"
+					_condition_6 = "nothing"
 				end
-				thisPlayer.set_weapon("throwable1", _condition_5, _condition_6)
-				local _result_6 = thisPlayerLoadout.throwable2
-				if _result_6 ~= nil then
-					_result_6 = _result_6.client_data
-					if _result_6 ~= nil then
-						_result_6 = _result_6.name
-					end
-				end
-				local _condition_7 = _result_6
-				if not (_condition_7 ~= "" and _condition_7) then
-					_condition_7 = "nothing"
-				end
-				local _result_7 = thisPlayerLoadout.throwable2
-				if _result_7 ~= nil then
-					_result_7 = _result_7.client_data
-					if _result_7 ~= nil then
-						_result_7 = _result_7.setup
-					end
-				end
-				local _condition_8 = _result_7
-				if not (_condition_8 ~= "" and _condition_8) then
-					_condition_8 = "[]"
-				end
-				thisPlayer.set_weapon("throwable2", _condition_7, _condition_8)
+				thisPlayer.set_weapon("throwable2", _condition_6, "[]")
 				thisPlayer.refill_ammo()
 				task.delay(0.1, function()
 					thisPlayer.fire_client("reset_velocity")
@@ -2984,7 +2956,7 @@ __modulesFolder["map_generator"] = function()
 			power = 3,
 			scale = math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS,
 		}
-		local POSITION_OFFSET = Vector3.new(-(MAP_SIZE.X / 2), 300, -(MAP_SIZE.Y / 2))
+		local POSITION_OFFSET = Vector3.new(-(MAP_SIZE.X / 2), 500, -(MAP_SIZE.Y / 2))
 		local offset = Vector2.new(math.random(1, 10e6), math.random(1, 10e6))
 		local noiseData = PerlinNoise.new():generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power)
 		local wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges")

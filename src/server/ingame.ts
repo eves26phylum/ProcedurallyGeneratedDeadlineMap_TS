@@ -106,8 +106,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
     type PlayerLoadoutData = {
         primary: CharacterWeaponData | undefined,
         secondary: CharacterWeaponData | undefined,
-        throwable1: CharacterWeaponData | undefined,
-        throwable2: CharacterWeaponData | undefined
+        throwable1: ThrowableWeaponData | undefined,
+        throwable2: ThrowableWeaponData | undefined
     }
     type TeamState = {
         voiceline?: string
@@ -226,8 +226,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
             };
             thisPlayer.set_weapon("primary", thisPlayerLoadout.primary?.client_data?.name || "nothing", thisPlayerLoadout.primary?.client_data?.setup || "[]")
             thisPlayer.set_weapon("secondary", thisPlayerLoadout.secondary?.client_data?.name || "nothing", thisPlayerLoadout.secondary?.client_data?.setup || "[]")
-            thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.client_data?.name || "nothing", thisPlayerLoadout.throwable1?.client_data?.setup || "[]")
-            thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.client_data?.name || "nothing", thisPlayerLoadout.throwable2?.client_data?.setup || "[]")
+            thisPlayer.set_weapon("throwable1", thisPlayerLoadout.throwable1?.name || "nothing", "[]")
+            thisPlayer.set_weapon("throwable2", thisPlayerLoadout.throwable2?.name || "nothing", "[]")
             thisPlayer.refill_ammo();
             task.delay(0.1, () => {
                thisPlayer.fire_client("reset_velocity");

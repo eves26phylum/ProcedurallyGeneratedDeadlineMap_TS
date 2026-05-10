@@ -238,6 +238,8 @@ interface RaycastResult {
 // ================================================================
 
 type WeaponSlot = "primary" | "secondary" | "throwable1" | "throwable2";
+type GunSlot = "primary" | "secondary";
+type UtilitySlot = "throwable1" | "throwable2";
 type PlayerTeam  = "defender" | "attacker";
 type KillerType  = "burning" | "drowning" | "firearm" | "grenade" | "map_reset" | "other" | "reset";
 
@@ -285,6 +287,10 @@ interface CharacterWeaponClientData {
     laser_enabled: boolean;
 }
 
+interface ThrowableWeaponData {
+    name: string;
+    type: "throwable"
+}
 interface CharacterWeaponData {
     /** Raw ammo table — modifying this directly produces unpredictable results. */
     ammo: unknown;
@@ -582,8 +588,9 @@ interface Player {
      */
     get_weapon_from_loadout: (loadoutIndex: number, slot: WeaponSlot) => LoadoutWeaponData | undefined;
     /** Returns live weapon data from the character currently present in the world. */
-    get_weapon_data_from_character: (slot: WeaponSlot) => CharacterWeaponData | undefined;
-
+    // get_weapon_data_from_character: (slot: WeaponSlot) => CharacterWeaponData | undefined;
+    // get_weapon_data_from_character: (slot: UtilitySlot) => ThrowableWeaponData | undefined;
+    get_weapon_data_from_character: <T extends WeaponSlot>(slot: T) => (T extends GunSlot ? CharacterWeaponData : ThrowableWeaponData) | undefined;
     // ── Profile & Leaderboard ───────────────────────────────────
     // docs: player.get_profile_stats(), player.get_leaderboard_stats() — dot notation
     get_profile_stats: () => unknown;
