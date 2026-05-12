@@ -348,7 +348,7 @@ export class NuristanBuildings implements Biome {
                     //     x: x,
                     //     y: y
                     // },
-    private operateOnThisTriangleInstance(data: WedgeCell, trianglePair: [AnyInstance<WedgePart>, AnyInstance<WedgePart>], verticesForTriangles: triangleVerticesTrio): boolean {
+    operateOnThisTriangleInstance(data: WedgeCell, trianglePair: [AnyInstance<WedgePart>, AnyInstance<WedgePart>], verticesForTriangles: triangleVerticesTrio): boolean {
         const orientation = trianglePair[0].Orientation;
         const middlePos = trianglePair[0].CFrame.Lerp(trianglePair[1].CFrame, 0.5);
         const translatedOrientationForStructurePlacement = this.translateTerrain.Translate(orientation);
