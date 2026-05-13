@@ -174,7 +174,8 @@ standardBox.registerModifier(new Tree(adapterToUse, {
             Color: Color3.fromRGB(36, 107, 51)
         }
     },
-    treesPerTriangle: 4
+    treesPerTriangle: 4,
+    offset: new Vector3(0, -1.5, 0)
 }, wedgesFolder))
 class CustomTriangleFunc {
     private adapter: InstanceAdapter;
