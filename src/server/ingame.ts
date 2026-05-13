@@ -71,7 +71,7 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
     player.fire_client("send_drone_info", generatedName);
     return drone;
 }
-export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
+export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, dogRef: {current?: number}) {
     if (!isDeadline) return Log.info("Did not execute because the environment is not Deadline.");;
     Log.info("Listening for people spawning.");
     sharedvars.plr_ping_limit_sec = math.huge
@@ -207,7 +207,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance) {
                 thisSpectatorBox.setSignText("We couldn't find a place to spawn. This is a mapping error, and please report it to the map developers.");
                 return Log.warn(`Hit was not found when doing spawn logic`, `Position from: ${posToHitStartFrom}`);
             }
-            const hitSpawnPos = hit.position.add(new Vector3(0, 340, 0));
+            const hitSpawnPos = hit.position.add(new Vector3(0, math.min(hit.position.Y + 340, dogRef.current || math.huge), 0));
             if (drones[thisPlayer.name]) adapterToUse.destroy(drones[thisPlayer.name]);
             thisPlayer.set_camera_mode("Default");
             thisPlayer.set_position(hitSpawnPos);

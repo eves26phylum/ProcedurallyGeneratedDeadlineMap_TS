@@ -223,6 +223,7 @@ class CustomTriangleFunc {
         return [WedgeA, WedgeB];
     }
 }
+let maxHeight = -math.huge;
 function generate() {
     // work on this later
     // prob some bug because it did work earlier on client, but this code does not work or replicate to client from a server
@@ -241,8 +242,10 @@ function generate() {
         }
         const _self = thisData._self;
         standardBox.executeAllModifiers(thisData._self, thisData);
+        const computedHeight = thisData.data.averageHeightSized * POSITION_OFFSET.Y;
+        if (computedHeight > maxHeight) maxHeight = computedHeight;
     }, EgoMoose, adapterToUse, wedgesFolder, newTriangleFunc.materialise);
-    const triangles = createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);
+    return createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);
 }
 if (isDeadline) {
     sharedvars.sv_spawning_enabled = false;
@@ -267,4 +270,5 @@ if (isDeadline) {
         player.fire_client("disconnect_iris");
     })
 }
+return maxHeight;
 }
