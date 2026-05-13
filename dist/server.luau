@@ -2668,7 +2668,7 @@ __modulesFolder["ingame"] = function()
 					return Log:warn(`Hit was not found when doing spawn logic`, `Position from: {posToHitStartFrom}`)
 				end
 				local _position = hit.position
-				local _vector3_1 = Vector3.new(0, 26, 0)
+				local _vector3_1 = Vector3.new(0, 140, 0)
 				local hitSpawnPos = _position + _vector3_1
 				if drones[thisPlayer.name] then
 					adapterToUse.destroy(drones[thisPlayer.name])
