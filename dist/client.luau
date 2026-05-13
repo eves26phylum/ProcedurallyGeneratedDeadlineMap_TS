@@ -2540,31 +2540,6 @@ end
 
 task.defer(function()
 	local script
-	script = newFakeInstance({"antigravity"})
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	framework.on_spawned:Connect(function()
-		local thisPlayer = get_chars_root().find_first_child("StarterCharacter")
-		assert(thisPlayer, "This player's character does not exist")
-		local humanoid_root_part = thisPlayer.find_first_child("humanoid_root_part")
-		local _arg0 = humanoid_root_part and humanoid_root_part.is_a("BasePart")
-		local _arg1 = `This humanoid root part does not exist or is wrong type. {if humanoid_root_part then `ClassName is: {humanoid_root_part.ClassName}` else ""}`
-		assert(_arg0, _arg1)
-		local body_force = create_instance("BodyForce")
-		body_force.Force = Vector3.new(0, -((60 - sharedvars.sv_gravity) * humanoid_root_part.AssemblyMass), 0)
-		body_force.Parent = humanoid_root_part
-	end)
-
-end)
-
-task.defer(function()
-	local script
 	script = newFakeInstance({"main"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
