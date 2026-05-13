@@ -82,6 +82,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
     sharedvars.ac_sound_kill = false
     sharedvars.plr_drum_magazines = 3
     sharedvars.plr_magazines = 9
+    sharedvars.plr_death_view_shot_location = false
     sharedvars.plr_spare_rounds = 90
     sharedvars.plr_base_weight = 1.7
     sharedvars.sv_gravity = 25.5
