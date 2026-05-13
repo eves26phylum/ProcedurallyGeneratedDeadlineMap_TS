@@ -3050,7 +3050,7 @@ __modulesFolder["map_generator"] = function()
 				},
 			},
 			treesPerTriangle = 4,
-			offset = Vector3.new(0, -1.5, 0),
+			offset = Vector3.new(0, -2, 0),
 		}, wedgesFolder))
 		local CustomTriangleFunc
 		do
