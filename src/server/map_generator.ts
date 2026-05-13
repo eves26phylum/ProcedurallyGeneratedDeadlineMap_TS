@@ -242,7 +242,7 @@ function generate() {
         }
         const _self = thisData._self;
         standardBox.executeAllModifiers(thisData._self, thisData);
-        const computedHeight = thisData.data.averageHeightSized * POSITION_OFFSET.Y;
+        const computedHeight = thisData.data.averageHeightSized;
         if (computedHeight > maxHeight) maxHeight = computedHeight;
     }, EgoMoose, adapterToUse, wedgesFolder, newTriangleFunc.materialise);
     return createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);

@@ -207,7 +207,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
                 thisSpectatorBox.setSignText("We couldn't find a place to spawn. This is a mapping error, and please report it to the map developers.");
                 return Log.warn(`Hit was not found when doing spawn logic`, `Position from: ${posToHitStartFrom}`);
             }
-            const hitSpawnPos = hit.position.add(new Vector3(0, math.min(hit.position.Y + 340, dogRef.current || math.huge), 0));
+            const hitSpawnPos = hit.position.add(new Vector3(0, math.min(340, dogRef.current || math.huge), 0));
             if (drones[thisPlayer.name]) adapterToUse.destroy(drones[thisPlayer.name]);
             thisPlayer.set_camera_mode("Default");
             thisPlayer.set_position(hitSpawnPos);
