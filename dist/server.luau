@@ -3131,7 +3131,7 @@ __modulesFolder["map_generator"] = function()
 				end
 				local _self = thisData._self
 				standardBox:executeAllModifiers(thisData._self, thisData)
-				local computedHeight = thisData.data.averageHeightSized
+				local computedHeight = thisData.data.averageHeightSized * PART_SIZE
 				if computedHeight > maxHeight then
 					maxHeight = computedHeight
 				end
