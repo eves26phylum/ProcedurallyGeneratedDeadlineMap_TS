@@ -8,6 +8,7 @@ const dogRef: {
     current?: number
 } = {};
 loadPeoplesRepublicOfGermetistan();
+map.set_preset("afghanistan");
 kickStart(adapterToUse, getWorldRoot(), dogRef);
 const maxHeight = startMapGenerator();
 dogRef.current = maxHeight + 20;

@@ -3273,6 +3273,7 @@ task.defer(function()
 	local __modulesFolder = nil
 	local dogRef = {}
 	loadPeoplesRepublicOfGermetistan()
+	map.set_preset("afghanistan")
 	kickStart(adapterToUse, getWorldRoot(), dogRef)
 	local maxHeight = startMapGenerator()
 	dogRef.current = maxHeight + 20
