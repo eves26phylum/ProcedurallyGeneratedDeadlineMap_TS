@@ -211,7 +211,11 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
             const hitSpawnPos = hit.position.add(new Vector3(0, math.min(340, dogRef.current || math.huge), 0));
             if (drones[thisPlayer.name]) adapterToUse.destroy(drones[thisPlayer.name]);
             thisPlayer.set_camera_mode("Default");
-            thisPlayer.set_position(hitSpawnPos);
+            const thisSpawnedAmount = spawnedAmounts[thisPlayer.name];
+            time.delay(5, () => {
+                if (thisSpawnedAmount !== spawnedAmounts[thisPlayer.name]) return;
+                thisPlayer.set_position(hitSpawnPos);
+            });
             task.delay(3, () => {
                 for (let i = 0; i < 20; i++) { 
                     thisPlayer.set_health(100); 

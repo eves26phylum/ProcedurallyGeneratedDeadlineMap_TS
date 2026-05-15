@@ -2681,7 +2681,13 @@ __modulesFolder["ingame"] = function()
 					adapterToUse.destroy(drones[thisPlayer.name])
 				end
 				thisPlayer.set_camera_mode("Default")
-				thisPlayer.set_position(hitSpawnPos)
+				local thisSpawnedAmount = spawnedAmounts[thisPlayer.name]
+				time.delay(5, function()
+					if thisSpawnedAmount ~= spawnedAmounts[thisPlayer.name] then
+						return nil
+					end
+					thisPlayer.set_position(hitSpawnPos)
+				end)
 				task.delay(3, function()
 					for i = 0, 19 do
 						thisPlayer.set_health(100)
