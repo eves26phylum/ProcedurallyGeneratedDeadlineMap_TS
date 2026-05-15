@@ -212,7 +212,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
             if (drones[thisPlayer.name]) adapterToUse.destroy(drones[thisPlayer.name]);
             thisPlayer.set_camera_mode("Default");
             const thisSpawnedAmount = spawnedAmounts[thisPlayer.name];
-            time.delay(5, () => {
+            time.delay(10, () => {
                 if (thisSpawnedAmount !== spawnedAmounts[thisPlayer.name]) return;
                 thisPlayer.set_position(hitSpawnPos);
             });
