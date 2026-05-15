@@ -2682,7 +2682,7 @@ __modulesFolder["ingame"] = function()
 				end
 				thisPlayer.set_camera_mode("Default")
 				local thisSpawnedAmount = spawnedAmounts[thisPlayer.name]
-				time.delay(5, function()
+				time.delay(10, function()
 					if thisSpawnedAmount ~= spawnedAmounts[thisPlayer.name] then
 						return nil
 					end
