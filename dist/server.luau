@@ -1,4 +1,4 @@
--- bundled with deadline-ts (no rbxts modules supported yet)
+-- bundled with deadline-ts (no, rbxts are modules not supported yet)
 function assert(condition, messageIfFalse)
 	if not condition then error(messageIfFalse or _VERSION .. " assertion error") end
 end
@@ -7,17 +7,7 @@ local unpack = table.unpack
 local old_require = require
 local __modulesFolder = {}
 local __modulesCachedValues = {}
-
--- Roblox instance path of the RuntimeLib module. The custom require() wrapper
--- intercepts any require() call whose target resolves to this path and returns
--- __customTS instead, making the bundle self-contained in both Roblox and
--- Deadline-TS environments.
 local __runtimeLibPath = {"ReplicatedStorage", "rbxts_include", "RuntimeLib"}
-
--- Trie mirroring the Roblox tree for all compiled output directories.
--- TS.import walks this trie against the incoming path segments to find the
--- output directory boundary; segments after that boundary are the module-relative
--- key used to index __modulesFolder.
 local __OUTPUT_DIR_MARKER = {}
 local __robloxTree = {
 	["ServerScriptService"] = {
@@ -32,9 +22,6 @@ local __robloxTree = {
 		["TS"] = __OUTPUT_DIR_MARKER
 	}
 }
-
--- Constructs a lightweight fake Roblox Instance backed by a path-segment array.
--- Used when running outside a real Roblox environment (Deadline-TS).
 local function newFakeInstance(pathSegs)
 	pathSegs = pathSegs or {}
 	local inst = {}
@@ -62,8 +49,6 @@ local function newFakeInstance(pathSegs)
 	return inst
 end
 
--- Use the real Roblox game global when available; fall back to a minimal fake
--- that covers GetService so compiled imports resolve to fake instances.
 local old_game = game
 local game
 if old_game ~= nil then
@@ -78,8 +63,6 @@ else
 	}
 end
 
--- Walks the Parent chain of a real Roblox Instance to reconstruct its path
--- segment array. Only reached when running inside a real Roblox environment.
 local function getRobloxInstancePath(inst)
 	local parts = {}
 	local current = inst
@@ -90,7 +73,6 @@ local function getRobloxInstancePath(inst)
 	return parts
 end
 
--- Returns true when the given segment array exactly matches __runtimeLibPath.
 local function matchesRuntimeLibPath(pathToCheck)
 	if #pathToCheck ~= #__runtimeLibPath then return false end
 	for i = 1, #__runtimeLibPath do
@@ -99,12 +81,6 @@ local function matchesRuntimeLibPath(pathToCheck)
 	return true
 end
 
--- Uses the __robloxTree trie to determine which leading segments of an import
--- call belong to the output directory path, then returns only the remaining
--- module-relative segments for __modulesFolder lookup.
---
--- Works for both fake instances (table with .Name) and real Roblox Instances
--- (userdata with .Name), since both expose a Name field on startModule.
 local function resolveModuleRelativeSegs(startModule, ...)
 	local varargs = table.pack(...)
 	local segCount = varargs.n
@@ -112,8 +88,6 @@ local function resolveModuleRelativeSegs(startModule, ...)
 	local serviceNode = __robloxTree[serviceName]
 
 	if serviceNode == nil then
-		-- Unknown service: return all segments unchanged (import will error on lookup
-		-- if the module is not registered, which is the correct failure mode).
 		local segs = {}
 		for i = 1, segCount do segs[i] = varargs[i] end
 		return segs
@@ -126,16 +100,12 @@ local function resolveModuleRelativeSegs(startModule, ...)
 		local nextNode = currentNode[seg]
 
 		if nextNode == nil then
-			-- Current segment is not part of the output directory prefix.
-			-- Collect from here onwards as the module-relative path.
 			local relSegs = {}
 			for j = i, segCount do relSegs[#relSegs + 1] = varargs[j] end
 			return relSegs
 		end
 
 		if nextNode == __OUTPUT_DIR_MARKER then
-			-- Output directory boundary reached; collect everything after as the
-			-- module-relative path.
 			local relSegs = {}
 			for j = i + 1, segCount do relSegs[#relSegs + 1] = varargs[j] end
 			return relSegs
@@ -143,20 +113,10 @@ local function resolveModuleRelativeSegs(startModule, ...)
 
 		currentNode = nextNode
 	end
-
-	-- Exhausted all segments while still inside the trie (should not occur in
-	-- well-formed roblox-ts output).
 	return {}
 end
 
--- Self-contained RuntimeLib replacement. Returned to any compiled roblox-ts code
--- that requires RuntimeLib. Provides TS.import and all pure-Lua TS runtime
--- utilities. RunService-dependent features (isPlugin, getModule) are omitted
--- as they are unnecessary in a bundled, self-contained context.
 local __customTS = {}
-
--- Promise is not bundled. TS.async / TS.await will error if called without a
--- Promise implementation being assigned to __customTS.Promise externally.
 __customTS.Promise = nil
 
 __customTS.import = function(context, startModule, ...)
@@ -314,13 +274,6 @@ __customTS.generator = function(callback)
 	}
 end
 
--- Smart require() wrapper.
---
--- Intercepts require() calls targeting the RuntimeLib instance (resolved via
--- __runtimeLibPath) and returns __customTS so the bundle is self-contained.
--- All other require() calls are forwarded to old_require unchanged, preserving
--- full compatibility with anything else in the environment (numbers, real
--- ModuleScripts outside the intercepted path, etc.).
 local require = function(moduleRef)
 	if type(moduleRef) == 'table' and moduleRef.__path then
 		if matchesRuntimeLibPath(moduleRef.__path) then
