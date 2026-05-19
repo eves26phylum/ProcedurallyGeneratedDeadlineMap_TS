@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "@eves26phylum/types": "^1.0.3",
-    "deadline-ts": "^100.0.1"
+    "deadline-ts": "^100.2.0"
   }
 }
