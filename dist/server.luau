@@ -1122,8 +1122,6 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 	local ensureStructureData = _structure.ensureStructureData
 	local structureClaimLand = _structure.structureClaimLand
 	local useStructureData = _structure.useStructureData
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 	-- If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
 	-- Here is the Gigachad Terms of Service 2000 Iteration 0
 	--[[
@@ -1458,7 +1456,6 @@ __modulesFolder["biomes"]["Tree"] = function()
 	local structureClaimLand = _structure.structureClaimLand
 	local useStructureData = _structure.useStructureData
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local Tree
 	do
 		Tree = setmetatable({}, {
@@ -1580,7 +1577,6 @@ __modulesFolder["biomes"]["nuristanStandardBiome"] = function()
 	local _biome = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome")
 	local ensureBiomeData = _biome.ensureBiomeData
 	local biomeClaimLand = _biome.biomeClaimLand
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local NuristanStandardBiome
 	do
 		NuristanStandardBiome = setmetatable({}, {
@@ -2270,7 +2266,6 @@ __modulesFolder["nuristanHandler"]["livingRoom"] = function()
 	script = newFakeInstance({"nuristanHandler", "livingRoom"})	local newFakeInstance = nil
 
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local LivingRoomHandler
 	do
 		LivingRoomHandler = setmetatable({}, {
@@ -2316,7 +2311,6 @@ __modulesFolder["nuristanHandler"]["sniperWindow"] = function()
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local ALL_WALL_FACES = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomes", "NuristanBuildings").ALL_WALL_FACES
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local SniperWindowRoomHandler
 	do
 		SniperWindowRoomHandler = setmetatable({}, {
@@ -2889,7 +2883,6 @@ __modulesFolder["ingame"] = function()
 	local droneMaterialConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "droneMaterialConfig").droneMaterialConfig
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	local PingSystem = TS.import(script, game:GetService("ServerScriptService"), "TS", "pingSystem").PingSystem
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local Log = Logger.new("team_spawner")
 	local droneNames = {}
 	local function createDrone(player, adapterToUse, DroneFolder, random_drone_noise, customProperties)
@@ -3306,7 +3299,6 @@ __modulesFolder["loadPeoplesRepublicOfGermetistan"] = function()
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local function loadPeoplesRepublicOfGermetistan()
 		if not isDeadline then
 			return nil
@@ -3357,7 +3349,6 @@ __modulesFolder["map_generator"] = function()
 	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
 	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 	-- If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
 	-- Here is the Gigachad Terms of Service 2000 Iteration 0
@@ -3515,7 +3506,7 @@ __modulesFolder["map_generator"] = function()
 				},
 			},
 			treesPerTriangle = 4,
-			offset = Vector3.new(0, -2, 0),
+			offset = Vector3.new(0, -3, 0),
 		}, wedgesFolder))
 		local CustomTriangleFunc
 		do
@@ -3750,7 +3741,6 @@ task.defer(function()
 	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
 	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
 	local loadPeoplesRepublicOfGermetistan = TS.import(script, game:GetService("ServerScriptService"), "TS", "loadPeoplesRepublicOfGermetistan").loadPeoplesRepublicOfGermetistan
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local dogRef = {}
 	loadPeoplesRepublicOfGermetistan()
 	map.set_preset("afghanistan")

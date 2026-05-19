@@ -9,7 +9,6 @@ import { alphabetArray } from "shared/alphabetArray";
 import { droneMaterialConfig } from "shared/droneMaterialConfig";
 import { assign } from "shared/Util";
 import { PingSystem } from "./pingSystem";
-// !deadline-ts.customFinishSector_FinishModulesEnd
 const Log = new Logger("team_spawner"); // log, warn, info, error
 const droneNames: Record<string, string | undefined> = {};
 export type lastSpawnType = {coordination: number} & Record<PlayerTeam, string[]>;

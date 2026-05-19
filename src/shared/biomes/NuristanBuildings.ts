@@ -11,9 +11,6 @@ import { DepthFirstMazeSearch } from "../DepthFirstMazeSearch";
 import { fisherYatesShuffle } from "../Util";
 import { ensureStructureData, structureClaimLand, useStructureData } from "../structure";
 
-// !deadline-ts.customFinishSector_FinishModulesEnd
-// The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
-
 // If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
 // Here is the Gigachad Terms of Service 2000 Iteration 0
 /* Terms of Service

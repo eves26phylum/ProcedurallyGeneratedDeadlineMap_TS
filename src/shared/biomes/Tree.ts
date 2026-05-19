@@ -4,7 +4,6 @@ import { AnyInstance, InstanceAdapter } from "../definition";
 import { EgoMoose } from "../EgoMoose";
 import { ensureStructureData, structureClaimLand, useStructureData } from "../structure";
 import { assign } from "../Util";
-// !deadline-ts.customFinishSector_FinishModulesEnd
 
 export interface TreeConfig {
     treesPerTriangle: number; // how many trees to place per triangle in each WedgeCell

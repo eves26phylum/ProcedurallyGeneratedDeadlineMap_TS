@@ -3,7 +3,6 @@ import { NuristanBuildings } from "shared/biomes/NuristanBuildings";
 import { DoorwayDataType } from "shared/biomes/NuristanBuildings";
 import { RoomFaceData } from "shared/ProceduralRoomGeneration";
 import { ALL_WALL_FACES } from "shared/biomes/NuristanBuildings";
-// !deadline-ts.customFinishSector_FinishModulesEnd
 export class SniperWindowRoomHandler implements RoomTypeHandler {
     readonly priority = 10;
     private readonly buildings: NuristanBuildings;

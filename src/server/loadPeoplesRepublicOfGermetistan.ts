@@ -1,5 +1,4 @@
 import { isDeadline } from "shared/isDeadline";
-// !deadline-ts.customFinishSector_FinishModulesEnd
 export function loadPeoplesRepublicOfGermetistan() {
     if (!isDeadline) return;
     /* 

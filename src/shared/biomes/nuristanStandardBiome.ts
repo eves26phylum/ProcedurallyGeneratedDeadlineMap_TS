@@ -5,7 +5,7 @@ import type { createTerrain } from "shared/createTerrainFromVerticesUsingAdapter
 import { WedgeCell } from "shared/createTerrainFromVerticesUsingAdapter"
 import { assign } from "shared/Util"
 import { ensureBiomeData, biomeClaimLand } from "shared/biome"
-// !deadline-ts.customFinishSector_FinishModulesEnd
+
 export interface NuristanStandardBiomeConfig {
     desert: () => Partial<InstanceProperties<WedgePart>>
     grass: () => Partial<InstanceProperties<WedgePart>>

@@ -14,7 +14,7 @@ import { getWorldRoot } from "shared/getRoot";
 import { adapterToUse } from "shared/adapterToUse";
 import { AnyInstance, EgoMooseFiles, InstanceAdapter } from "shared/definition";
 import { assign } from "shared/Util";
-// !deadline-ts.customFinishSector_FinishModulesEnd
+
 // The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 
 // If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
@@ -175,7 +175,7 @@ standardBox.registerModifier(new Tree(adapterToUse, {
         }
     },
     treesPerTriangle: 4,
-    offset: new Vector3(0, -2, 0)
+    offset: new Vector3(0, -3, 0)
 }, wedgesFolder))
 class CustomTriangleFunc {
     private adapter: InstanceAdapter;
