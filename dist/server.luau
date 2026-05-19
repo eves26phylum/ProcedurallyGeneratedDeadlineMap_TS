@@ -3729,6 +3729,17 @@ end
 
 task.defer(function()
 	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"main"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
