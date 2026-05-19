@@ -2143,7 +2143,8 @@ __modulesFolder["isDeadline"] = function()
 	script = newFakeInstance({"isDeadline"})	local newFakeInstance = nil
 
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
-	local isDeadline = game == nil
+	local isDeadline = { string.find(_VERSION, "{deadline-ts", 1, true) }
+	--local _VERSION = _VERSION.." {deadline-ts PRE-RELEASE}"
 	return {
 		isDeadline = isDeadline,
 	}
