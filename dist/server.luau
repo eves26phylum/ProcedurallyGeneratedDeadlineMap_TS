@@ -1,12 +1,40 @@
--- bundled with deadline-ts (no you cannot use rbxts modules right now)
+-- bundled with deadline-ts (no rbxts modules supported yet)
 function assert(condition, messageIfFalse)
-    if not condition then error(messageIfFalse or _VERSION.." assertion error") end
+	if not condition then error(messageIfFalse or _VERSION .. " assertion error") end
 end
+local _VERSION = _VERSION.." {deadline-ts PRE-RELEASE}"
 local unpack = table.unpack
 local old_require = require
 local __modulesFolder = {}
 local __modulesCachedValues = {}
 
+-- Roblox instance path of the RuntimeLib module. The custom require() wrapper
+-- intercepts any require() call whose target resolves to this path and returns
+-- __customTS instead, making the bundle self-contained in both Roblox and
+-- Deadline-TS environments.
+local __runtimeLibPath = {"ReplicatedStorage", "rbxts_include", "RuntimeLib"}
+
+-- Trie mirroring the Roblox tree for all compiled output directories.
+-- TS.import walks this trie against the incoming path segments to find the
+-- output directory boundary; segments after that boundary are the module-relative
+-- key used to index __modulesFolder.
+local __OUTPUT_DIR_MARKER = {}
+local __robloxTree = {
+	["ServerScriptService"] = {
+		["TS"] = __OUTPUT_DIR_MARKER
+	},
+	["StarterPlayer"] = {
+		["StarterPlayerScripts"] = {
+			["TS"] = __OUTPUT_DIR_MARKER
+		}
+	},
+	["ReplicatedStorage"] = {
+		["TS"] = __OUTPUT_DIR_MARKER
+	}
+}
+
+-- Constructs a lightweight fake Roblox Instance backed by a path-segment array.
+-- Used when running outside a real Roblox environment (Deadline-TS).
 local function newFakeInstance(pathSegs)
 	pathSegs = pathSegs or {}
 	local inst = {}
@@ -26,70 +54,310 @@ local function newFakeInstance(pathSegs)
 		inst.Parent = {
 			__path = {},
 			Name = "",
-			WaitForChild = function(self, name) return newFakeInstance({ name }) end,
+			WaitForChild = function(self, name) return newFakeInstance({name}) end,
+			is_fake_instance = true,
 		}
 		inst.is_fake_instance = true
 	end
 	return inst
 end
+
+-- Use the real Roblox game global when available; fall back to a minimal fake
+-- that covers GetService so compiled imports resolve to fake instances.
 local old_game = game
-local game = {
-	GetService = function(self, name)
-		local inst = newFakeInstance({ name })
-		inst.__isService = true
-		return inst
-	end,
-}
-
-local require = function(_ref)
-	return {
-		import = function(_ctx, startModule, ...)
-			local current = startModule.__isService and newFakeInstance({}) or startModule
-			for i = 1, select("#", ...) do
-				local seg = select(i, ...)
-				if seg ~= "TS" then
-					current = current:WaitForChild(seg)
-				end
-			end
-
-			local pathSegs = current.__path
-			local cacheKey = table.concat(pathSegs, "\0")
-
-			if __modulesCachedValues[cacheKey] ~= nil then
-				return __modulesCachedValues[cacheKey]
-			end
-
-			local folder = __modulesFolder
-			for _, seg in ipairs(pathSegs) do
-				folder = folder[seg]
-				if folder == nil then
-					error("TS.import: module not found at path \"" .. table.concat(pathSegs, "/") .. "\"")
-				end
-			end
-
-			local result = folder()
-			__modulesCachedValues[cacheKey] = result
-			return result
+local game
+if old_game ~= nil then
+	game = old_game
+else
+	game = {
+		GetService = function(self, name)
+			local inst = newFakeInstance({name})
+			inst.__isService = true
+			return inst
 		end,
 	}
+end
+
+-- Walks the Parent chain of a real Roblox Instance to reconstruct its path
+-- segment array. Only reached when running inside a real Roblox environment.
+local function getRobloxInstancePath(inst)
+	local parts = {}
+	local current = inst
+	while current ~= nil and current.Parent ~= nil do
+		table.insert(parts, 1, current.Name)
+		current = current.Parent
+	end
+	return parts
+end
+
+-- Returns true when the given segment array exactly matches __runtimeLibPath.
+local function matchesRuntimeLibPath(pathToCheck)
+	if #pathToCheck ~= #__runtimeLibPath then return false end
+	for i = 1, #__runtimeLibPath do
+		if pathToCheck[i] ~= __runtimeLibPath[i] then return false end
+	end
+	return true
+end
+
+-- Uses the __robloxTree trie to determine which leading segments of an import
+-- call belong to the output directory path, then returns only the remaining
+-- module-relative segments for __modulesFolder lookup.
+--
+-- Works for both fake instances (table with .Name) and real Roblox Instances
+-- (userdata with .Name), since both expose a Name field on startModule.
+local function resolveModuleRelativeSegs(startModule, ...)
+	local varargs = table.pack(...)
+	local segCount = varargs.n
+	local serviceName = startModule.Name
+	local serviceNode = __robloxTree[serviceName]
+
+	if serviceNode == nil then
+		-- Unknown service: return all segments unchanged (import will error on lookup
+		-- if the module is not registered, which is the correct failure mode).
+		local segs = {}
+		for i = 1, segCount do segs[i] = varargs[i] end
+		return segs
+	end
+
+	local currentNode = serviceNode
+
+	for i = 1, segCount do
+		local seg = varargs[i]
+		local nextNode = currentNode[seg]
+
+		if nextNode == nil then
+			-- Current segment is not part of the output directory prefix.
+			-- Collect from here onwards as the module-relative path.
+			local relSegs = {}
+			for j = i, segCount do relSegs[#relSegs + 1] = varargs[j] end
+			return relSegs
+		end
+
+		if nextNode == __OUTPUT_DIR_MARKER then
+			-- Output directory boundary reached; collect everything after as the
+			-- module-relative path.
+			local relSegs = {}
+			for j = i + 1, segCount do relSegs[#relSegs + 1] = varargs[j] end
+			return relSegs
+		end
+
+		currentNode = nextNode
+	end
+
+	-- Exhausted all segments while still inside the trie (should not occur in
+	-- well-formed roblox-ts output).
+	return {}
+end
+
+-- Self-contained RuntimeLib replacement. Returned to any compiled roblox-ts code
+-- that requires RuntimeLib. Provides TS.import and all pure-Lua TS runtime
+-- utilities. RunService-dependent features (isPlugin, getModule) are omitted
+-- as they are unnecessary in a bundled, self-contained context.
+local __customTS = {}
+
+-- Promise is not bundled. TS.async / TS.await will error if called without a
+-- Promise implementation being assigned to __customTS.Promise externally.
+__customTS.Promise = nil
+
+__customTS.import = function(context, startModule, ...)
+	local relSegs = resolveModuleRelativeSegs(startModule, ...)
+
+	if #relSegs == 0 then
+		error('TS.import: resolved to an empty module path — check your project.json output directory configuration')
+	end
+
+	local cacheKey = table.concat(relSegs, '\0')
+
+	if __modulesCachedValues[cacheKey] ~= nil then
+		return __modulesCachedValues[cacheKey]
+	end
+
+	local node = __modulesFolder
+	for _, seg in ipairs(relSegs) do
+		node = node[seg]
+		if node == nil then
+			error('TS.import: module not found at path "' .. table.concat(relSegs, '/') .. '"')
+		end
+	end
+
+	if type(node) ~= 'function' then
+		error('TS.import: resolved path "' .. table.concat(relSegs, '/') .. '" is not a module factory')
+	end
+
+	local result = node()
+	__modulesCachedValues[cacheKey] = result
+	return result
+end
+
+__customTS.instanceof = function(obj, class)
+	if type(class) == 'table' and type(class.instanceof) == 'function' then
+		return class.instanceof(obj)
+	end
+	if type(obj) == 'table' then
+		obj = getmetatable(obj)
+		while obj ~= nil do
+			if obj == class then return true end
+			local mt = getmetatable(obj)
+			if mt then
+				obj = mt.__index
+			else
+				obj = nil
+			end
+		end
+	end
+	return false
+end
+
+__customTS.async = function(callback)
+	return function(...)
+		local n = select('#', ...)
+		local args = {...}
+		return __customTS.Promise.new(function(resolve, reject)
+			local ok, result = pcall(callback, unpack(args, 1, n))
+			if ok then
+				resolve(result)
+			else
+				reject(result)
+			end
+		end)
+	end
+end
+
+__customTS.await = function(promise)
+	if not __customTS.Promise or not __customTS.Promise.is(promise) then
+		return promise
+	end
+	local status, value = promise:awaitStatus()
+	if status == __customTS.Promise.Status.Resolved then
+		return value
+	elseif status == __customTS.Promise.Status.Rejected then
+		error(value, 2)
+	else
+		error('The awaited Promise was cancelled', 2)
+	end
+end
+
+local __SIGN = 2 ^ 31
+local __COMPLEMENT = 2 ^ 32
+local function __bitSign(num)
+	if bit32.btest(num, __SIGN) then
+		return num - __COMPLEMENT
+	else
+		return num
+	end
+end
+
+__customTS.bit_lrsh = function(a, b)
+	return __bitSign(bit32.arshift(a, b))
+end
+
+__customTS.TRY_RETURN = 1
+__customTS.TRY_BREAK = 2
+__customTS.TRY_CONTINUE = 3
+
+__customTS.try = function(try, catch, finally)
+	local trySuccess, exitTypeOrTryError, returns = pcall(try)
+	local exitType, tryError
+	if trySuccess then
+		exitType = exitTypeOrTryError
+	else
+		tryError = exitTypeOrTryError
+	end
+	local catchSuccess = true
+	local catchError
+	if not trySuccess and catch then
+		local newExitType, newReturns
+		catchSuccess, newExitType, newReturns = pcall(catch, tryError)
+		local resolvedExitType
+		if catchSuccess then
+			resolvedExitType = newExitType
+		else
+			catchError = newExitType
+		end
+		if resolvedExitType then
+			exitType, returns = resolvedExitType, newReturns
+		end
+	end
+	if finally then
+		local finallyExitType, finallyReturns = finally()
+		if finallyExitType then
+			exitType, returns = finallyExitType, finallyReturns
+		end
+	end
+	if exitType ~= __customTS.TRY_RETURN and exitType ~= __customTS.TRY_BREAK and exitType ~= __customTS.TRY_CONTINUE then
+		if not catchSuccess then
+			error(catchError, 2)
+		end
+		if not trySuccess and not catch then
+			error(tryError, 2)
+		end
+	end
+	return exitType, returns
+end
+
+__customTS.generator = function(callback)
+	local co = coroutine.create(callback)
+	return {
+		next = function(...)
+			if coroutine.status(co) == 'dead' then
+				return {done = true}
+			end
+			local success, value = coroutine.resume(co, ...)
+			if success == false then
+				error(value, 2)
+			end
+			return {
+				value = value,
+				done = coroutine.status(co) == 'dead',
+			}
+		end,
+	}
+end
+
+-- Smart require() wrapper.
+--
+-- Intercepts require() calls targeting the RuntimeLib instance (resolved via
+-- __runtimeLibPath) and returns __customTS so the bundle is self-contained.
+-- All other require() calls are forwarded to old_require unchanged, preserving
+-- full compatibility with anything else in the environment (numbers, real
+-- ModuleScripts outside the intercepted path, etc.).
+local require = function(moduleRef)
+	if type(moduleRef) == 'table' and moduleRef.__path then
+		if matchesRuntimeLibPath(moduleRef.__path) then
+			return __customTS
+		end
+	end
+	if type(moduleRef) == 'userdata' then
+		local instPath = getRobloxInstancePath(moduleRef)
+		if matchesRuntimeLibPath(instPath) then
+			return __customTS
+		end
+	end
+	return old_require(moduleRef)
 end
 
 __modulesFolder["biomes"] = __modulesFolder["biomes"] or {}
 __modulesFolder["nuristanHandler"] = __modulesFolder["nuristanHandler"] or {}
 
 __modulesFolder["DepthFirstMazeSearch"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"DepthFirstMazeSearch"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local fisherYatesShuffle = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").fisherYatesShuffle
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 	local function mazePassageKey(firstColumn, firstRow, secondColumn, secondRow)
 		if firstColumn < secondColumn or (firstColumn == secondColumn and firstRow < secondRow) then
@@ -157,6 +425,18 @@ __modulesFolder["DepthFirstMazeSearch"] = function()
 end
 
 __modulesFolder["EgoMoose"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"EgoMoose"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -164,12 +444,6 @@ __modulesFolder["EgoMoose"] = function()
 	-- https://github.com/EgoMoose/Articles
 	-- saved some time
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local EgoMoose = {}
 	do
 		local _container = EgoMoose
@@ -261,15 +535,20 @@ __modulesFolder["EgoMoose"] = function()
 end
 
 __modulesFolder["PerlinNoise"] = function()
-	local script
-	script = newFakeInstance({"PerlinNoise"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"PerlinNoise"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local function FUCKROBLOX(a)
 		-- fuck roblox basically fucks roblox and also avoids integer noise
@@ -369,18 +648,24 @@ __modulesFolder["PerlinNoise"] = function()
 end
 
 __modulesFolder["ProceduralRoomGeneration"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"ProceduralRoomGeneration"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local mazePassageKey = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "DepthFirstMazeSearch").mazePassageKey
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 	local EXIT_ROOM_CELL_TYPE = "__exitRoom__"
 	local ProceduralRoomGrid
@@ -565,15 +850,20 @@ __modulesFolder["ProceduralRoomGeneration"] = function()
 end
 
 __modulesFolder["Util"] = function()
-	local script
-	script = newFakeInstance({"Util"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"Util"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local function assign(a, b, optionalFunc)
 		if optionalFunc == nil then
@@ -611,6 +901,18 @@ __modulesFolder["Util"] = function()
 end
 
 __modulesFolder["adapterToUse"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"adapterToUse"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -619,12 +921,6 @@ __modulesFolder["adapterToUse"] = function()
 	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
 	local robloxAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "robloxAdapter").robloxAdapter
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local adapterToUse = if isDeadline then deadlineAdapter else robloxAdapter
 	return {
 		adapterToUse = adapterToUse,
@@ -633,15 +929,20 @@ __modulesFolder["adapterToUse"] = function()
 end
 
 __modulesFolder["alphabetArray"] = function()
-	local script
-	script = newFakeInstance({"alphabetArray"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"alphabetArray"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local alphabetArray = string.split("abcdefghijklmnopqrstuvwxyz", "")
 	return {
@@ -651,18 +952,24 @@ __modulesFolder["alphabetArray"] = function()
 end
 
 __modulesFolder["biome"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"biome"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local biomeExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeExtension").biomeExtension
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local function useBiomeData(yourCell)
 		local data = biomeExtension:get(yourCell)
 		if not data then
@@ -696,18 +1003,24 @@ __modulesFolder["biome"] = function()
 end
 
 __modulesFolder["biomeAndStructureRegistrySystem"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"biomeAndStructureRegistrySystem"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local thisLogger = Logger.new("biome_box")
 	local biomeBox
 	do
@@ -752,18 +1065,24 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 end
 
 __modulesFolder["biomeExtension"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"biomeExtension"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local createCellExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "cellExtension").createCellExtension
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local biomeExtension = createCellExtension()
 	local structureExtension = createCellExtension()
 	-- idk structure data goes here
@@ -777,6 +1096,18 @@ __modulesFolder["biomeExtension"] = function()
 end
 
 __modulesFolder["biomes"]["NuristanBuildings"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"biomes", "NuristanBuildings"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -792,12 +1123,6 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 	local structureClaimLand = _structure.structureClaimLand
 	local useStructureData = _structure.useStructureData
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 	-- If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
 	-- Here is the Gigachad Terms of Service 2000 Iteration 0
@@ -1111,6 +1436,18 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 end
 
 __modulesFolder["biomes"]["Tree"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"biomes", "Tree"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -1122,12 +1459,6 @@ __modulesFolder["biomes"]["Tree"] = function()
 	local useStructureData = _structure.useStructureData
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local Tree
 	do
 		Tree = setmetatable({}, {
@@ -1227,6 +1558,18 @@ __modulesFolder["biomes"]["Tree"] = function()
 end
 
 __modulesFolder["biomes"]["nuristanStandardBiome"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"biomes", "nuristanStandardBiome"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -1238,12 +1581,6 @@ __modulesFolder["biomes"]["nuristanStandardBiome"] = function()
 	local ensureBiomeData = _biome.ensureBiomeData
 	local biomeClaimLand = _biome.biomeClaimLand
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local NuristanStandardBiome
 	do
 		NuristanStandardBiome = setmetatable({}, {
@@ -1295,15 +1632,20 @@ __modulesFolder["biomes"]["nuristanStandardBiome"] = function()
 end
 
 __modulesFolder["cellExtension"] = function()
-	local script
-	script = newFakeInstance({"cellExtension"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"cellExtension"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local function createCellExtension()
 		local store = setmetatable({}, {
@@ -1350,6 +1692,18 @@ __modulesFolder["cellExtension"] = function()
 end
 
 __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"createTerrainFromVerticesUsingAdapter"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -1357,12 +1711,6 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	-- modules go above
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local createTerrain
 	do
 		createTerrain = setmetatable({}, {
@@ -1557,15 +1905,20 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 end
 
 __modulesFolder["deadlineAdapter"] = function()
-	local script
-	script = newFakeInstance({"deadlineAdapter"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"deadlineAdapter"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	-- let wagesCounter = 0;
 	local deadlineAdapter = {}
@@ -1620,15 +1973,20 @@ __modulesFolder["deadlineAdapter"] = function()
 end
 
 __modulesFolder["droneMaterialConfig"] = function()
-	local script
-	script = newFakeInstance({"droneMaterialConfig"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"droneMaterialConfig"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local droneMaterialConfig = {
 		selected = {
@@ -1647,18 +2005,24 @@ __modulesFolder["droneMaterialConfig"] = function()
 end
 
 __modulesFolder["generateId"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"generateId"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local getRandomItemInArray = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRandomItemInArray").getRandomItemInArray
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local function generateId(length, charMap)
 		local result = ""
 		do
@@ -1685,15 +2049,20 @@ __modulesFolder["generateId"] = function()
 end
 
 __modulesFolder["getRandomItemInArray"] = function()
-	local script
-	script = newFakeInstance({"getRandomItemInArray"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"getRandomItemInArray"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local function getRandomItemInArray(array)
 		return array[math.random(0, #array - 1) + 1]
@@ -1705,18 +2074,24 @@ __modulesFolder["getRandomItemInArray"] = function()
 end
 
 __modulesFolder["getRoot"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"getRoot"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local function getWorldRoot()
 		return if isDeadline then get_map_root() else game:GetService("Workspace")
 	end
@@ -1727,15 +2102,20 @@ __modulesFolder["getRoot"] = function()
 end
 
 __modulesFolder["humanConfig"] = function()
-	local script
-	script = newFakeInstance({"humanConfig"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"humanConfig"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local default = {
 		maxLivableSteepness = 15,
@@ -1748,15 +2128,20 @@ __modulesFolder["humanConfig"] = function()
 end
 
 __modulesFolder["isDeadline"] = function()
-	local script
-	script = newFakeInstance({"isDeadline"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"isDeadline"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local isDeadline = game == nil
 	return {
@@ -1766,18 +2151,24 @@ __modulesFolder["isDeadline"] = function()
 end
 
 __modulesFolder["logger"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"logger"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local DefaultLogTypes = {
 		print = print,
 		warn = warn,
@@ -1863,16 +2254,22 @@ __modulesFolder["logger"] = function()
 end
 
 __modulesFolder["nuristanHandler"]["livingRoom"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"nuristanHandler", "livingRoom"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local LivingRoomHandler
 	do
 		LivingRoomHandler = setmetatable({}, {
@@ -1901,18 +2298,24 @@ __modulesFolder["nuristanHandler"]["livingRoom"] = function()
 end
 
 __modulesFolder["nuristanHandler"]["sniperWindow"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"nuristanHandler", "sniperWindow"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local ALL_WALL_FACES = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomes", "NuristanBuildings").ALL_WALL_FACES
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local SniperWindowRoomHandler
 	do
 		SniperWindowRoomHandler = setmetatable({}, {
@@ -1971,15 +2374,20 @@ __modulesFolder["nuristanHandler"]["sniperWindow"] = function()
 end
 
 __modulesFolder["randomDroneNoise"] = function()
-	local script
-	script = newFakeInstance({"randomDroneNoise"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"randomDroneNoise"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local random_drone_noise = {
 		defender = { "rbxassetid://131625660349459", "rbxassetid://126734205451508", "rbxassetid://112226499298758" },
@@ -1992,15 +2400,20 @@ __modulesFolder["randomDroneNoise"] = function()
 end
 
 __modulesFolder["robloxAdapter"] = function()
-	local script
-	script = newFakeInstance({"robloxAdapter"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"robloxAdapter"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local _CollectionService = game
 	if _CollectionService ~= nil then
@@ -2053,15 +2466,20 @@ __modulesFolder["robloxAdapter"] = function()
 end
 
 __modulesFolder["selfProp"] = function()
-	local script
-	script = newFakeInstance({"selfProp"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"selfProp"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local function returnFunctionWithIdentity(func, _self)
 		local _func = func
@@ -2080,16 +2498,22 @@ __modulesFolder["selfProp"] = function()
 end
 
 __modulesFolder["spectatorBoxBuilder"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"spectatorBoxBuilder"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local INTERIOR_DIMENSION = 18
 	local WALL_THICKNESS = 3
 	local EXTERIOR_DIMENSION = INTERIOR_DIMENSION + WALL_THICKNESS * 2
@@ -2234,18 +2658,24 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 end
 
 __modulesFolder["structure"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"structure"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local structureExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeExtension").structureExtension
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local function useStructureData(yourCell)
 		local data = structureExtension:get(yourCell)
 		if not data then
@@ -2279,15 +2709,20 @@ __modulesFolder["structure"] = function()
 end
 
 __modulesFolder["tagsService"] = function()
-	local script
-	script = newFakeInstance({"tagsService"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"tagsService"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local _CollectionService = game
 	if _CollectionService ~= nil then
@@ -2313,30 +2748,40 @@ __modulesFolder["tagsService"] = function()
 end
 
 __modulesFolder["terrainProgressInterface"] = function()
-	local script
-	script = newFakeInstance({"terrainProgressInterface"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"terrainProgressInterface"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	return nil
 
 end
 
 __modulesFolder["translateTerrainForStructureBonding"] = function()
-	local script
-	script = newFakeInstance({"translateTerrainForStructureBonding"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"translateTerrainForStructureBonding"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	-- local translateTerrainOrientationForStructureBonding = {
 	--     orientationSubtraction = Vector3.new(0, 0, -90)
@@ -2391,15 +2836,20 @@ __modulesFolder["translateTerrainForStructureBonding"] = function()
 end
 
 __modulesFolder["voicelines"] = function()
-	local script
-	script = newFakeInstance({"voicelines"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"voicelines"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local voicelines = {
 		defender = { "Good morning, SYNO! We are waiting on %s more SYNO until we deploy. Stay cool, stay frosty.", "Eyes up, SYNO. %s personnel still need to link up for deployment. Remember your objective.", "Listen up. Command sent you here with triple the ammunition compared to a mission in Complex for a reason. We need %s more. Do not waste your rounds." },
@@ -2412,6 +2862,18 @@ __modulesFolder["voicelines"] = function()
 end
 
 __modulesFolder["ingame"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"ingame"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -2427,12 +2889,6 @@ __modulesFolder["ingame"] = function()
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	local PingSystem = TS.import(script, game:GetService("ServerScriptService"), "TS", "pingSystem").PingSystem
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local Log = Logger.new("team_spawner")
 	local droneNames = {}
 	local function createDrone(player, adapterToUse, DroneFolder, random_drone_noise, customProperties)
@@ -2832,18 +3288,24 @@ __modulesFolder["ingame"] = function()
 end
 
 __modulesFolder["loadPeoplesRepublicOfGermetistan"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"loadPeoplesRepublicOfGermetistan"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local function loadPeoplesRepublicOfGermetistan()
 		if not isDeadline then
 			return nil
@@ -2863,6 +3325,18 @@ __modulesFolder["loadPeoplesRepublicOfGermetistan"] = function()
 end
 
 __modulesFolder["map_generator"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local newFakeInstance = nil
+	local old_game = nil
 	local script
 	script = newFakeInstance({"map_generator"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -2883,12 +3357,6 @@ __modulesFolder["map_generator"] = function()
 	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 	-- If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
 	-- Here is the Gigachad Terms of Service 2000 Iteration 0
@@ -3179,15 +3647,20 @@ __modulesFolder["map_generator"] = function()
 end
 
 __modulesFolder["pingSystem"] = function()
-	local script
-	script = newFakeInstance({"pingSystem"})
-	local require = old_require
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
 	local old_require = nil
 	local newFakeInstance = nil
-	local game = old_game
 	local old_game = nil
-	local __modulesFolder = nil
-	-- !deadline-ts.customFinishSector_FinishModulesEnd
+	local script
+	script = newFakeInstance({"pingSystem"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	-- export class RateLimit 
 	local PingSystem
@@ -3255,6 +3728,7 @@ __modulesFolder["pingSystem"] = function()
 end
 
 task.defer(function()
+	local __modulesFolder = nil
 	local script
 	script = newFakeInstance({"main"})
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
@@ -3265,12 +3739,6 @@ task.defer(function()
 	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
 	local loadPeoplesRepublicOfGermetistan = TS.import(script, game:GetService("ServerScriptService"), "TS", "loadPeoplesRepublicOfGermetistan").loadPeoplesRepublicOfGermetistan
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
-	local require = old_require
-	local old_require = nil
-	local newFakeInstance = nil
-	local game = old_game
-	local old_game = nil
-	local __modulesFolder = nil
 	local dogRef = {}
 	loadPeoplesRepublicOfGermetistan()
 	map.set_preset("afghanistan")

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "rbxtsc",
+    "build": "npx deadline-dog",
     "watch": "rbxtsc -w"
   },
   "keywords": [],
@@ -23,5 +23,9 @@
     "prettier": "^3.8.3",
     "roblox-ts": "^3.0.0-dev-9165cde",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@eves26phylum/types": "^1.0.3",
+    "deadline-ts": "^100.0.0"
   }
 }
