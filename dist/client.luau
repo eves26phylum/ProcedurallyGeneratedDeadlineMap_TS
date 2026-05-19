@@ -350,10 +350,10 @@ __modulesFolder["DepthFirstMazeSearch"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"DepthFirstMazeSearch"})
+	script = newFakeInstance({"DepthFirstMazeSearch"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local fisherYatesShuffle = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").fisherYatesShuffle
@@ -435,10 +435,10 @@ __modulesFolder["EgoMoose"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"EgoMoose"})
+	script = newFakeInstance({"EgoMoose"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	-- thanks from EgoMoose
 	-- https://github.com/EgoMoose/Articles
@@ -545,10 +545,10 @@ __modulesFolder["PerlinNoise"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"PerlinNoise"})
+	script = newFakeInstance({"PerlinNoise"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local function FUCKROBLOX(a)
 		-- fuck roblox basically fucks roblox and also avoids integer noise
@@ -658,10 +658,10 @@ __modulesFolder["ProceduralRoomGeneration"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"ProceduralRoomGeneration"})
+	script = newFakeInstance({"ProceduralRoomGeneration"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local mazePassageKey = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "DepthFirstMazeSearch").mazePassageKey
@@ -860,10 +860,10 @@ __modulesFolder["Util"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"Util"})
+	script = newFakeInstance({"Util"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local function assign(a, b, optionalFunc)
 		if optionalFunc == nil then
@@ -911,10 +911,10 @@ __modulesFolder["adapterToUse"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"adapterToUse"})
+	script = newFakeInstance({"adapterToUse"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
@@ -939,10 +939,10 @@ __modulesFolder["alphabetArray"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"alphabetArray"})
+	script = newFakeInstance({"alphabetArray"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local alphabetArray = string.split("abcdefghijklmnopqrstuvwxyz", "")
 	return {
@@ -962,10 +962,10 @@ __modulesFolder["biome"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"biome"})
+	script = newFakeInstance({"biome"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local biomeExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeExtension").biomeExtension
@@ -1013,10 +1013,10 @@ __modulesFolder["biomeAndStructureRegistrySystem"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"biomeAndStructureRegistrySystem"})
+	script = newFakeInstance({"biomeAndStructureRegistrySystem"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
@@ -1075,10 +1075,10 @@ __modulesFolder["biomeExtension"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"biomeExtension"})
+	script = newFakeInstance({"biomeExtension"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local createCellExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "cellExtension").createCellExtension
@@ -1106,10 +1106,10 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"biomes", "NuristanBuildings"})
+	script = newFakeInstance({"biomes", "NuristanBuildings"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
@@ -1446,10 +1446,10 @@ __modulesFolder["biomes"]["Tree"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"biomes", "Tree"})
+	script = newFakeInstance({"biomes", "Tree"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local EgoMoose = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "EgoMoose").EgoMoose
@@ -1568,10 +1568,10 @@ __modulesFolder["biomes"]["nuristanStandardBiome"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"biomes", "nuristanStandardBiome"})
+	script = newFakeInstance({"biomes", "nuristanStandardBiome"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local useBiomeData = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biome").useBiomeData
@@ -1642,10 +1642,10 @@ __modulesFolder["cellExtension"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"cellExtension"})
+	script = newFakeInstance({"cellExtension"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local function createCellExtension()
 		local store = setmetatable({}, {
@@ -1702,10 +1702,10 @@ __modulesFolder["createTerrainFromVerticesUsingAdapter"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"createTerrainFromVerticesUsingAdapter"})
+	script = newFakeInstance({"createTerrainFromVerticesUsingAdapter"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
@@ -1915,10 +1915,10 @@ __modulesFolder["deadlineAdapter"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"deadlineAdapter"})
+	script = newFakeInstance({"deadlineAdapter"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	-- let wagesCounter = 0;
 	local deadlineAdapter = {}
@@ -1983,10 +1983,10 @@ __modulesFolder["droneMaterialConfig"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"droneMaterialConfig"})
+	script = newFakeInstance({"droneMaterialConfig"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local droneMaterialConfig = {
 		selected = {
@@ -2015,10 +2015,10 @@ __modulesFolder["generateId"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"generateId"})
+	script = newFakeInstance({"generateId"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local getRandomItemInArray = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRandomItemInArray").getRandomItemInArray
@@ -2059,10 +2059,10 @@ __modulesFolder["getRandomItemInArray"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"getRandomItemInArray"})
+	script = newFakeInstance({"getRandomItemInArray"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local function getRandomItemInArray(array)
 		return array[math.random(0, #array - 1) + 1]
@@ -2084,10 +2084,10 @@ __modulesFolder["getRoot"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"getRoot"})
+	script = newFakeInstance({"getRoot"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
@@ -2112,10 +2112,10 @@ __modulesFolder["humanConfig"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"humanConfig"})
+	script = newFakeInstance({"humanConfig"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local default = {
 		maxLivableSteepness = 15,
@@ -2138,10 +2138,10 @@ __modulesFolder["isDeadline"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"isDeadline"})
+	script = newFakeInstance({"isDeadline"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local isDeadline = game == nil
 	return {
@@ -2161,10 +2161,10 @@ __modulesFolder["logger"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"logger"})
+	script = newFakeInstance({"logger"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
@@ -2264,10 +2264,10 @@ __modulesFolder["nuristanHandler"]["livingRoom"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"nuristanHandler", "livingRoom"})
+	script = newFakeInstance({"nuristanHandler", "livingRoom"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local LivingRoomHandler
@@ -2308,10 +2308,10 @@ __modulesFolder["nuristanHandler"]["sniperWindow"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"nuristanHandler", "sniperWindow"})
+	script = newFakeInstance({"nuristanHandler", "sniperWindow"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local ALL_WALL_FACES = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomes", "NuristanBuildings").ALL_WALL_FACES
@@ -2384,10 +2384,10 @@ __modulesFolder["randomDroneNoise"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"randomDroneNoise"})
+	script = newFakeInstance({"randomDroneNoise"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local random_drone_noise = {
 		defender = { "rbxassetid://131625660349459", "rbxassetid://126734205451508", "rbxassetid://112226499298758" },
@@ -2410,10 +2410,10 @@ __modulesFolder["robloxAdapter"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"robloxAdapter"})
+	script = newFakeInstance({"robloxAdapter"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local _CollectionService = game
 	if _CollectionService ~= nil then
@@ -2476,10 +2476,10 @@ __modulesFolder["selfProp"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"selfProp"})
+	script = newFakeInstance({"selfProp"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local function returnFunctionWithIdentity(func, _self)
 		local _func = func
@@ -2508,10 +2508,10 @@ __modulesFolder["spectatorBoxBuilder"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"spectatorBoxBuilder"})
+	script = newFakeInstance({"spectatorBoxBuilder"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local INTERIOR_DIMENSION = 18
@@ -2668,10 +2668,10 @@ __modulesFolder["structure"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"structure"})
+	script = newFakeInstance({"structure"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local structureExtension = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "biomeExtension").structureExtension
@@ -2719,10 +2719,10 @@ __modulesFolder["tagsService"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"tagsService"})
+	script = newFakeInstance({"tagsService"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local _CollectionService = game
 	if _CollectionService ~= nil then
@@ -2758,10 +2758,10 @@ __modulesFolder["terrainProgressInterface"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"terrainProgressInterface"})
+	script = newFakeInstance({"terrainProgressInterface"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	return nil
 
@@ -2778,10 +2778,10 @@ __modulesFolder["translateTerrainForStructureBonding"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"translateTerrainForStructureBonding"})
+	script = newFakeInstance({"translateTerrainForStructureBonding"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	-- local translateTerrainOrientationForStructureBonding = {
 	--     orientationSubtraction = Vector3.new(0, 0, -90)
@@ -2846,10 +2846,10 @@ __modulesFolder["voicelines"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"voicelines"})
+	script = newFakeInstance({"voicelines"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local voicelines = {
 		defender = { "Good morning, SYNO! We are waiting on %s more SYNO until we deploy. Stay cool, stay frosty.", "Eyes up, SYNO. %s personnel still need to link up for deployment. Remember your objective.", "Listen up. Command sent you here with triple the ammunition compared to a mission in Complex for a reason. We need %s more. Do not waste your rounds." },
@@ -2872,10 +2872,10 @@ __modulesFolder["pingfactory"] = function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"pingfactory"})
+	script = newFakeInstance({"pingfactory"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
@@ -3007,10 +3007,10 @@ task.defer(function()
 	local __runtimeLibPath = nil
 	local __modulesCachedValues = nil
 	local old_require = nil
-	local newFakeInstance = nil
 	local old_game = nil
 	local script
-	script = newFakeInstance({"main"})
+	script = newFakeInstance({"main"})	local newFakeInstance = nil
+
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local droneMaterialConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "droneMaterialConfig").droneMaterialConfig
