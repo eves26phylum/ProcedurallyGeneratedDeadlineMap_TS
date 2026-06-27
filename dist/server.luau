@@ -3045,7 +3045,7 @@ __modulesFolder["ingame"] = function()
 					task.wait(1)
 				end
 				if spawnedAmount == spawnedAmounts[player.name] then
-					player.set_camera_mode("Default")
+					player.set_camera_mode("RecoilCam")
 				end
 			end)
 			local thisVoicelineStr = voicelines[team][math.random(0, #voicelines[team] - 1) + 1]
@@ -3088,7 +3088,7 @@ __modulesFolder["ingame"] = function()
 				if drones[thisPlayer.name] then
 					adapterToUse.destroy(drones[thisPlayer.name])
 				end
-				thisPlayer.set_camera_mode("Default")
+				thisPlayer.set_camera_mode("RecoilCam")
 				thisPlayer.set_position(hitSpawnPos)
 				task.delay(3, function()
 					for i = 0, 19 do

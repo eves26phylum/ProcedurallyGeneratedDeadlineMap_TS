@@ -243,6 +243,6 @@ class CustomFreecam {
     }
 }
 
-register_camera_mode("Default", CustomFreecam);
+register_camera_mode("RecoilCam", CustomFreecam);
 }
 if (isDeadline) main();

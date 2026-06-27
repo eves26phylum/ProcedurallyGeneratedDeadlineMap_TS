@@ -188,7 +188,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
         }
         task.defer(() => {
             while (drone.Parent !== undefined) {task.wait(1);}
-            if (spawnedAmount === spawnedAmounts[player.name]) player.set_camera_mode("Default");
+            if (spawnedAmount === spawnedAmounts[player.name]) player.set_camera_mode("RecoilCam");
         });
         const thisVoicelineStr: string = voicelines[team][math.random(0, voicelines[team].size() - 1)];
         const coordAmount = math.min(lastSpawns.coordination, players.get_all().size());
@@ -214,7 +214,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
             }
             const hitSpawnPos = hit.position.add(new Vector3(0, math.min(340, dogRef.current || math.huge), 0));
             if (drones[thisPlayer.name]) adapterToUse.destroy(drones[thisPlayer.name]);
-            thisPlayer.set_camera_mode("Default");
+            thisPlayer.set_camera_mode("RecoilCam");
             thisPlayer.set_position(hitSpawnPos);
             task.delay(3, () => {
                 for (let i = 0; i < 20; i++) { 

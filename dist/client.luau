@@ -3342,7 +3342,7 @@ __modulesFolder["superShakeRecoil"] = function()
 				self.camera_cframe = camera_cframe
 			end
 		end
-		register_camera_mode("Default", CustomFreecam)
+		register_camera_mode("RecoilCam", CustomFreecam)
 	end
 	if isDeadline then
 		main()
