@@ -3224,15 +3224,6 @@ __modulesFolder["superShakeRecoil"] = function()
 		local checker = RestrictionChecker.new()
 		local traverser = ParentTraverser.new(checker)
 		local finder = IgnoreFolderFinder.new(traverser, checker)
-		local candidates = finder:getIgnoreFolderUsingTaggedChildren(function(finder, instance, parent)
-			local result = finder.checker:isRestricted(parent)
-			if result.restricted and { string.find(result.message, "is not accessible") } then
-				return { parent.Name, parent }
-			end
-			return nil
-		end)
-		local _lighting = candidates.Lighting
-		assert(_lighting, "Lighting candidate not found")
 		local blurCreator = BlurCreator.new()
 		framework.on_died:Connect(function()
 			return blurCreator:destroyBlur()
@@ -3250,6 +3241,15 @@ __modulesFolder["superShakeRecoil"] = function()
 				return self:constructor(...) or self
 			end
 			function CustomFreecam:constructor(get_head_cframe)
+				local candidates = finder:getIgnoreFolderUsingTaggedChildren(function(finder, instance, parent)
+					local result = finder.checker:isRestricted(parent)
+					if result.restricted and { string.find(result.message, "is not accessible") } then
+						return { parent.Name, parent }
+					end
+					return nil
+				end)
+				local _lighting = candidates.Lighting
+				assert(_lighting, "Lighting candidate not found")
 				self.get_head_cframe = get_head_cframe
 				self.cam_position = CFrame.new(-35.25, 200.662, 8.242)
 				self.rot_x = 0
