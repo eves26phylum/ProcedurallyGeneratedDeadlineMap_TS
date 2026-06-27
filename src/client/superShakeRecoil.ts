@@ -106,6 +106,7 @@ class CustomFreecam {
 
     roll_limit_buffer: number;
     recoil_recovery_speed: number;
+    look_damping_speed: number;
     recoil_threshold: number;
     recoil_intensity: number;
     blur_intensity: number;
@@ -148,6 +149,7 @@ class CustomFreecam {
 
         this.roll_limit_buffer = 0.2;
         this.recoil_recovery_speed = 0.5;
+        this.look_damping_speed = 20;
         this.recoil_threshold = 0.01;
         this.recoil_intensity = 0.03;
         this.current_rot_x = 0;
@@ -193,8 +195,8 @@ class CustomFreecam {
         this.real_rot_y = math.clamp(this.real_rot_y, this.min_roll, this.max_roll);
         this.real_rot_x -= rawDelta.X * scale;
 
-        this.current_rot_x = 0;
-        this.current_rot_y = 0;
+        this.current_rot_x += (this.real_rot_x - this.current_rot_x) * math.min(1, delta_time * this.look_damping_speed);
+        this.current_rot_y += (this.real_rot_y - this.current_rot_y) * math.min(1, delta_time * this.look_damping_speed);
 
         const head_cframe = this.get_head_cframe();
         this.cam_position = new CFrame(head_cframe.Position);
