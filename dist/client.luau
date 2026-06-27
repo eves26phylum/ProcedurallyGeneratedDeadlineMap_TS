@@ -2809,6 +2809,141 @@ __modulesFolder["voicelines"] = function()
 
 end
 
+__modulesFolder["assetPreloader"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"assetPreloader"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function assign(a, b, optionalFunc)
+		if optionalFunc == nil then
+			optionalFunc = function(a, index, value)
+				a[index] = value
+			end
+		end
+		for index, value in pairs(b) do
+			optionalFunc(a, index, value)
+		end
+		return a
+	end
+	local ThresholdUtility
+	do
+		ThresholdUtility = setmetatable({}, {
+			__tostring = function()
+				return "ThresholdUtility"
+			end,
+		})
+		ThresholdUtility.__index = ThresholdUtility
+		function ThresholdUtility.new(...)
+			local self = setmetatable({}, ThresholdUtility)
+			return self:constructor(...) or self
+		end
+		function ThresholdUtility:constructor(upperLimits)
+			self.threshold = 0
+			self.upperLimits = upperLimits
+		end
+		function ThresholdUtility:validate()
+			self.threshold += 1
+			if self.threshold > self.upperLimits then
+				return true
+			end
+			return false
+		end
+	end
+	local function CheckUntil(validatorFunction)
+		while true do
+			local _value = validatorFunction()
+			if not not (_value ~= 0 and _value == _value and _value ~= "" and _value) then
+				break
+			end
+			task.wait()
+		end
+	end
+	local AudioAsset
+	do
+		AudioAsset = setmetatable({}, {
+			__tostring = function()
+				return "AudioAsset"
+			end,
+		})
+		AudioAsset.__index = AudioAsset
+		function AudioAsset.new(...)
+			local self = setmetatable({}, AudioAsset)
+			return self:constructor(...) or self
+		end
+		function AudioAsset:constructor(props, thresholdUtility)
+			self.object = sound.create()
+			self.object.Volume = 0
+			self.thisThresholdUtility = thresholdUtility
+			assign(self.object, props)
+		end
+		function AudioAsset:preload()
+			self.object.play()
+			-- const thisThresholdUtility = new ThresholdUtility(60); don't hardcode
+			CheckUntil(function()
+				local isPastTimeLimit = self.thisThresholdUtility:validate()
+				local isTheSoundLoadedYetImBored = self.object.TimeLength ~= 0
+				return isPastTimeLimit or isTheSoundLoadedYetImBored
+			end)
+			-- this.object.destroy();
+			task.delay(self.object.TimeLength + 1, function()
+				self.object.destroy()
+			end)
+		end
+	end
+	local AssetPreloader
+	do
+		AssetPreloader = setmetatable({}, {
+			__tostring = function()
+				return "AssetPreloader"
+			end,
+		})
+		AssetPreloader.__index = AssetPreloader
+		function AssetPreloader.new(...)
+			local self = setmetatable({}, AssetPreloader)
+			return self:constructor(...) or self
+		end
+		function AssetPreloader:constructor(assets)
+			self.assets = assets
+		end
+		function AssetPreloader:preloadAll()
+			local preloadedCounter = 0
+			local _exp = self.assets
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(thisAssetPreloaderAsset, index)
+				task.defer(function()
+					thisAssetPreloaderAsset:preload()
+					preloadedCounter += 1
+				end)
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+			while preloadedCounter < #self.assets do
+				task.wait()
+			end
+		end
+	end
+	--new AudioAsset({}, new ThresholdUtility(60));
+	return {
+		ThresholdUtility = ThresholdUtility,
+		AudioAsset = AudioAsset,
+		AssetPreloader = AssetPreloader,
+	}
+
+end
+
 __modulesFolder["pingfactory"] = function()
 	local __modulesFolder = nil
 	local __customTS = nil
@@ -2941,6 +3076,274 @@ __modulesFolder["pingfactory"] = function()
 		PingNoisePlayer = PingNoisePlayer,
 		Ping = Ping,
 	}
+
+end
+
+__modulesFolder["superShakeRecoil"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"superShakeRecoil"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	-- -- CLASS: PROPRIETARY
+	local function main()
+		local RestrictionChecker
+		do
+			RestrictionChecker = setmetatable({}, {
+				__tostring = function()
+					return "RestrictionChecker"
+				end,
+			})
+			RestrictionChecker.__index = RestrictionChecker
+			function RestrictionChecker.new(...)
+				local self = setmetatable({}, RestrictionChecker)
+				return self:constructor(...) or self
+			end
+			function RestrictionChecker:constructor()
+			end
+			function RestrictionChecker:isRestricted(instance)
+				local message = ""
+				local restricted = false
+				TS.try(function()
+					local _ = instance.Parent
+				end, function(e)
+					message = tostring(e)
+					restricted = true
+				end)
+				return {
+					message = message,
+					restricted = restricted,
+				}
+			end
+		end
+		local ParentTraverser
+		do
+			ParentTraverser = setmetatable({}, {
+				__tostring = function()
+					return "ParentTraverser"
+				end,
+			})
+			ParentTraverser.__index = ParentTraverser
+			function ParentTraverser.new(...)
+				local self = setmetatable({}, ParentTraverser)
+				return self:constructor(...) or self
+			end
+			function ParentTraverser:constructor(checker)
+				self.checker = checker
+			end
+			function ParentTraverser:traverse(instance, callback)
+				if self.checker:isRestricted(instance).restricted then
+					return nil
+				end
+				local parent = instance.Parent
+				if not parent then
+					return nil
+				end
+				local result = callback(instance, parent)
+				if result ~= nil then
+					return result
+				end
+				return self:traverse(parent, callback)
+			end
+		end
+		local IgnoreFolderFinder
+		do
+			IgnoreFolderFinder = setmetatable({}, {
+				__tostring = function()
+					return "IgnoreFolderFinder"
+				end,
+			})
+			IgnoreFolderFinder.__index = IgnoreFolderFinder
+			function IgnoreFolderFinder.new(...)
+				local self = setmetatable({}, IgnoreFolderFinder)
+				return self:constructor(...) or self
+			end
+			function IgnoreFolderFinder:constructor(traverser, checker)
+				self.traverser = traverser
+				self.checker = checker
+			end
+			function IgnoreFolderFinder:getIgnoreFolderUsingTaggedChildren(proprietaryLogic)
+				local candidates = {}
+				for _, tagString in tags.get_tags() do
+					for _1, instance in tags.get_tagged(tagString) do
+						local result = self.traverser:traverse(instance, function(inst, parent)
+							return proprietaryLogic(self, inst, parent)
+						end)
+						if not result then
+							continue
+						end
+						local key = result[1]
+						local candidate = result[2]
+						candidates[key] = candidate
+					end
+				end
+				return candidates
+			end
+		end
+		local BlurCreator
+		do
+			BlurCreator = setmetatable({}, {
+				__tostring = function()
+					return "BlurCreator"
+				end,
+			})
+			BlurCreator.__index = BlurCreator
+			function BlurCreator.new(...)
+				local self = setmetatable({}, BlurCreator)
+				return self:constructor(...) or self
+			end
+			function BlurCreator:constructor()
+				self.lastBlur = nil
+			end
+			function BlurCreator:destroyBlur()
+				if self.lastBlur then
+					self.lastBlur.destroy()
+				end
+			end
+			function BlurCreator:createBlur(Lighting)
+				self:destroyBlur()
+				local blur = create_instance("BlurEffect")
+				blur.Size = 0
+				blur.Parent = Lighting
+				self.lastBlur = blur
+				return blur
+			end
+		end
+		local checker = RestrictionChecker.new()
+		local traverser = ParentTraverser.new(checker)
+		local finder = IgnoreFolderFinder.new(traverser, checker)
+		local candidates = finder:getIgnoreFolderUsingTaggedChildren(function(finder, instance, parent)
+			local result = finder.checker:isRestricted(parent)
+			if result.restricted and { string.find(result.message, "is not accessible") } then
+				return { parent.Name, parent }
+			end
+			return nil
+		end)
+		local _lighting = candidates.Lighting
+		assert(_lighting, "Lighting candidate not found")
+		local blurCreator = BlurCreator.new()
+		framework.on_died:Connect(function()
+			return blurCreator:destroyBlur()
+		end)
+		local CustomFreecam
+		do
+			CustomFreecam = setmetatable({}, {
+				__tostring = function()
+					return "CustomFreecam"
+				end,
+			})
+			CustomFreecam.__index = CustomFreecam
+			function CustomFreecam.new(...)
+				local self = setmetatable({}, CustomFreecam)
+				return self:constructor(...) or self
+			end
+			function CustomFreecam:constructor(get_head_cframe)
+				self.get_head_cframe = get_head_cframe
+				self.cam_position = CFrame.new(-35.25, 200.662, 8.242)
+				self.rot_x = 0
+				self.rot_y = 0
+				self.real_rot_x = 0
+				self.real_rot_y = 0
+				self.roll_limit_buffer = 0.2
+				self.recoil_recovery_speed = 0.5
+				self.recoil_threshold = 0.01
+				self.recoil_intensity = 0.03
+				self.blur_intensity = 150
+				self.input = {
+					movementX = 0,
+					movementY = 0,
+					movementZ = 0,
+				}
+				self.blur_bound_lower = 0
+				self.blur_bound_upper = 5
+				self.horizontal_vis_multiplier = 0.25
+				self.horizontal_shake_multiplier = 0.5
+				self.rot_y_softening = 10
+				self.vertical_recoil_frequency = 3
+				self.lateral_recoil_frequency = 3
+				self.super_recoil_intensity = 5
+				self.sway_frequency = 0.2
+				self.sway_intensity = 0.01
+				self.mouse_delta_base_scale = 0.035
+				self.recoil_lateral_fraction = 0.7
+				self.recoil_lateral_displacement_scale = 0.05
+				self.t_seed_range = 256
+				self.vertical_shake_base_threshold = 1.0
+				self.vertical_shake_frequency_scale = 2.0
+				self.vertical_shake_amplitude_scale = 0.008
+				self.vertical_shake_phase = 0
+				self.last_base_recoil = 0
+				self.blur = blurCreator:createBlur(candidates.Lighting)
+				self.min_roll = -(math.pi / 2 - self.roll_limit_buffer)
+				self.max_roll = math.pi / 2 - self.roll_limit_buffer
+				self.t = math.random() * self.t_seed_range
+				self.camera_cframe = self.cam_position
+				Shared.config = self
+			end
+			function CustomFreecam:update(delta_time)
+				local rawDelta = input.get_mouse_delta()
+				local scale = self.mouse_delta_base_scale * input.get_mouse_sensitivity()
+				self.real_rot_y -= rawDelta.Y * scale
+				self.real_rot_y = math.clamp(self.real_rot_y, self.min_roll, self.max_roll)
+				self.real_rot_x -= rawDelta.X * scale
+				local head_cframe = self.get_head_cframe()
+				self.cam_position = CFrame.new(head_cframe.Position)
+				local camera_cframe = self.cam_position
+				self.rot_x += (0 - self.rot_x) * math.min(1, delta_time * self.recoil_recovery_speed)
+				self.rot_y += (0 - self.rot_y) * math.min(1, delta_time * self.recoil_recovery_speed)
+				local base_recoil_addon = self.rot_x + self.rot_y
+				local recoil_rate = (base_recoil_addon - self.last_base_recoil) / delta_time
+				local effective_rate = math.abs(recoil_rate) * self.vertical_shake_base_threshold
+				local shake_recoil = math.sin(base_recoil_addon * math.pi / self.recoil_threshold)
+				local shake_recoil_half = math.sin(base_recoil_addon * math.pi / (self.recoil_threshold * self.horizontal_shake_multiplier))
+				local total_recoil = shake_recoil * self.recoil_intensity
+				local half_recoil = shake_recoil_half * self.recoil_intensity
+				local softened_rot_y = self.rot_y / (1 + math.abs(self.rot_y) * self.rot_y_softening)
+				self.t += delta_time
+				local lateral_recoil = math.noise(self.t * self.lateral_recoil_frequency, 0) * base_recoil_addon * self.super_recoil_intensity * self.recoil_intensity
+				local vertical_recoil = math.noise(self.t * self.vertical_recoil_frequency, 1) * base_recoil_addon * self.super_recoil_intensity * self.recoil_intensity
+				local sway_x = math.noise(self.t * self.sway_frequency, 0) * self.sway_intensity
+				local sway_y = math.noise(self.t * self.sway_frequency, 1) * self.sway_intensity
+				self.vertical_shake_phase += effective_rate * self.vertical_shake_frequency_scale * delta_time
+				local vertical_shake_offset = math.sin(self.vertical_shake_phase * math.pi * 2) * (effective_rate * self.vertical_shake_amplitude_scale)
+				local roll_recoil = (1 - self.recoil_lateral_fraction) * total_recoil
+				local lateral_disp_x = math.noise(self.t * self.lateral_recoil_frequency, 2) * base_recoil_addon * self.recoil_lateral_fraction * self.recoil_lateral_displacement_scale
+				local lateral_disp_y = math.noise(self.t * self.vertical_recoil_frequency, 3) * base_recoil_addon * self.recoil_lateral_fraction * self.recoil_lateral_displacement_scale
+				self.blur.Size = math.clamp(base_recoil_addon * self.blur_intensity, self.blur_bound_lower, self.blur_bound_upper)
+				local _camera_cframe = camera_cframe
+				local _arg0 = CFrame.Angles(0, self.real_rot_x + lateral_recoil + sway_x, 0)
+				local _arg0_1 = CFrame.Angles((self.real_rot_y - softened_rot_y) + half_recoil * self.horizontal_vis_multiplier + vertical_recoil + sway_y, 0, 0)
+				local _arg0_2 = CFrame.Angles(vertical_shake_offset, 0, 0)
+				local _arg0_3 = CFrame.Angles(0, 0, roll_recoil)
+				local _condition = self.roll
+				if _condition == nil then
+					_condition = 0
+				end
+				local _arg0_4 = CFrame.Angles(0, 0, -_condition)
+				local _cFrame = CFrame.new(lateral_disp_x, lateral_disp_y, 0)
+				camera_cframe = _camera_cframe * _arg0 * _arg0_1 * _arg0_2 * _arg0_3 * _arg0_4 * _cFrame
+				self.last_base_recoil = base_recoil_addon
+				self.camera_cframe = camera_cframe
+			end
+		end
+		register_camera_mode("Default", CustomFreecam)
+	end
+	if isDeadline then
+		main()
+	end
+	return nil
 
 end
 
