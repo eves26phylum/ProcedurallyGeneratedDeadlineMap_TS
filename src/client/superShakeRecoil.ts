@@ -1,7 +1,4 @@
-import { isDeadline } from "shared/isDeadline";
-
 // -- CLASS: PROPRIETARY
-function main() {
 class RestrictionChecker {
     isRestricted(instance: WrappedInstance) {
         let message = "";
@@ -77,8 +74,19 @@ const checker = new RestrictionChecker();
 const traverser = new ParentTraverser(checker);
 const finder = new IgnoreFolderFinder(traverser, checker);
 const blurCreator = new BlurCreator();
-framework.on_died.Connect(() => blurCreator.destroyBlur());
+const candidates = finder.getIgnoreFolderUsingTaggedChildren(
+    (finder, instance, parent) => {
+        const result = finder.checker.isRestricted(parent);
+        if (result.restricted && string.find(result.message, "is not accessible")) {
+            return [parent.Name, parent];
+        }
+        return undefined;
+    }
+);
 
+assert(candidates.Lighting, "Lighting candidate not found");
+framework.on_died.Connect(() => blurCreator.destroyBlur());
+export function bindRecoilCam() {
 class CustomFreecam {
     get_head_cframe: () => CFrame;
     cam_position: CFrame;
@@ -128,17 +136,6 @@ class CustomFreecam {
     last_base_recoil: number;
 
     constructor(get_head_cframe: () => CFrame) {
-        const candidates = finder.getIgnoreFolderUsingTaggedChildren(
-            (finder, instance, parent) => {
-                const result = finder.checker.isRestricted(parent);
-                if (result.restricted && string.find(result.message, "is not accessible")) {
-                    return [parent.Name, parent];
-                }
-                return undefined;
-            }
-        );
-
-        assert(candidates.Lighting, "Lighting candidate not found");
         this.get_head_cframe = get_head_cframe;
 
         this.cam_position = new CFrame(-35.25, 200.662, 8.242);
@@ -245,4 +242,3 @@ class CustomFreecam {
 
 register_camera_mode("RecoilCam", CustomFreecam);
 }
-if (isDeadline) main();

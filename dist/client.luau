@@ -3096,138 +3096,146 @@ __modulesFolder["superShakeRecoil"] = function()
 
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	-- -- CLASS: PROPRIETARY
-	local function main()
-		local RestrictionChecker
-		do
-			RestrictionChecker = setmetatable({}, {
-				__tostring = function()
-					return "RestrictionChecker"
-				end,
-			})
-			RestrictionChecker.__index = RestrictionChecker
-			function RestrictionChecker.new(...)
-				local self = setmetatable({}, RestrictionChecker)
-				return self:constructor(...) or self
-			end
-			function RestrictionChecker:constructor()
-			end
-			function RestrictionChecker:isRestricted(instance)
-				local message = ""
-				local restricted = false
-				TS.try(function()
-					local _ = instance.Parent
-				end, function(e)
-					message = tostring(e)
-					restricted = true
-				end)
-				return {
-					message = message,
-					restricted = restricted,
-				}
-			end
+	local RestrictionChecker
+	do
+		RestrictionChecker = setmetatable({}, {
+			__tostring = function()
+				return "RestrictionChecker"
+			end,
+		})
+		RestrictionChecker.__index = RestrictionChecker
+		function RestrictionChecker.new(...)
+			local self = setmetatable({}, RestrictionChecker)
+			return self:constructor(...) or self
 		end
-		local ParentTraverser
-		do
-			ParentTraverser = setmetatable({}, {
-				__tostring = function()
-					return "ParentTraverser"
-				end,
-			})
-			ParentTraverser.__index = ParentTraverser
-			function ParentTraverser.new(...)
-				local self = setmetatable({}, ParentTraverser)
-				return self:constructor(...) or self
-			end
-			function ParentTraverser:constructor(checker)
-				self.checker = checker
-			end
-			function ParentTraverser:traverse(instance, callback)
-				if self.checker:isRestricted(instance).restricted then
-					return nil
-				end
-				local parent = instance.Parent
-				if not parent then
-					return nil
-				end
-				local result = callback(instance, parent)
-				if result ~= nil then
-					return result
-				end
-				return self:traverse(parent, callback)
-			end
+		function RestrictionChecker:constructor()
 		end
-		local IgnoreFolderFinder
-		do
-			IgnoreFolderFinder = setmetatable({}, {
-				__tostring = function()
-					return "IgnoreFolderFinder"
-				end,
-			})
-			IgnoreFolderFinder.__index = IgnoreFolderFinder
-			function IgnoreFolderFinder.new(...)
-				local self = setmetatable({}, IgnoreFolderFinder)
-				return self:constructor(...) or self
+		function RestrictionChecker:isRestricted(instance)
+			local message = ""
+			local restricted = false
+			TS.try(function()
+				local _ = instance.Parent
+			end, function(e)
+				message = tostring(e)
+				restricted = true
+			end)
+			return {
+				message = message,
+				restricted = restricted,
+			}
+		end
+	end
+	local ParentTraverser
+	do
+		ParentTraverser = setmetatable({}, {
+			__tostring = function()
+				return "ParentTraverser"
+			end,
+		})
+		ParentTraverser.__index = ParentTraverser
+		function ParentTraverser.new(...)
+			local self = setmetatable({}, ParentTraverser)
+			return self:constructor(...) or self
+		end
+		function ParentTraverser:constructor(checker)
+			self.checker = checker
+		end
+		function ParentTraverser:traverse(instance, callback)
+			if self.checker:isRestricted(instance).restricted then
+				return nil
 			end
-			function IgnoreFolderFinder:constructor(traverser, checker)
-				self.traverser = traverser
-				self.checker = checker
+			local parent = instance.Parent
+			if not parent then
+				return nil
 			end
-			function IgnoreFolderFinder:getIgnoreFolderUsingTaggedChildren(proprietaryLogic)
-				local candidates = {}
-				for _, tagString in tags.get_tags() do
-					for _1, instance in tags.get_tagged(tagString) do
-						local result = self.traverser:traverse(instance, function(inst, parent)
-							return proprietaryLogic(self, inst, parent)
-						end)
-						if not result then
-							continue
-						end
-						local key = result[1]
-						local candidate = result[2]
-						candidates[key] = candidate
+			local result = callback(instance, parent)
+			if result ~= nil then
+				return result
+			end
+			return self:traverse(parent, callback)
+		end
+	end
+	local IgnoreFolderFinder
+	do
+		IgnoreFolderFinder = setmetatable({}, {
+			__tostring = function()
+				return "IgnoreFolderFinder"
+			end,
+		})
+		IgnoreFolderFinder.__index = IgnoreFolderFinder
+		function IgnoreFolderFinder.new(...)
+			local self = setmetatable({}, IgnoreFolderFinder)
+			return self:constructor(...) or self
+		end
+		function IgnoreFolderFinder:constructor(traverser, checker)
+			self.traverser = traverser
+			self.checker = checker
+		end
+		function IgnoreFolderFinder:getIgnoreFolderUsingTaggedChildren(proprietaryLogic)
+			local candidates = {}
+			for _, tagString in tags.get_tags() do
+				for _1, instance in tags.get_tagged(tagString) do
+					local result = self.traverser:traverse(instance, function(inst, parent)
+						return proprietaryLogic(self, inst, parent)
+					end)
+					if not result then
+						continue
 					end
-				end
-				return candidates
-			end
-		end
-		local BlurCreator
-		do
-			BlurCreator = setmetatable({}, {
-				__tostring = function()
-					return "BlurCreator"
-				end,
-			})
-			BlurCreator.__index = BlurCreator
-			function BlurCreator.new(...)
-				local self = setmetatable({}, BlurCreator)
-				return self:constructor(...) or self
-			end
-			function BlurCreator:constructor()
-				self.lastBlur = nil
-			end
-			function BlurCreator:destroyBlur()
-				if self.lastBlur then
-					self.lastBlur.destroy()
+					local key = result[1]
+					local candidate = result[2]
+					candidates[key] = candidate
 				end
 			end
-			function BlurCreator:createBlur(Lighting)
-				self:destroyBlur()
-				local blur = create_instance("BlurEffect")
-				blur.Size = 0
-				blur.Parent = Lighting
-				self.lastBlur = blur
-				return blur
+			return candidates
+		end
+	end
+	local BlurCreator
+	do
+		BlurCreator = setmetatable({}, {
+			__tostring = function()
+				return "BlurCreator"
+			end,
+		})
+		BlurCreator.__index = BlurCreator
+		function BlurCreator.new(...)
+			local self = setmetatable({}, BlurCreator)
+			return self:constructor(...) or self
+		end
+		function BlurCreator:constructor()
+			self.lastBlur = nil
+		end
+		function BlurCreator:destroyBlur()
+			if self.lastBlur then
+				self.lastBlur.destroy()
 			end
 		end
-		local checker = RestrictionChecker.new()
-		local traverser = ParentTraverser.new(checker)
-		local finder = IgnoreFolderFinder.new(traverser, checker)
-		local blurCreator = BlurCreator.new()
-		framework.on_died:Connect(function()
-			return blurCreator:destroyBlur()
-		end)
+		function BlurCreator:createBlur(Lighting)
+			self:destroyBlur()
+			local blur = create_instance("BlurEffect")
+			blur.Size = 0
+			blur.Parent = Lighting
+			self.lastBlur = blur
+			return blur
+		end
+	end
+	local checker = RestrictionChecker.new()
+	local traverser = ParentTraverser.new(checker)
+	local finder = IgnoreFolderFinder.new(traverser, checker)
+	local blurCreator = BlurCreator.new()
+	local candidates = finder:getIgnoreFolderUsingTaggedChildren(function(finder, instance, parent)
+		local result = finder.checker:isRestricted(parent)
+		if result.restricted and { string.find(result.message, "is not accessible") } then
+			return { parent.Name, parent }
+		end
+		return nil
+	end)
+	local _lighting = candidates.Lighting
+	assert(_lighting, "Lighting candidate not found")
+	framework.on_died:Connect(function()
+		return blurCreator:destroyBlur()
+	end)
+	local function bindRecoilCam()
 		local CustomFreecam
 		do
 			CustomFreecam = setmetatable({}, {
@@ -3241,15 +3249,6 @@ __modulesFolder["superShakeRecoil"] = function()
 				return self:constructor(...) or self
 			end
 			function CustomFreecam:constructor(get_head_cframe)
-				local candidates = finder:getIgnoreFolderUsingTaggedChildren(function(finder, instance, parent)
-					local result = finder.checker:isRestricted(parent)
-					if result.restricted and { string.find(result.message, "is not accessible") } then
-						return { parent.Name, parent }
-					end
-					return nil
-				end)
-				local _lighting = candidates.Lighting
-				assert(_lighting, "Lighting candidate not found")
 				self.get_head_cframe = get_head_cframe
 				self.cam_position = CFrame.new(-35.25, 200.662, 8.242)
 				self.rot_x = 0
@@ -3344,10 +3343,9 @@ __modulesFolder["superShakeRecoil"] = function()
 		end
 		register_camera_mode("RecoilCam", CustomFreecam)
 	end
-	if isDeadline then
-		main()
-	end
-	return nil
+	return {
+		bindRecoilCam = bindRecoilCam,
+	}
 
 end
 
@@ -3369,6 +3367,7 @@ task.defer(function()
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local droneMaterialConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "droneMaterialConfig").droneMaterialConfig
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
 	local _pingfactory = TS.import(script, script.Parent, "pingfactory")
@@ -3377,6 +3376,7 @@ task.defer(function()
 	local PingUIItem = _pingfactory.PingUIItem
 	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
 	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
+	local bindRecoilCam = TS.import(script, script.Parent, "superShakeRecoil").bindRecoilCam
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local Log = Logger.new("main")
 	local lookListener
@@ -3649,5 +3649,8 @@ task.defer(function()
 		end
 		fire_server("ping_at_position", raycastPos)
 	end, InputType.Ended, "lean_left")
+	if isDeadline then
+		bindRecoilCam()
+	end
 
 end)

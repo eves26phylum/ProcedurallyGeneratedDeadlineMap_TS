@@ -7,6 +7,7 @@ import { Ping, PingNoisePlayer, PingUIItem } from "./pingfactory";
 import { adapterToUse } from "shared/adapterToUse";
 import { getWorldRoot } from "shared/getRoot";
 import { deadlineAdapter } from "shared/deadlineAdapter";
+import { bindRecoilCam } from "./superShakeRecoil";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 const Log = new Logger("main");
 class lookListener {
@@ -234,3 +235,5 @@ clientInputGroup.bind_user_setting(() => { // check
         raycastPos
     )
 }, InputType.Ended, "lean_left")
+
+if (isDeadline) bindRecoilCam();
