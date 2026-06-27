@@ -130,7 +130,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
     adapterToUse.setProperty(DroneFolder, "Parent", parent);
     // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
     let offset = new Vector3(0, 3000, 0);
-    const [firstPos, secondPos] = [new Vector3(-4000, 5000, -4000), new Vector3(4000, 5000, 4000)]
+    const [firstPos, secondPos] = [new Vector3(-3000, 5000, -3000), new Vector3(3000, 5000, 3000)]
     const spawnedAmounts: Record<string, number> = {};
     on_player_spawned.Connect((name) => {
         const player: Player | undefined = players.get(name);
