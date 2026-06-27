@@ -131,7 +131,8 @@ class CustomFreecam {
     vertical_shake_base_threshold: number;
     vertical_shake_frequency_scale: number;
     vertical_shake_amplitude_scale: number;
-
+    current_rot_x: number;
+    current_rot_y: number;
     t: number;
     vertical_shake_phase: number;
     last_base_recoil: number;
@@ -149,6 +150,8 @@ class CustomFreecam {
         this.recoil_recovery_speed = 0.5;
         this.recoil_threshold = 0.01;
         this.recoil_intensity = 0.03;
+        this.current_rot_x = 0;
+        this.current_rot_y = 0;
         this.blur_intensity = 150;
         this.input = {
             movementX: 0,
@@ -181,8 +184,6 @@ class CustomFreecam {
         this.max_roll = math.pi / 2 - this.roll_limit_buffer;
         this.t = math.random() * this.t_seed_range;
         this.camera_cframe = this.cam_position;
-
-        Shared.config = this; // edit this
     }
 
     update(delta_time: number): void {
@@ -191,6 +192,9 @@ class CustomFreecam {
         this.real_rot_y -= rawDelta.Y * scale;
         this.real_rot_y = math.clamp(this.real_rot_y, this.min_roll, this.max_roll);
         this.real_rot_x -= rawDelta.X * scale;
+
+        this.current_rot_x = 0;
+        this.current_rot_y = 0;
 
         const head_cframe = this.get_head_cframe();
         this.cam_position = new CFrame(head_cframe.Position);
@@ -225,8 +229,8 @@ class CustomFreecam {
         this.blur.Size = math.clamp(base_recoil_addon * this.blur_intensity, this.blur_bound_lower, this.blur_bound_upper);
 
         camera_cframe = camera_cframe
-            .mul(CFrame.Angles(0, this.real_rot_x + lateral_recoil + sway_x, 0))
-            .mul(CFrame.Angles((this.real_rot_y - softened_rot_y) + half_recoil * this.horizontal_vis_multiplier + vertical_recoil + sway_y, 0, 0))
+            .mul(CFrame.Angles(0, this.current_rot_x + lateral_recoil + sway_x, 0))
+            .mul(CFrame.Angles((this.current_rot_y - softened_rot_y) + half_recoil * this.horizontal_vis_multiplier + vertical_recoil + sway_y, 0, 0))
             .mul(CFrame.Angles(vertical_shake_offset, 0, 0))
             .mul(CFrame.Angles(0, 0, roll_recoil))
             .mul(CFrame.Angles(0, 0, -(this.roll ?? 0)))
