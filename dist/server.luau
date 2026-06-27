@@ -2347,6 +2347,133 @@ __modulesFolder["randomDroneNoise"] = function()
 
 end
 
+__modulesFolder["restrictedAssets"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"restrictedAssets"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	-- -- CLASS: PROPRIETARY
+	local RestrictionChecker
+	do
+		RestrictionChecker = setmetatable({}, {
+			__tostring = function()
+				return "RestrictionChecker"
+			end,
+		})
+		RestrictionChecker.__index = RestrictionChecker
+		function RestrictionChecker.new(...)
+			local self = setmetatable({}, RestrictionChecker)
+			return self:constructor(...) or self
+		end
+		function RestrictionChecker:constructor()
+		end
+		function RestrictionChecker:isRestricted(instance)
+			local message = ""
+			local restricted = false
+			TS.try(function()
+				local _ = instance.Parent
+			end, function(e)
+				message = tostring(e)
+				restricted = true
+			end)
+			return {
+				message = message,
+				restricted = restricted,
+			}
+		end
+	end
+	local ParentTraverser
+	do
+		ParentTraverser = setmetatable({}, {
+			__tostring = function()
+				return "ParentTraverser"
+			end,
+		})
+		ParentTraverser.__index = ParentTraverser
+		function ParentTraverser.new(...)
+			local self = setmetatable({}, ParentTraverser)
+			return self:constructor(...) or self
+		end
+		function ParentTraverser:constructor(checker)
+			self.checker = checker
+		end
+		function ParentTraverser:traverse(instance, callback)
+			if self.checker:isRestricted(instance).restricted then
+				return nil
+			end
+			local parent = instance.Parent
+			if not parent then
+				return nil
+			end
+			local result = callback(instance, parent)
+			if result ~= nil then
+				return result
+			end
+			return self:traverse(parent, callback)
+		end
+	end
+	local IgnoreFolderFinder
+	do
+		IgnoreFolderFinder = setmetatable({}, {
+			__tostring = function()
+				return "IgnoreFolderFinder"
+			end,
+		})
+		IgnoreFolderFinder.__index = IgnoreFolderFinder
+		function IgnoreFolderFinder.new(...)
+			local self = setmetatable({}, IgnoreFolderFinder)
+			return self:constructor(...) or self
+		end
+		function IgnoreFolderFinder:constructor(traverser, checker)
+			self.traverser = traverser
+			self.checker = checker
+		end
+		function IgnoreFolderFinder:getIgnoreFolderUsingTaggedChildren(proprietaryLogic)
+			local candidates = {}
+			for _, tagString in tags.get_tags() do
+				for _1, instance in tags.get_tagged(tagString) do
+					local result = self.traverser:traverse(instance, function(inst, parent)
+						return proprietaryLogic(self, inst, parent)
+					end)
+					if not result then
+						continue
+					end
+					local key = result[1]
+					local candidate = result[2]
+					candidates[key] = candidate
+				end
+			end
+			return candidates
+		end
+	end
+	local checker = RestrictionChecker.new()
+	local traverser = ParentTraverser.new(checker)
+	local finder = IgnoreFolderFinder.new(traverser, checker)
+	local candidates = finder:getIgnoreFolderUsingTaggedChildren(function(finder, instance, parent)
+		local result = finder.checker:isRestricted(parent)
+		if result.restricted and { string.find(result.message, "is not accessible") } then
+			return { parent.Name, parent }
+		end
+		return nil
+	end)
+	return {
+		candidates = candidates,
+	}
+
+end
+
 __modulesFolder["robloxAdapter"] = function()
 	local __modulesFolder = nil
 	local __customTS = nil
@@ -2961,7 +3088,7 @@ __modulesFolder["ingame"] = function()
 		adapterToUse.setProperty(DroneFolder, "Parent", parent)
 		-- const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
 		local offset = Vector3.new(0, 3000, 0)
-		local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
+		local firstPos, secondPos = Vector3.new(-3000, 5000, -3000), Vector3.new(3000, 5000, 3000)
 		local spawnedAmounts = {}
 		on_player_spawned:Connect(function(name)
 			local player = players.get(name)
