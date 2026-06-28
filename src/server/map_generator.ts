@@ -248,15 +248,10 @@ function generate() {
     }, EgoMoose, adapterToUse, wedgesFolder, newTriangleFunc.materialise);
     return createTerrainDefault.createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET);
 }
-if (isDeadline) {
-    sharedvars.sv_spawning_enabled = false;
-    chat.set_spawning_disabled_reason("The map is generating. Please be patient.");
-}
 Log.log("Generating Afghanistan map.");
 generate();
 Log.info("Done.");
 if (isDeadline) {
-    sharedvars.sv_spawning_enabled = true;
     players.get_all().forEach((player: Player, index: number) => {
         player.fire_client("terrain_finished");
     })

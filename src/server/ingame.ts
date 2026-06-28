@@ -70,7 +70,7 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
     player.fire_client("send_drone_info", generatedName);
     return drone;
 }
-export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, dogRef: {current?: number}) {
+export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, dogRef: {current?: number}, onWin: (team_alive: string) => void) {
     if (!isDeadline) return Log.info("Did not execute because the environment is not Deadline.");;
     Log.info("Listening for people spawning.");
     sharedvars.plr_ping_limit_sec = math.huge
@@ -89,6 +89,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
     sharedvars.plr_movement_min_stiffness = 20
     sharedvars.plr_movement_max_stiffness = 30
     sharedvars.sv_day_cycle_speed = 1
+    map.set_time(math.random(0, 24))
     sharedvars.plr_speed = 0.95
     sharedvars.plr_recoil = 0.5
     sharedvars.ac_sound_kill = false
@@ -106,9 +107,10 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
         defender: undefined,
         attacker: undefined
     }
+    const STARTING_TICKETS = 100;
     const ticketsLeft: Record<PlayerTeam, number> = {
-        defender: 100,
-        attacker: 100
+        defender: STARTING_TICKETS,
+        attacker: STARTING_TICKETS
     }
     game_vars.ticketsLeft = ticketsLeft;
     const drones: Record<string, AnyInstance<BasePart>> = {}
@@ -136,7 +138,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
     let offset = new Vector3(0, 3000, 0);
     const [firstPos, secondPos] = [new Vector3(-3000, 5000, -3000), new Vector3(3000, 5000, 3000)]
     const spawnedAmounts: Record<string, number> = {};
-    on_player_spawned.Connect((name) => {
+    const conn_1 = on_player_spawned.Connect((name) => {
         const player: Player | undefined = players.get(name);
         if (!player || !player.is_alive()) return;
         const spawnedAmount = spawnedAmounts[player.name] !== undefined ? spawnedAmounts[player.name] + 1 : 0;
@@ -183,6 +185,19 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
         player.set_weapon("throwable2", "nothing");
         player.set_custom_camera_mode("DroneFreecam");
         if (ticketsLeft[team] <= 0) {
+            const teams_alive: PlayerTeam[] = [];
+            players.get_all().forEach((thisPlayer: Player) => {
+                const playerDrone = drones[thisPlayer.name];
+                if (playerDrone && playerDrone.Parent !== undefined) return; // still parked in a drone, not actively playing
+                const thisTeam = thisPlayer.get_team();
+                if (teams_alive.indexOf(thisTeam) === -1) {
+                    teams_alive.push(thisTeam);
+                }
+            });
+            if (teams_alive.size() <= 1) {
+                onWin(teams_alive[0] || "what da hell");
+                return;
+            }
             task.defer(() => {
                 while (spawnedAmount === spawnedAmounts[player.name] && drone.Parent !== undefined) {task.wait(1);}
                 player.respawn();
@@ -249,21 +264,21 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
         // Log.info(`Player ${player.name} is arriving`);
         // Spawn this guy at a spectator box at Y level -200. You must separate spectator boxes for each team. Each wall in a spectator box is 3 studs thick (prevents penetration for rifles). When a spectator box spawns, it will spawn to the left of the last spectator box. Each spectator box is transparent and glass. The inside is filled with no collide water. There is a metal sign bolted to the middle of one of the walls that will say (if defender) `The mission will start when ${playersLeft} more SYNO arrive.`. If they're attacker, they will say `You will protect the homeland! ${playersLeft} players left until you will spawn`. The text resets in the HERE logic.
     });
-    on_player_died.Connect((name) => {
+    const conn_2 = on_player_died.Connect((name) => {
         const player: Player | undefined = players.get(name);
         if (!player) return;
         const spawnedAmount = spawnedAmounts[player.name] !== undefined ? spawnedAmounts[player.name] + 1 : 0;
         spawnedAmounts[player.name] = spawnedAmount;
         lastSpawns[player.get_team()].remove(lastSpawns[player.get_team()].indexOf(player.name));
     })
-    on_player_left.Connect((name) => {
+    const conn_3 = on_player_left.Connect((name) => {
         const player: Player | undefined = players.get(name);
         if (!player) return;
         const spawnedAmount = spawnedAmounts[player.name] !== undefined ? spawnedAmounts[player.name] + 1 : 0;
         spawnedAmounts[player.name] = spawnedAmount;
         lastSpawns[player.get_team()].remove(lastSpawns[player.get_team()].indexOf(player.name));
     })
-    on_client_event.Connect((playerName: string, args: unknown[]) => {
+    const conn_4 = on_client_event.Connect((playerName: string, args: unknown[]) => {
         const player = players.get(playerName);
         if (!player) return;
         const eventType = args[0];
@@ -275,4 +290,11 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
             pingSystem.handlePlayerPing(player, pingPosition, droneNames[player.name] || "fucking dog");
         }
     })
+
+    return () => {
+        conn_1.Disconnect();
+        conn_2.Disconnect();
+        conn_3.Disconnect();
+        conn_4.Disconnect();
+    }
 }

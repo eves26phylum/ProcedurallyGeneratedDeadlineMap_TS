@@ -3036,7 +3036,7 @@ __modulesFolder["ingame"] = function()
 		player.fire_client("send_drone_info", generatedName)
 		return drone
 	end
-	local function kickStart(adapterToUse, parent, dogRef)
+	local function kickStart(adapterToUse, parent, dogRef, onWin)
 		if not isDeadline then
 			return Log:info("Did not execute because the environment is not Deadline.")
 		end
@@ -3057,6 +3057,7 @@ __modulesFolder["ingame"] = function()
 		sharedvars.plr_movement_min_stiffness = 20
 		sharedvars.plr_movement_max_stiffness = 30
 		sharedvars.sv_day_cycle_speed = 1
+		map.set_time(math.random(0, 24))
 		sharedvars.plr_speed = 0.95
 		sharedvars.plr_recoil = 0.5
 		sharedvars.ac_sound_kill = false
@@ -3074,9 +3075,10 @@ __modulesFolder["ingame"] = function()
 			defender = nil,
 			attacker = nil,
 		}
+		local STARTING_TICKETS = 100
 		local ticketsLeft = {
-			defender = 100,
-			attacker = 100,
+			defender = STARTING_TICKETS,
+			attacker = STARTING_TICKETS,
 		}
 		game_vars.ticketsLeft = ticketsLeft
 		local drones = {}
@@ -3095,7 +3097,7 @@ __modulesFolder["ingame"] = function()
 		local offset = Vector3.new(0, 3000, 0)
 		local firstPos, secondPos = Vector3.new(-3000, 5000, -3000), Vector3.new(3000, 5000, 3000)
 		local spawnedAmounts = {}
-		on_player_spawned:Connect(function(name)
+		local conn_1 = on_player_spawned:Connect(function(name)
 			local player = players.get(name)
 			if not player or not player.is_alive() then
 				return nil
@@ -3163,6 +3165,27 @@ __modulesFolder["ingame"] = function()
 			player.set_weapon("throwable2", "nothing")
 			player.set_custom_camera_mode("DroneFreecam")
 			if ticketsLeft[team] <= 0 then
+				local teams_alive = {}
+				local _exp_2 = players.get_all()
+				-- ▼ ReadonlyArray.forEach ▼
+				local _callback_1 = function(thisPlayer)
+					local playerDrone = drones[thisPlayer.name]
+					if playerDrone and playerDrone.Parent ~= nil then
+						return nil
+					end
+					local thisTeam = thisPlayer.get_team()
+					if (table.find(teams_alive, thisTeam) or 0) - 1 == -1 then
+						table.insert(teams_alive, thisTeam)
+					end
+				end
+				for _k, _v in _exp_2 do
+					_callback_1(_v, _k - 1, _exp_2)
+				end
+				-- ▲ ReadonlyArray.forEach ▲
+				if #teams_alive <= 1 then
+					onWin(teams_alive[1] or "what da hell")
+					return nil
+				end
 				task.defer(function()
 					while spawnedAmount == spawnedAmounts[player.name] and drone.Parent ~= nil do
 						task.wait(1)
@@ -3316,7 +3339,7 @@ __modulesFolder["ingame"] = function()
 			-- Log.info(`Player ${player.name} is arriving`);
 			-- Spawn this guy at a spectator box at Y level -200. You must separate spectator boxes for each team. Each wall in a spectator box is 3 studs thick (prevents penetration for rifles). When a spectator box spawns, it will spawn to the left of the last spectator box. Each spectator box is transparent and glass. The inside is filled with no collide water. There is a metal sign bolted to the middle of one of the walls that will say (if defender) `The mission will start when ${playersLeft} more SYNO arrive.`. If they're attacker, they will say `You will protect the homeland! ${playersLeft} players left until you will spawn`. The text resets in the HERE logic.
 		end)
-		on_player_died:Connect(function(name)
+		local conn_2 = on_player_died:Connect(function(name)
 			local player = players.get(name)
 			if not player then
 				return nil
@@ -3329,7 +3352,7 @@ __modulesFolder["ingame"] = function()
 			local _arg0 = (table.find(_exp_1, _name) or 0) - 1
 			table.remove(_exp, _arg0 + 1)
 		end)
-		on_player_left:Connect(function(name)
+		local conn_3 = on_player_left:Connect(function(name)
 			local player = players.get(name)
 			if not player then
 				return nil
@@ -3342,7 +3365,7 @@ __modulesFolder["ingame"] = function()
 			local _arg0 = (table.find(_exp_1, _name) or 0) - 1
 			table.remove(_exp, _arg0 + 1)
 		end)
-		on_client_event:Connect(function(playerName, args)
+		local conn_4 = on_client_event:Connect(function(playerName, args)
 			local player = players.get(playerName)
 			if not player then
 				return nil
@@ -3363,6 +3386,12 @@ __modulesFolder["ingame"] = function()
 				pingSystem:handlePlayerPing(player, pingPosition, _condition)
 			end
 		end)
+		return function()
+			conn_1:Disconnect()
+			conn_2:Disconnect()
+			conn_3:Disconnect()
+			conn_4:Disconnect()
+		end
 	end
 	return {
 		createDrone = createDrone,
@@ -3687,15 +3716,10 @@ __modulesFolder["map_generator"] = function()
 			end, EgoMoose, adapterToUse, wedgesFolder, newTriangleFunc.materialise)
 			return createTerrainDefault:createTrianglesFromData(noiseData, RESOLUTION, PART_SIZE, POSITION_OFFSET)
 		end
-		if isDeadline then
-			sharedvars.sv_spawning_enabled = false
-			chat.set_spawning_disabled_reason("The map is generating. Please be patient.")
-		end
 		Log:log("Generating Afghanistan map.")
 		generate()
 		Log:info("Done.")
 		if isDeadline then
-			sharedvars.sv_spawning_enabled = true
 			local _exp = players.get_all()
 			-- ▼ ReadonlyArray.forEach ▼
 			local _callback = function(player, index)
@@ -3831,11 +3855,39 @@ task.defer(function()
 	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
 	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
 	local loadPeoplesRepublicOfGermetistan = TS.import(script, game:GetService("ServerScriptService"), "TS", "loadPeoplesRepublicOfGermetistan").loadPeoplesRepublicOfGermetistan
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	local dogRef = {}
 	loadPeoplesRepublicOfGermetistan()
 	map.set_preset("afghanistan")
-	kickStart(adapterToUse, getWorldRoot(), dogRef)
+	local function connect()
+		local disconnectAll
+		disconnectAll = kickStart(adapterToUse, getWorldRoot(), dogRef, function(team_alive)
+			if not disconnectAll then
+				return nil
+			end
+			disconnectAll()
+			local _exp = players.get_alive()
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(player)
+				player.kill()
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+			info(team_alive)
+			connect()
+		end)
+	end
+	connect()
+	if isDeadline then
+		sharedvars.sv_spawning_enabled = false
+		chat.set_spawning_disabled_reason("The map is generating. Please be patient.")
+	end
 	local maxHeight = startMapGenerator()
 	dogRef.current = maxHeight + 20
+	if isDeadline then
+		sharedvars.sv_spawning_enabled = true
+	end
 
 end)
