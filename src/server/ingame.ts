@@ -184,6 +184,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
         player.set_weapon("throwable1", "nothing");
         player.set_weapon("throwable2", "nothing");
         player.set_custom_camera_mode("DroneFreecam");
+        let hasWon = false;
         if (ticketsLeft[team] <= 0) {
             const teams_alive: PlayerTeam[] = [];
             players.get_all().forEach((thisPlayer: Player) => {
@@ -194,8 +195,9 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
                     teams_alive.push(thisTeam);
                 }
             });
-            Log.info(...teams_alive);
+            if (hasWon) return;
             if (teams_alive.size() <= 1) {
+                hasWon = true;
                 onWin(teams_alive[0] || "what da hell");
                 return;
             }

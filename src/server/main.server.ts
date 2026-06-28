@@ -4,6 +4,9 @@ import { adapterToUse } from "shared/adapterToUse";
 import { getWorldRoot } from "shared/getRoot";
 import { loadPeoplesRepublicOfGermetistan } from "./loadPeoplesRepublicOfGermetistan";
 import { isDeadline } from "shared/isDeadline";
+import { Logger } from "shared/logger";
+
+const Log = new Logger("main");
 
 const dogRef: {
     current?: number
@@ -18,7 +21,7 @@ function connect() {
         players.get_alive().forEach((player: Player) => {
             player.kill();
         })
-        info(team_alive);
+        Log.info("someone won", team_alive);
         connect();
     });
 }

@@ -3164,6 +3164,7 @@ __modulesFolder["ingame"] = function()
 			player.set_weapon("throwable1", "nothing")
 			player.set_weapon("throwable2", "nothing")
 			player.set_custom_camera_mode("DroneFreecam")
+			local hasWon = false
 			if ticketsLeft[team] <= 0 then
 				local teams_alive = {}
 				local _exp_2 = players.get_all()
@@ -3182,8 +3183,11 @@ __modulesFolder["ingame"] = function()
 					_callback_1(_v, _k - 1, _exp_2)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
-				Log:info(unpack(teams_alive))
+				if hasWon then
+					return nil
+				end
 				if #teams_alive <= 1 then
+					hasWon = true
 					onWin(teams_alive[1] or "what da hell")
 					return nil
 				end
@@ -3857,6 +3861,8 @@ task.defer(function()
 	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
 	local loadPeoplesRepublicOfGermetistan = TS.import(script, game:GetService("ServerScriptService"), "TS", "loadPeoplesRepublicOfGermetistan").loadPeoplesRepublicOfGermetistan
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local Log = Logger.new("main")
 	local dogRef = {}
 	loadPeoplesRepublicOfGermetistan()
 	map.set_preset("afghanistan")
@@ -3876,7 +3882,7 @@ task.defer(function()
 				_callback(_v, _k - 1, _exp)
 			end
 			-- ▲ ReadonlyArray.forEach ▲
-			info(team_alive)
+			Log:info("someone won", team_alive)
 			connect()
 		end)
 	end
