@@ -2,6 +2,7 @@
 function assert(condition, messageIfFalse)
 	if not condition then error(messageIfFalse or _VERSION .. " assertion error") end
 end
+local Shared = shared
 local _VERSION = create_instance and _VERSION.." {deadline-ts PRE-RELEASE}" or _VERSION
 local unpack = table.unpack
 local old_require = require
