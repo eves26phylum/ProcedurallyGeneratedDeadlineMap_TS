@@ -134,10 +134,14 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
     const DroneFolder = adapterToUse.newInstance("Folder");
     adapterToUse.setProperty(DroneFolder, "Name", "DronesFolder");
     adapterToUse.setProperty(DroneFolder, "Parent", parent);
+    const SpectatorFolder = adapterToUse.newInstance("Folder");
+    adapterToUse.setProperty(SpectatorFolder, "Name", "SpectatorsFolder");
+    adapterToUse.setProperty(SpectatorFolder, "Parent", parent);
     // const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
     let offset = new Vector3(0, 3000, 0);
     const [firstPos, secondPos] = [new Vector3(-3000, 5000, -3000), new Vector3(3000, 5000, 3000)]
     const spawnedAmounts: Record<string, number> = {};
+    let hasWon = false;
     const conn_1 = on_player_spawned.Connect((name) => {
         const player: Player | undefined = players.get(name);
         if (!player || !player.is_alive()) return;
@@ -146,7 +150,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
         time.wait(1.4);
         if (spawnedAmount !== spawnedAmounts[player.name]) return;
         const team: PlayerTeam = player.get_team();
-        const thisSpectatorBox = spectatorBoxes[team] || new SpectatorBox(adapterToUse, offset, parent); // Get spectator box or create a new one if does not exist
+        const thisSpectatorBox = spectatorBoxes[team] || new SpectatorBox(adapterToUse, offset, SpectatorFolder); // Get spectator box or create a new one if does not exist
         if (!spectatorBoxes[team]) {
             thisSpectatorBox.setSignText("*singing to myself*");
             offset = offset.add(new Vector3(200, 0, 0));
@@ -184,7 +188,6 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
         player.set_weapon("throwable1", "nothing");
         player.set_weapon("throwable2", "nothing");
         player.set_custom_camera_mode("DroneFreecam");
-        let hasWon = false;
         if (ticketsLeft[team] <= 0) {
             const teams_alive: PlayerTeam[] = [];
             players.get_alive().forEach((thisPlayer: Player) => {
@@ -295,6 +298,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
     })
 
     return () => {
+        adapterToUse.destroy(DroneFolder);
+        adapterToUse.destroy(SpectatorFolder)
         conn_1.Disconnect();
         conn_2.Disconnect();
         conn_3.Disconnect();
