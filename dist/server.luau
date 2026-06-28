@@ -3167,7 +3167,7 @@ __modulesFolder["ingame"] = function()
 			local hasWon = false
 			if ticketsLeft[team] <= 0 then
 				local teams_alive = {}
-				local _exp_2 = players.get_all()
+				local _exp_2 = players.get_alive()
 				-- ▼ ReadonlyArray.forEach ▼
 				local _callback_1 = function(thisPlayer)
 					local playerDrone = drones[thisPlayer.name]

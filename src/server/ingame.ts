@@ -187,7 +187,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
         let hasWon = false;
         if (ticketsLeft[team] <= 0) {
             const teams_alive: PlayerTeam[] = [];
-            players.get_all().forEach((thisPlayer: Player) => {
+            players.get_alive().forEach((thisPlayer: Player) => {
                 const playerDrone = drones[thisPlayer.name];
                 if (playerDrone && playerDrone.Parent !== undefined) return; // still parked in a drone, not actively playing
                 const thisTeam = thisPlayer.get_team();
