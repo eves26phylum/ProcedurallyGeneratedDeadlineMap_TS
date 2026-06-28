@@ -3060,12 +3060,15 @@ __modulesFolder["ingame"] = function()
 		sharedvars.plr_recoil = 0.5
 		sharedvars.ac_sound_kill = false
 		sharedvars.ff_field_voicelines = true
+		local game_vars = {}
+		Shared.game = game_vars
 		map.set_time(10)
 		local lastSpawns = {
 			defender = {},
 			attacker = {},
 			coordination = 10,
 		}
+		game_vars.lastSpawns = lastSpawns
 		local spectatorBoxes = {
 			defender = nil,
 			attacker = nil,
@@ -3074,6 +3077,7 @@ __modulesFolder["ingame"] = function()
 			defender = 100,
 			attacker = 100,
 		}
+		game_vars.ticketsLeft = ticketsLeft
 		local drones = {}
 		local playerLoadouts = {}
 		local tempState = {

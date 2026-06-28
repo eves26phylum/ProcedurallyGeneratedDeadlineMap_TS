@@ -93,12 +93,15 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
     sharedvars.plr_recoil = 0.5
     sharedvars.ac_sound_kill = false
     sharedvars.ff_field_voicelines = true
+    const game_vars: Record<string, unknown> = {};
+    Shared.game = game_vars;
     map.set_time(10)
     const lastSpawns: lastSpawnType = {
         defender: [],
         attacker: [],
         coordination: 10
     }
+    game_vars.lastSpawns = lastSpawns;
     const spectatorBoxes: Record<PlayerTeam, SpectatorBox | undefined> = {
         defender: undefined,
         attacker: undefined
@@ -107,6 +110,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
         defender: 100,
         attacker: 100
     }
+    game_vars.ticketsLeft = ticketsLeft;
     const drones: Record<string, AnyInstance<BasePart>> = {}
     type PlayerLoadoutData = {
         primary: CharacterWeaponData | undefined,
