@@ -14,6 +14,7 @@ import { getWorldRoot } from "shared/getRoot";
 import { adapterToUse } from "shared/adapterToUse";
 import { AnyInstance, EgoMooseFiles, InstanceAdapter } from "shared/definition";
 import { assign } from "shared/Util";
+import { NuristanBuildingsConfig, StandardNuristanConfig, TreeConfig, PART_SIZE, PARAMS, RESOLUTION, MAP_SIZE, ROUGHNESS, POSITION_OFFSET } from "./config";
 
 // The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 
@@ -75,23 +76,6 @@ export function startMapGenerator() {
 const worldRoot = getWorldRoot();
 const Log = new Logger("map_generator");
 const workspace = worldRoot;
-const PART_SIZE = 100;
-const MAP_SIZE = new Vector2(10000, 10000);
-const RESOLUTION = new Vector2(
-    math.round(MAP_SIZE.X / PART_SIZE), 
-    math.round(MAP_SIZE.Y / PART_SIZE)
-);
-// const RESOLUTION = new Vector2(5, 5);
-const ROUGHNESS = 4;
-const PARAMS = {
-    lacunarity: 4,
-    persistence: 0.25,
-    octaves: 2,
-    exaggeratedness: 20,
-    power: 3,
-    scale: math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS
-};
-const POSITION_OFFSET = new Vector3(-(MAP_SIZE.X / 2), 0, -(MAP_SIZE.Y / 2));
 const offset = new Vector2(math.random(1, 10e6), math.random(1, 10e6));
 const noiseData = new PerlinNoise().generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power);
 const wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges"); // getservice because we're exporting this to deadline and there's no fucking way am I going to import an entire rbxts node module pipeline
@@ -105,48 +89,8 @@ const translateTerrain = new translateTerrainOrientationForStructureBonding({
     orientationSubtraction: new Vector3(0, 0, -90) 
 });
 
-const stdnuristanconfig = {
-    grass: () => {
-        return {
-            Material: Enum.Material.Grass, Color: Color3.fromRGB(43, 219, 84)
-        }
-    },
-    desert: () => { 
-        const secondaryAngs = math.random(-20, 10);
-        return {Material: Enum.Material.Sand, Color: Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs)}
-    }
-}
-standardBox.registerModifier(new NuristanStandardBiome(adapterToUse, stdnuristanconfig, wedgesFolder));
-standardBox.registerModifier(new NuristanBuildings(adapterToUse, translateTerrain, {
-        wallPartProps: {
-            Material: Enum.Material.Sand,
-            Color: Color3.fromRGB(237, 201, 175)
-        },
-        doorway: {
-            width: 2.5,
-            height: 6,
-            offsetAlongWall: 0,
-            bottomOffset: 0
-        },
-        roomProps: {
-            RoomSize: new Vector3(20, 2, 20)
-        },
-        wall: {
-            height: 10,
-            thickness: 2
-        },
-        roomGeneration: {
-            minRooms: 2,
-            maxRooms: 10,
-            mergeWallChance: 0.3
-        },
-        sniperWindowDoorway: {
-            width: 5,
-            height: 2,
-            bottomOffset: 3,
-            offsetAlongWall: 0
-        }
-    }, wedgesFolder,
+standardBox.registerModifier(new NuristanStandardBiome(adapterToUse, StandardNuristanConfig, wedgesFolder));
+standardBox.registerModifier(new NuristanBuildings(adapterToUse, translateTerrain, NuristanBuildingsConfig, wedgesFolder,
     (thisThing: NuristanBuildings) => {
         return [
             new SniperWindowRoomHandler(thisThing, thisThing.config.sniperWindowDoorway),
@@ -154,29 +98,7 @@ standardBox.registerModifier(new NuristanBuildings(adapterToUse, translateTerrai
         ]
     }
 ));
-standardBox.registerModifier(new Tree(adapterToUse, {
-    branch: {
-        minSize: new Vector2(4, 12),
-        maxSize: new Vector2(8, 24),
-        props: {
-            Material: Enum.Material.Wood,
-            Color: Color3.fromRGB(71, 38, 8)
-        }
-    },
-    leaf: {
-        minBoxSize: 12,
-        maxBoxSize: 32,
-        props: {
-            Material: Enum.Material.Grass,
-            CanCollide: false,
-            CanQuery: false,
-            Transparency: 0.4,
-            Color: Color3.fromRGB(36, 107, 51)
-        }
-    },
-    treesPerTriangle: 4,
-    offset: new Vector3(0, -3, 0)
-}, wedgesFolder))
+standardBox.registerModifier(new Tree(adapterToUse, TreeConfig, wedgesFolder))
 class CustomTriangleFunc {
     private adapter: InstanceAdapter;
     private EgoMoose: EgoMooseFiles;
