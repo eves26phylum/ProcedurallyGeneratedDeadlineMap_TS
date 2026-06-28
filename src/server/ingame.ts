@@ -194,6 +194,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
                     teams_alive.push(thisTeam);
                 }
             });
+            Log.info(...teams_alive);
             if (teams_alive.size() <= 1) {
                 onWin(teams_alive[0] || "what da hell");
                 return;
