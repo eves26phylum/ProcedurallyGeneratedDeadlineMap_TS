@@ -3093,10 +3093,14 @@ __modulesFolder["ingame"] = function()
 		local DroneFolder = adapterToUse.newInstance("Folder")
 		adapterToUse.setProperty(DroneFolder, "Name", "DronesFolder")
 		adapterToUse.setProperty(DroneFolder, "Parent", parent)
+		local SpectatorFolder = adapterToUse.newInstance("Folder")
+		adapterToUse.setProperty(SpectatorFolder, "Name", "SpectatorsFolder")
+		adapterToUse.setProperty(SpectatorFolder, "Parent", parent)
 		-- const lastSpawnedPos: Partial<Record<PlayerTeam, Vector3>> = {};
 		local offset = Vector3.new(0, 3000, 0)
 		local firstPos, secondPos = Vector3.new(-3000, 5000, -3000), Vector3.new(3000, 5000, 3000)
 		local spawnedAmounts = {}
+		local hasWon = false
 		local conn_1 = on_player_spawned:Connect(function(name)
 			local player = players.get(name)
 			if not player or not player.is_alive() then
@@ -3109,7 +3113,7 @@ __modulesFolder["ingame"] = function()
 				return nil
 			end
 			local team = player.get_team()
-			local thisSpectatorBox = spectatorBoxes[team] or SpectatorBox.new(adapterToUse, offset, parent)
+			local thisSpectatorBox = spectatorBoxes[team] or SpectatorBox.new(adapterToUse, offset, SpectatorFolder)
 			if not spectatorBoxes[team] then
 				thisSpectatorBox:setSignText("*singing to myself*")
 				local _offset = offset
@@ -3164,7 +3168,6 @@ __modulesFolder["ingame"] = function()
 			player.set_weapon("throwable1", "nothing")
 			player.set_weapon("throwable2", "nothing")
 			player.set_custom_camera_mode("DroneFreecam")
-			local hasWon = false
 			if ticketsLeft[team] <= 0 then
 				local teams_alive = {}
 				local _exp_2 = players.get_alive()
@@ -3392,6 +3395,8 @@ __modulesFolder["ingame"] = function()
 			end
 		end)
 		return function()
+			adapterToUse.destroy(DroneFolder)
+			adapterToUse.destroy(SpectatorFolder)
 			conn_1:Disconnect()
 			conn_2:Disconnect()
 			conn_3:Disconnect()
