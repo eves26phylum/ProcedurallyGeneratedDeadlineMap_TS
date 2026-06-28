@@ -2937,6 +2937,118 @@ __modulesFolder["voicelines"] = function()
 
 end
 
+__modulesFolder["config"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"config"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local NuristanBuildingsConfig = {
+		wallPartProps = {
+			Material = Enum.Material.Sand,
+			Color = Color3.fromRGB(237, 201, 175),
+		},
+		doorway = {
+			width = 2.5,
+			height = 6,
+			offsetAlongWall = 0,
+			bottomOffset = 0,
+		},
+		roomProps = {
+			RoomSize = Vector3.new(20, 2, 20),
+		},
+		wall = {
+			height = 10,
+			thickness = 2,
+		},
+		roomGeneration = {
+			minRooms = 2,
+			maxRooms = 10,
+			mergeWallChance = 0.3,
+		},
+		sniperWindowDoorway = {
+			width = 5,
+			height = 2,
+			bottomOffset = 3,
+			offsetAlongWall = 0,
+		},
+	}
+	local StandardNuristanConfig = {
+		grass = function()
+			return {
+				Material = Enum.Material.Grass,
+				Color = Color3.fromRGB(158, 201, 33),
+			}
+		end,
+		desert = function()
+			local secondaryAngs = math.random(-20, 10)
+			return {
+				Material = Enum.Material.Sand,
+				Color = Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs),
+			}
+		end,
+	}
+	local TreeConfig = {
+		branch = {
+			minSize = Vector2.new(4, 12),
+			maxSize = Vector2.new(8, 24),
+			props = {
+				Material = Enum.Material.Wood,
+				Color = Color3.fromRGB(71, 38, 8),
+			},
+		},
+		leaf = {
+			minBoxSize = 12,
+			maxBoxSize = 32,
+			props = {
+				Material = Enum.Material.Grass,
+				CanCollide = false,
+				CanQuery = false,
+				Transparency = 0.4,
+				Color = Color3.fromRGB(36, 107, 51),
+			},
+		},
+		treesPerTriangle = 4,
+		offset = Vector3.new(0, -3, 0),
+	}
+	local PART_SIZE = 100
+	local MAP_SIZE = Vector2.new(10000, 10000)
+	local RESOLUTION = Vector2.new(math.round(MAP_SIZE.X / PART_SIZE), math.round(MAP_SIZE.Y / PART_SIZE))
+	-- export const RESOLUTION = new Vector2(5, 5);
+	local ROUGHNESS = 4
+	local PARAMS = {
+		lacunarity = 4,
+		persistence = 0.25,
+		octaves = 2,
+		exaggeratedness = 20,
+		power = 3,
+		scale = math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS,
+	}
+	local POSITION_OFFSET = Vector3.new(-(MAP_SIZE.X / 2), 0, -(MAP_SIZE.Y / 2))
+	return {
+		NuristanBuildingsConfig = NuristanBuildingsConfig,
+		StandardNuristanConfig = StandardNuristanConfig,
+		TreeConfig = TreeConfig,
+		PART_SIZE = PART_SIZE,
+		MAP_SIZE = MAP_SIZE,
+		RESOLUTION = RESOLUTION,
+		ROUGHNESS = ROUGHNESS,
+		PARAMS = PARAMS,
+		POSITION_OFFSET = POSITION_OFFSET,
+	}
+
+end
+
 __modulesFolder["ingame"] = function()
 	local __modulesFolder = nil
 	local __customTS = nil
@@ -3478,6 +3590,14 @@ __modulesFolder["map_generator"] = function()
 	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
 	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
 	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	local _config = TS.import(script, game:GetService("ServerScriptService"), "TS", "config")
+	local NuristanBuildingsConfig = _config.NuristanBuildingsConfig
+	local StandardNuristanConfig = _config.StandardNuristanConfig
+	local TreeConfig = _config.TreeConfig
+	local PART_SIZE = _config.PART_SIZE
+	local PARAMS = _config.PARAMS
+	local RESOLUTION = _config.RESOLUTION
+	local POSITION_OFFSET = _config.POSITION_OFFSET
 	-- The comment above is required for deadline-ts to parse this code correctly. You place the comment above this comment to define the end of all import statements.
 	-- If you want to write on this program, you will follow the following Terms of Service. Failure to obey with the ToS is an illegal action and can lead to severe consequences.
 	-- Here is the Gigachad Terms of Service 2000 Iteration 0
@@ -3539,20 +3659,6 @@ __modulesFolder["map_generator"] = function()
 		local worldRoot = getWorldRoot()
 		local Log = Logger.new("map_generator")
 		local workspace = worldRoot
-		local PART_SIZE = 100
-		local MAP_SIZE = Vector2.new(10000, 10000)
-		local RESOLUTION = Vector2.new(math.round(MAP_SIZE.X / PART_SIZE), math.round(MAP_SIZE.Y / PART_SIZE))
-		-- const RESOLUTION = new Vector2(5, 5);
-		local ROUGHNESS = 4
-		local PARAMS = {
-			lacunarity = 4,
-			persistence = 0.25,
-			octaves = 2,
-			exaggeratedness = 20,
-			power = 3,
-			scale = math.max(RESOLUTION.X, RESOLUTION.Y) / ROUGHNESS,
-		}
-		local POSITION_OFFSET = Vector3.new(-(MAP_SIZE.X / 2), 0, -(MAP_SIZE.Y / 2))
 		local offset = Vector2.new(math.random(1, 10e6), math.random(1, 10e6))
 		local noiseData = PerlinNoise.new():generate(PARAMS.scale, RESOLUTION, offset, PARAMS.exaggeratedness, PARAMS.lacunarity, PARAMS.persistence, PARAMS.octaves, PARAMS.power)
 		local wedgesFolderToDestroy = adapterToUse.findFirstChild(workspace, "Wedges")
@@ -3566,77 +3672,11 @@ __modulesFolder["map_generator"] = function()
 		local translateTerrain = translateTerrainOrientationForStructureBonding.new({
 			orientationSubtraction = Vector3.new(0, 0, -90),
 		})
-		local stdnuristanconfig = {
-			grass = function()
-				return {
-					Material = Enum.Material.Grass,
-					Color = Color3.fromRGB(43, 219, 84),
-				}
-			end,
-			desert = function()
-				local secondaryAngs = math.random(-20, 10)
-				return {
-					Material = Enum.Material.Sand,
-					Color = Color3.fromRGB(237 + secondaryAngs, 201 + math.random(0, 20), 175 + secondaryAngs),
-				}
-			end,
-		}
-		standardBox:registerModifier(NuristanStandardBiome.new(adapterToUse, stdnuristanconfig, wedgesFolder))
-		standardBox:registerModifier(NuristanBuildings.new(adapterToUse, translateTerrain, {
-			wallPartProps = {
-				Material = Enum.Material.Sand,
-				Color = Color3.fromRGB(237, 201, 175),
-			},
-			doorway = {
-				width = 2.5,
-				height = 6,
-				offsetAlongWall = 0,
-				bottomOffset = 0,
-			},
-			roomProps = {
-				RoomSize = Vector3.new(20, 2, 20),
-			},
-			wall = {
-				height = 10,
-				thickness = 2,
-			},
-			roomGeneration = {
-				minRooms = 2,
-				maxRooms = 10,
-				mergeWallChance = 0.3,
-			},
-			sniperWindowDoorway = {
-				width = 5,
-				height = 2,
-				bottomOffset = 3,
-				offsetAlongWall = 0,
-			},
-		}, wedgesFolder, function(thisThing)
+		standardBox:registerModifier(NuristanStandardBiome.new(adapterToUse, StandardNuristanConfig, wedgesFolder))
+		standardBox:registerModifier(NuristanBuildings.new(adapterToUse, translateTerrain, NuristanBuildingsConfig, wedgesFolder, function(thisThing)
 			return { SniperWindowRoomHandler.new(thisThing, thisThing.config.sniperWindowDoorway), LivingRoomHandler.new(thisThing) }
 		end))
-		standardBox:registerModifier(Tree.new(adapterToUse, {
-			branch = {
-				minSize = Vector2.new(4, 12),
-				maxSize = Vector2.new(8, 24),
-				props = {
-					Material = Enum.Material.Wood,
-					Color = Color3.fromRGB(71, 38, 8),
-				},
-			},
-			leaf = {
-				minBoxSize = 12,
-				maxBoxSize = 32,
-				props = {
-					Material = Enum.Material.Grass,
-					CanCollide = false,
-					CanQuery = false,
-					Transparency = 0.4,
-					Color = Color3.fromRGB(36, 107, 51),
-				},
-			},
-			treesPerTriangle = 4,
-			offset = Vector3.new(0, -3, 0),
-		}, wedgesFolder))
+		standardBox:registerModifier(Tree.new(adapterToUse, TreeConfig, wedgesFolder))
 		local CustomTriangleFunc
 		do
 			CustomTriangleFunc = setmetatable({}, {
