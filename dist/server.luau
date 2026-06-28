@@ -3182,6 +3182,7 @@ __modulesFolder["ingame"] = function()
 					_callback_1(_v, _k - 1, _exp_2)
 				end
 				-- ▲ ReadonlyArray.forEach ▲
+				Log:info(unpack(teams_alive))
 				if #teams_alive <= 1 then
 					onWin(teams_alive[1] or "what da hell")
 					return nil
