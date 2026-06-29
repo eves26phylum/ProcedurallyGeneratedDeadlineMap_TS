@@ -12,7 +12,7 @@ const dogRef: {
     current?: number
 } = {};
 loadPeoplesRepublicOfGermetistan();
-map.set_preset("afghanistan");
+if (isDeadline) map.set_preset("afghanistan");
 function connect() {
     let disconnectAll: void | (() => void);
     disconnectAll = kickStart(adapterToUse, getWorldRoot(), dogRef, (team_alive) => {
