@@ -366,6 +366,20 @@ export class NuristanBuildings implements Biome {
     //     this.createSingleHouse(rotationalCFrame.add(middlePos.Position), verticesForTriangles);
     //     return true;
     // }
+    // operateOnThisTriangleInstance(data: WedgeCell, trianglePair: [AnyInstance<WedgePart>, AnyInstance<WedgePart>], verticesForTriangles: triangleVerticesTrio): boolean {
+    //     const middlePos = trianglePair[0].CFrame.Lerp(trianglePair[1].CFrame, 0.5);
+    //     const triangleSurfaceNormal = trianglePair[0].CFrame.RightVector;
+    //     const degreesTiltedOfSteepness = math.deg(math.acos(triangleSurfaceNormal.Dot(new Vector3(0, 1, 0))));
+    //     const isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness;
+    //     if (!isALivableDegree) return false;
+    //     const horizontalReferenceVector = math.abs(triangleSurfaceNormal.Y) < 0.99 ? new Vector3(0, 1, 0) : new Vector3(1, 0, 0);
+    //     const houseRightVector = horizontalReferenceVector.Cross(triangleSurfaceNormal).Unit;
+    //     const houseBackVector = triangleSurfaceNormal.Cross(houseRightVector).Unit;
+    //     const levelHouseCFrame = CFrame.fromMatrix(middlePos.Position, houseRightVector, triangleSurfaceNormal, houseBackVector);
+    //     const randomYawCFrame = CFrame.fromAxisAngle(new Vector3(0, 1, 0), math.rad(math.random(0, 360)));
+    //     this.createSingleHouse(levelHouseCFrame.mul(randomYawCFrame), verticesForTriangles);
+    //     return true;
+    // }
     operateOnThisTriangleInstance(data: WedgeCell, trianglePair: [AnyInstance<WedgePart>, AnyInstance<WedgePart>], verticesForTriangles: triangleVerticesTrio): boolean {
         const middlePos = trianglePair[0].CFrame.Lerp(trianglePair[1].CFrame, 0.5);
         const triangleSurfaceNormal = trianglePair[0].CFrame.RightVector;
@@ -374,7 +388,7 @@ export class NuristanBuildings implements Biome {
         if (!isALivableDegree) return false;
         const horizontalReferenceVector = math.abs(triangleSurfaceNormal.Y) < 0.99 ? new Vector3(0, 1, 0) : new Vector3(1, 0, 0);
         const houseRightVector = horizontalReferenceVector.Cross(triangleSurfaceNormal).Unit;
-        const houseBackVector = triangleSurfaceNormal.Cross(houseRightVector).Unit;
+        const houseBackVector = houseRightVector.Cross(triangleSurfaceNormal).Unit;
         const levelHouseCFrame = CFrame.fromMatrix(middlePos.Position, houseRightVector, triangleSurfaceNormal, houseBackVector);
         const randomYawCFrame = CFrame.fromAxisAngle(new Vector3(0, 1, 0), math.rad(math.random(0, 360)));
         this.createSingleHouse(levelHouseCFrame.mul(randomYawCFrame), verticesForTriangles);

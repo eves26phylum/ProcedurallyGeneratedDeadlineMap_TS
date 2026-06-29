@@ -1358,7 +1358,7 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 			end
 			local horizontalReferenceVector = if math.abs(triangleSurfaceNormal.Y) < 0.99 then Vector3.new(0, 1, 0) else Vector3.new(1, 0, 0)
 			local houseRightVector = horizontalReferenceVector:Cross(triangleSurfaceNormal).Unit
-			local houseBackVector = triangleSurfaceNormal:Cross(houseRightVector).Unit
+			local houseBackVector = houseRightVector:Cross(triangleSurfaceNormal).Unit
 			local levelHouseCFrame = CFrame.fromMatrix(middlePos.Position, houseRightVector, triangleSurfaceNormal, houseBackVector)
 			local randomYawCFrame = CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.rad(math.random(0, 360)))
 			self:createSingleHouse(levelHouseCFrame * randomYawCFrame, verticesForTriangles)
