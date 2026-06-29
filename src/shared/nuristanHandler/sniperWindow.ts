@@ -32,7 +32,12 @@ export class SniperWindowRoomHandler implements RoomTypeHandler {
                 continue;
             }
             if (faceDatum.state === "doorway") {
-                this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face);
+                const random = math.random();
+                if (random > 0.5) {
+                    this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face);
+                    continue
+                }
+                this.buildings.makeWallWithoutDoorway(roomCFrame, roomSize, face);
                 continue;
             }
             this.buildings.makeWallWithoutDoorway(roomCFrame, roomSize, face);
