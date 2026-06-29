@@ -3167,6 +3167,7 @@ __modulesFolder["ingame"] = function()
 		sharedvars.plr_spare_rounds = 90
 		sharedvars.plr_base_weight = 1.7
 		sharedvars.sv_gravity = 25.5
+		sharedvars.plr_barrel_deviation = 0.25
 		sharedvars.plr_movement_damping = 300
 		sharedvars.plr_movement_min_stiffness = 20
 		sharedvars.plr_movement_max_stiffness = 30
