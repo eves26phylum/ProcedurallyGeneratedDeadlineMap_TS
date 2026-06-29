@@ -79,7 +79,7 @@ class CustomFreecam {
         this.max_stamina = 100;
         this.stamina_loss_threshold = 0.12;
         this.stamina_left = 100;
-        this.stamina_regen_secs = 0.5; // 1 stamina regenerated per sec
+        this.stamina_regen_secs = 0.3; // 1 stamina regenerated per sec
         this.recoil_intensity = 0.03;
         this.current_rot_x = 0;
         this.current_rot_y = 0;
