@@ -50,9 +50,16 @@ class CustomFreecam {
     vertical_shake_amplitude_scale: number;
     current_rot_x: number;
     current_rot_y: number;
+    loss_multiplier: number;
+    how_shaky_at_max: number;
+    max_stamina: number;
+    stamina_loss_threshold: number;
+    stamina_left: number;
+    stamina_regen_secs: number;
     t: number;
     vertical_shake_phase: number;
     last_base_recoil: number;
+    iterative: number;
 
     constructor(get_head_cframe: () => CFrame) {
         this.get_head_cframe = get_head_cframe;
@@ -67,6 +74,12 @@ class CustomFreecam {
         this.recoil_recovery_speed = 0.5;
         this.look_damping_speed = 20;
         this.recoil_threshold = 0.01;
+        this.loss_multiplier = 3;
+        this.how_shaky_at_max = 5;
+        this.max_stamina = 100;
+        this.stamina_loss_threshold = 0.12;
+        this.stamina_left = 100;
+        this.stamina_regen_secs = 1; // 1 stamina regenerated per sec
         this.recoil_intensity = 0.03;
         this.current_rot_x = 0;
         this.current_rot_y = 0;
@@ -93,7 +106,7 @@ class CustomFreecam {
         this.vertical_shake_base_threshold = 1.0;
         this.vertical_shake_frequency_scale = 2.0;
         this.vertical_shake_amplitude_scale = 0.008;
-
+        this.iterative = 0;
         this.vertical_shake_phase = 0;
         this.last_base_recoil = 0;
         this.blur = blurCreator.createBlur(candidates.Lighting);
@@ -105,6 +118,9 @@ class CustomFreecam {
     }
 
     update(delta_time: number): void {
+        this.stamina_left += this.stamina_regen_secs * delta_time;
+        this.stamina_left = math.clamp(this.stamina_left, 0, this.max_stamina);
+        this.iterative += 1;
         const rawDelta = input.get_mouse_delta();
         const scale = this.mouse_delta_base_scale * input.get_mouse_sensitivity();
         this.real_rot_y -= rawDelta.Y * scale;
@@ -122,6 +138,8 @@ class CustomFreecam {
         this.rot_y += (0 - this.rot_y) * math.min(1, delta_time * this.recoil_recovery_speed);
 
         const base_recoil_addon = this.rot_x + this.rot_y;
+        // if (this.iterative % 70 === 0) print(base_recoil_addon);
+        this.stamina_left -= (base_recoil_addon * (delta_time * this.loss_multiplier)) / this.stamina_loss_threshold;
         const recoil_rate = (base_recoil_addon - this.last_base_recoil) / delta_time;
         const effective_rate = math.abs(recoil_rate) * this.vertical_shake_base_threshold;
 
@@ -134,8 +152,11 @@ class CustomFreecam {
         this.t += delta_time;
         const lateral_recoil = math.noise(this.t * this.lateral_recoil_frequency, 0) * base_recoil_addon * this.super_recoil_intensity * this.recoil_intensity;
         const vertical_recoil = math.noise(this.t * this.vertical_recoil_frequency, 1) * base_recoil_addon * this.super_recoil_intensity * this.recoil_intensity;
-        const sway_x = math.noise(this.t * this.sway_frequency, 0) * this.sway_intensity;
-        const sway_y = math.noise(this.t * this.sway_frequency, 1) * this.sway_intensity;
+        
+        const multiplier_for_stamina_inverted_raw = (this.max_stamina - this.stamina_left) / this.max_stamina;
+        const multiplier_for_stamina_inverted = math.clamp(1 + multiplier_for_stamina_inverted_raw * this.how_shaky_at_max, 1, this.how_shaky_at_max);
+        const sway_x = math.noise(this.t * this.sway_frequency, 0) * this.sway_intensity * multiplier_for_stamina_inverted;
+        const sway_y = math.noise(this.t * this.sway_frequency, 1) * this.sway_intensity * multiplier_for_stamina_inverted;
 
         this.vertical_shake_phase += effective_rate * this.vertical_shake_frequency_scale * delta_time;
         const vertical_shake_offset = math.sin(this.vertical_shake_phase * math.pi * 2) * (effective_rate * this.vertical_shake_amplitude_scale);
