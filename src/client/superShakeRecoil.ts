@@ -75,11 +75,11 @@ class CustomFreecam {
         this.look_damping_speed = 20;
         this.recoil_threshold = 0.01;
         this.loss_multiplier = 3;
-        this.how_shaky_at_max = 10;
+        this.how_shaky_at_max = 20;
         this.max_stamina = 100;
         this.stamina_loss_threshold = 0.12;
         this.stamina_left = 100;
-        this.stamina_regen_secs = 1; // 1 stamina regenerated per sec
+        this.stamina_regen_secs = 0.5; // 1 stamina regenerated per sec
         this.recoil_intensity = 0.03;
         this.current_rot_x = 0;
         this.current_rot_y = 0;
