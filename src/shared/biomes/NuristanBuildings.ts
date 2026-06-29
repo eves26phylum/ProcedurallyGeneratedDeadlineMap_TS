@@ -350,19 +350,19 @@ export class NuristanBuildings implements Biome {
         const middlePos = trianglePair[0].CFrame.Lerp(trianglePair[1].CFrame, 0.5);
         const translatedOrientationForStructurePlacement = this.translateTerrain.Translate(orientation);
         const degreesTiltedOfSteepness = this.translateTerrain.GetSteepnessInDegrees(
-            CFrame.fromEulerAnglesXYZ(
-                math.rad(translatedOrientationForStructurePlacement.X),
-                math.rad(translatedOrientationForStructurePlacement.Y),
-                math.rad(translatedOrientationForStructurePlacement.Z)
-            )
-        );
+        CFrame.fromOrientation(
+        math.rad(translatedOrientationForStructurePlacement.X),
+        math.rad(translatedOrientationForStructurePlacement.Y),
+        math.rad(translatedOrientationForStructurePlacement.Z)
+                    )
+                );
         const isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness;
         if (!isALivableDegree) return false;
         // const part = this.adapter.newInstance("Part");
         // this.adapter.setProperty(part, "CFrame", middlePos);
         // this.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement);
         // this.adapter.setProperty(part, "Parent", this.parent);
-        const rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y + math.random(0, 360)), math.rad(translatedOrientationForStructurePlacement.Z));
+        const rotationalCFrame = CFrame.fromOrientation(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y + math.random(0, 360)), math.rad(translatedOrientationForStructurePlacement.Z));
         this.createSingleHouse(rotationalCFrame.add(middlePos.Position), verticesForTriangles);
         return true;
     }

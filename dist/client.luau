@@ -1352,7 +1352,7 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 			local orientation = trianglePair[1].Orientation
 			local middlePos = trianglePair[1].CFrame:Lerp(trianglePair[2].CFrame, 0.5)
 			local translatedOrientationForStructurePlacement = self.translateTerrain:Translate(orientation)
-			local degreesTiltedOfSteepness = self.translateTerrain:GetSteepnessInDegrees(CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z)))
+			local degreesTiltedOfSteepness = self.translateTerrain:GetSteepnessInDegrees(CFrame.fromOrientation(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z)))
 			local isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness
 			if not isALivableDegree then
 				return false
@@ -1361,7 +1361,7 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 			-- this.adapter.setProperty(part, "CFrame", middlePos);
 			-- this.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement);
 			-- this.adapter.setProperty(part, "Parent", this.parent);
-			local rotationalCFrame = CFrame.fromEulerAnglesXYZ(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y + math.random(0, 360)), math.rad(translatedOrientationForStructurePlacement.Z))
+			local rotationalCFrame = CFrame.fromOrientation(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y + math.random(0, 360)), math.rad(translatedOrientationForStructurePlacement.Z))
 			local _self = self
 			local _position = middlePos.Position
 			_self:createSingleHouse(rotationalCFrame + _position, verticesForTriangles)
