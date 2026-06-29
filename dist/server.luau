@@ -2299,18 +2299,18 @@ __modulesFolder["nuristanHandler"]["sniperWindow"] = function()
 					continue
 				end
 				if faceDatum.state == "exteriorWall" then
-					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face, {
-						doorway = self.sniperWindowDoorway,
-					})
-					continue
-				end
-				if faceDatum.state == "doorway" then
 					local random = math.random()
 					if random > 0.5 then
-						self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face)
+						self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face, {
+							doorway = self.sniperWindowDoorway,
+						})
 						continue
 					end
 					self.buildings:makeWallWithoutDoorway(roomCFrame, roomSize, face)
+					continue
+				end
+				if faceDatum.state == "doorway" then
+					self.buildings:makeWallWithDoorway(roomCFrame, roomSize, face)
 					continue
 				end
 				self.buildings:makeWallWithoutDoorway(roomCFrame, roomSize, face)

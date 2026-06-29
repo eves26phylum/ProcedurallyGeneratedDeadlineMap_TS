@@ -28,16 +28,16 @@ export class SniperWindowRoomHandler implements RoomTypeHandler {
             const faceDatum = faceData[face];
             if (faceDatum.state === "empty") continue;
             if (faceDatum.state === "exteriorWall") {
-                this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face, { doorway: this.sniperWindowDoorway });
-                continue;
-            }
-            if (faceDatum.state === "doorway") {
                 const random = math.random();
                 if (random > 0.5) {
-                    this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face);
+                    this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face, { doorway: this.sniperWindowDoorway });
                     continue
                 }
                 this.buildings.makeWallWithoutDoorway(roomCFrame, roomSize, face);
+                continue;
+            }
+            if (faceDatum.state === "doorway") {
+                this.buildings.makeWallWithDoorway(roomCFrame, roomSize, face);
                 continue;
             }
             this.buildings.makeWallWithoutDoorway(roomCFrame, roomSize, face);
