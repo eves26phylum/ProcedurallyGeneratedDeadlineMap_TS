@@ -75,7 +75,7 @@ class CustomFreecam {
         this.look_damping_speed = 20;
         this.recoil_threshold = 0.01;
         this.loss_multiplier = 3;
-        this.how_shaky_at_max = 5;
+        this.how_shaky_at_max = 10;
         this.max_stamina = 100;
         this.stamina_loss_threshold = 0.12;
         this.stamina_left = 100;
