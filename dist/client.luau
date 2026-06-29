@@ -1349,22 +1349,19 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 			end)
 		end
 		function NuristanBuildings:operateOnThisTriangleInstance(data, trianglePair, verticesForTriangles)
-			local orientation = trianglePair[1].Orientation
 			local middlePos = trianglePair[1].CFrame:Lerp(trianglePair[2].CFrame, 0.5)
-			local translatedOrientationForStructurePlacement = self.translateTerrain:Translate(orientation)
-			local degreesTiltedOfSteepness = self.translateTerrain:GetSteepnessInDegrees(CFrame.fromOrientation(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y), math.rad(translatedOrientationForStructurePlacement.Z)))
+			local triangleSurfaceNormal = trianglePair[1].CFrame.RightVector
+			local degreesTiltedOfSteepness = math.deg(math.acos(triangleSurfaceNormal:Dot(Vector3.new(0, 1, 0))))
 			local isALivableDegree = degreesTiltedOfSteepness < humanConfig.maxLivableSteepness
 			if not isALivableDegree then
 				return false
 			end
-			-- const part = this.adapter.newInstance("Part");
-			-- this.adapter.setProperty(part, "CFrame", middlePos);
-			-- this.adapter.setProperty(part, "Orientation", translatedOrientationForStructurePlacement);
-			-- this.adapter.setProperty(part, "Parent", this.parent);
-			local rotationalCFrame = CFrame.fromOrientation(math.rad(translatedOrientationForStructurePlacement.X), math.rad(translatedOrientationForStructurePlacement.Y + math.random(0, 360)), math.rad(translatedOrientationForStructurePlacement.Z))
-			local _self = self
-			local _position = middlePos.Position
-			_self:createSingleHouse(rotationalCFrame + _position, verticesForTriangles)
+			local horizontalReferenceVector = if math.abs(triangleSurfaceNormal.Y) < 0.99 then Vector3.new(0, 1, 0) else Vector3.new(1, 0, 0)
+			local houseRightVector = horizontalReferenceVector:Cross(triangleSurfaceNormal).Unit
+			local houseBackVector = triangleSurfaceNormal:Cross(houseRightVector).Unit
+			local levelHouseCFrame = CFrame.fromMatrix(middlePos.Position, houseRightVector, triangleSurfaceNormal, houseBackVector)
+			local randomYawCFrame = CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.rad(math.random(0, 360)))
+			self:createSingleHouse(levelHouseCFrame * randomYawCFrame, verticesForTriangles)
 			return true
 		end
 		function NuristanBuildings:generate(yourSelf, yourCell)
