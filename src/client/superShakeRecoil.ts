@@ -129,7 +129,6 @@ class CustomFreecam {
     }
 
     update(delta_time: number): void {
-        clear_console();
         this.stamina_left += this.stamina_regen_secs * delta_time;
         this.stamina_left = math.clamp(this.stamina_left, 0, this.max_stamina);
         this.iterative += 1;
@@ -195,7 +194,6 @@ class CustomFreecam {
 
         this.last_base_recoil = base_recoil_addon;
         this.camera_cframe = camera_cframe;
-        print(string.format("%.4f", this.displacement_x), string.format("%.4f",this.displacement_y), this.displacement_x_direction, this.displacement_y_direction);
     }
 }
 

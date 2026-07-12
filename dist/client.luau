@@ -3357,7 +3357,6 @@ __modulesFolder["superShakeRecoil"] = function()
 				self.camera_cframe = self.cam_position
 			end
 			function CustomFreecam:update(delta_time)
-				clear_console()
 				self.stamina_left += self.stamina_regen_secs * delta_time
 				self.stamina_left = math.clamp(self.stamina_left, 0, self.max_stamina)
 				self.iterative += 1
@@ -3416,7 +3415,6 @@ __modulesFolder["superShakeRecoil"] = function()
 				camera_cframe = _camera_cframe * _arg0 * _arg0_1 * _arg0_2 * _arg0_3 * _arg0_4 * _cFrame
 				self.last_base_recoil = base_recoil_addon
 				self.camera_cframe = camera_cframe
-				print(string.format("%.4f", self.displacement_x), string.format("%.4f", self.displacement_y), self.displacement_x_direction, self.displacement_y_direction)
 			end
 		end
 		register_camera_mode("RecoilCam", CustomFreecam)
