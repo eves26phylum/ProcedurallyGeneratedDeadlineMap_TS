@@ -248,6 +248,7 @@ clientInputGroup.bind_user_setting(() => { // check
 
 if (isDeadline) bindRecoilCam();
 
+Log.info("Run this command to start the game and map generation!", "shared.initialise_game\"\"")
 
 Shared.initialise_game = () => {
     fire_server("initialise_game");

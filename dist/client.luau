@@ -3730,6 +3730,7 @@ task.defer(function()
 	if isDeadline then
 		bindRecoilCam()
 	end
+	Log:info("Run this command to start the game and map generation!", 'shared.initialise_game\"\"')
 	Shared.initialise_game = function()
 		fire_server("initialise_game")
 	end
