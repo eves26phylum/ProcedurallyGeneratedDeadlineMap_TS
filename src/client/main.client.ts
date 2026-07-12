@@ -11,14 +11,13 @@ import { bindRecoilCam } from "./superShakeRecoil";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 const Log = new Logger("main");
 class lookListener {
-    irisConnection: () => void
+    irisConnection?: () => void
     private text: string
     private status1?: number
     private status2?: number
     windowSize: IrisState<Vector2>
     constructor() {
         this.windowSize = iris.State(new Vector2(500, 100));
-        this.irisConnection = iris.Connect(() => {this.renderThing()});
         this.text = "Generating terrain. You cannot spawn until it is done generating.";
     }
     private renderThing() {
@@ -32,6 +31,9 @@ class lookListener {
         iris.Text([this.text]);
         iris.End();
     }
+    kickStart() {
+        this.irisConnection = iris.Connect(() => {this.renderThing()});
+    }
     setText(text: string) {
         this.text = text;
     }
@@ -42,7 +44,7 @@ class lookListener {
         this.status2 = number;
     }
     disable() {
-        this.irisConnection();
+        this.irisConnection?.();
     }
 }
 const look = new lookListener();
@@ -53,6 +55,9 @@ on_server_event.Connect((args: unknown[]) => {
     assert(typeIs(eventType, "string"), "Event is not a string");
     if (eventType === "terrain_finished") {
         look.setText("Terrain has been generated. Feel free to spawn to get rid of this message.");
+    }
+    if (eventType === "terrain_generate") {
+        look.kickStart();
     }
     if (eventType === "disconnect_iris") {
         look.disable();

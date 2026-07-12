@@ -3457,9 +3457,6 @@ task.defer(function()
 		end
 		function lookListener:constructor()
 			self.windowSize = iris.State(Vector2.new(500, 100))
-			self.irisConnection = iris:Connect(function()
-				self:renderThing()
-			end)
 			self.text = "Generating terrain. You cannot spawn until it is done generating."
 		end
 		function lookListener:renderThing()
@@ -3477,6 +3474,11 @@ task.defer(function()
 			iris.Text({ self.text })
 			iris.End()
 		end
+		function lookListener:kickStart()
+			self.irisConnection = iris:Connect(function()
+				self:renderThing()
+			end)
+		end
 		function lookListener:setText(text)
 			self.text = text
 		end
@@ -3487,7 +3489,10 @@ task.defer(function()
 			self.status2 = number
 		end
 		function lookListener:disable()
-			self.irisConnection()
+			local _result = self.irisConnection
+			if _result ~= nil then
+				_result()
+			end
 		end
 	end
 	local look = lookListener.new()
@@ -3502,6 +3507,9 @@ task.defer(function()
 		assert(_arg0, "Event is not a string")
 		if eventType == "terrain_finished" then
 			look:setText("Terrain has been generated. Feel free to spawn to get rid of this message.")
+		end
+		if eventType == "terrain_generate" then
+			look:kickStart()
 		end
 		if eventType == "disconnect_iris" then
 			look:disable()
