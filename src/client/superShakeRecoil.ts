@@ -66,6 +66,7 @@ class CustomFreecam {
     displacement_x_direction: number;
     displacement_y_direction: number;
     displacement_random_addition: number;
+    displacement_max: number;
     constructor(get_head_cframe: () => CFrame) {
         this.get_head_cframe = get_head_cframe;
 
@@ -92,6 +93,7 @@ class CustomFreecam {
         this.displacement_multiplier = 0.05;
         this.displacement_x_direction = 0;
         this.displacement_y_direction = 0;
+        this.displacement_max = 0.1;
         this.displacement_random_addition = 2 / 60;
         this.current_rot_y = 0;
         this.blur_intensity = 150;
@@ -138,6 +140,16 @@ class CustomFreecam {
         this.real_rot_y = math.clamp(this.real_rot_y, this.min_roll, this.max_roll);
         this.real_rot_x -= rawDelta.X * scale;
 
+        const base_recoil_addon = this.rot_x + this.rot_y;
+        this.displacement_x += base_recoil_addon * this.displacement_multiplier * (this.displacement_x_direction > 0 ? 1 : -1);
+        this.displacement_y += base_recoil_addon * this.displacement_multiplier * (this.displacement_y_direction > 0 ? 1 : -1);
+        this.displacement_x = math.clamp(this.displacement_x, -this.displacement_max, this.displacement_max);
+        this.displacement_y = math.clamp(this.displacement_y, -this.displacement_max, this.displacement_max);
+        this.displacement_x_direction += math.clamp(math.random(-this.displacement_random_addition, this.displacement_random_addition), -1, 1);
+        this.displacement_y_direction += math.clamp(math.random(-this.displacement_random_addition, this.displacement_random_addition), -1, 1);
+        this.real_rot_y += this.displacement_x;
+        this.real_rot_x += this.displacement_y;
+        
         this.current_rot_x += (this.real_rot_x - this.current_rot_x) * math.min(1, delta_time * this.look_damping_speed);
         this.current_rot_y += (this.real_rot_y - this.current_rot_y) * math.min(1, delta_time * this.look_damping_speed);
 
@@ -147,14 +159,6 @@ class CustomFreecam {
 
         this.rot_x += (0 - this.rot_x) * math.min(1, delta_time * this.recoil_recovery_speed);
         this.rot_y += (0 - this.rot_y) * math.min(1, delta_time * this.recoil_recovery_speed);
-
-        const base_recoil_addon = this.rot_x + this.rot_y;
-        this.displacement_x += base_recoil_addon * this.displacement_multiplier * (this.displacement_x_direction > 0 ? 1 : 0);
-        this.displacement_y += base_recoil_addon * this.displacement_multiplier * (this.displacement_y_direction > 0 ? 1 : 0);
-        this.displacement_x_direction += math.random(-this.displacement_random_addition, this.displacement_random_addition);
-        this.displacement_y_direction += math.random(-this.displacement_random_addition, this.displacement_random_addition);
-        this.current_rot_x += this.displacement_x;
-        this.current_rot_y += this.displacement_y;
         // if (this.iterative % 70 === 0) print(base_recoil_addon);
         this.stamina_left -= (base_recoil_addon * (delta_time * this.loss_multiplier)) / this.stamina_loss_threshold;
         const recoil_rate = (base_recoil_addon - this.last_base_recoil) / delta_time;
