@@ -92,7 +92,7 @@ class CustomFreecam {
         this.displacement_multiplier = 0.05 / 60;
         this.displacement_x_direction = 0;
         this.displacement_y_direction = 0;
-        this.displacement_random_addition = 50 / 60;
+        this.displacement_random_addition = 20 / 60;
         this.current_rot_y = 0;
         this.blur_intensity = 150;
         this.input = {
