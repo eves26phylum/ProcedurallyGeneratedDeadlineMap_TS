@@ -57,6 +57,7 @@ on_server_event.Connect((args: unknown[]) => {
         look.setText("Terrain has been generated. Feel free to spawn to get rid of this message.");
     }
     if (eventType === "terrain_generate") {
+        look.disable(); // a hack for my bad code
         look.kickStart();
     }
     if (eventType === "disconnect_iris") {

@@ -3317,6 +3317,12 @@ __modulesFolder["superShakeRecoil"] = function()
 				self.stamina_regen_secs = 0.3
 				self.recoil_intensity = 0.03
 				self.current_rot_x = 0
+				self.displacement_x = 0
+				self.displacement_y = 0
+				self.displacement_multiplier = 0.05
+				self.displacement_x_direction = 0
+				self.displacement_y_direction = 0
+				self.displacement_random_addition = 2 / 60
 				self.current_rot_y = 0
 				self.blur_intensity = 150
 				self.input = {
@@ -3367,6 +3373,10 @@ __modulesFolder["superShakeRecoil"] = function()
 				self.rot_x += (0 - self.rot_x) * math.min(1, delta_time * self.recoil_recovery_speed)
 				self.rot_y += (0 - self.rot_y) * math.min(1, delta_time * self.recoil_recovery_speed)
 				local base_recoil_addon = self.rot_x + self.rot_y
+				self.displacement_x += base_recoil_addon * self.displacement_multiplier * (if self.displacement_x_direction > 0 then 1 else 0)
+				self.displacement_y += base_recoil_addon * self.displacement_multiplier * (if self.displacement_y_direction > 0 then 1 else 0)
+				self.displacement_x_direction += math.random(-self.displacement_random_addition, self.displacement_random_addition)
+				self.displacement_y_direction += math.random(-self.displacement_random_addition, self.displacement_random_addition)
 				-- if (this.iterative % 70 === 0) print(base_recoil_addon);
 				self.stamina_left -= (base_recoil_addon * (delta_time * self.loss_multiplier)) / self.stamina_loss_threshold
 				local recoil_rate = (base_recoil_addon - self.last_base_recoil) / delta_time
@@ -3509,6 +3519,7 @@ task.defer(function()
 			look:setText("Terrain has been generated. Feel free to spawn to get rid of this message.")
 		end
 		if eventType == "terrain_generate" then
+			look:disable()
 			look:kickStart()
 		end
 		if eventType == "disconnect_iris" then

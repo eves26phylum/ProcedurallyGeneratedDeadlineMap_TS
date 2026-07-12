@@ -60,7 +60,12 @@ class CustomFreecam {
     vertical_shake_phase: number;
     last_base_recoil: number;
     iterative: number;
-
+    displacement_x: number;
+    displacement_y: number;
+    displacement_multiplier: number;
+    displacement_x_direction: number;
+    displacement_y_direction: number;
+    displacement_random_addition: number;
     constructor(get_head_cframe: () => CFrame) {
         this.get_head_cframe = get_head_cframe;
 
@@ -82,6 +87,12 @@ class CustomFreecam {
         this.stamina_regen_secs = 0.3; // 1 stamina regenerated per sec
         this.recoil_intensity = 0.03;
         this.current_rot_x = 0;
+        this.displacement_x = 0;
+        this.displacement_y = 0;
+        this.displacement_multiplier = 0.05;
+        this.displacement_x_direction = 0;
+        this.displacement_y_direction = 0;
+        this.displacement_random_addition = 2 / 60;
         this.current_rot_y = 0;
         this.blur_intensity = 150;
         this.input = {
@@ -138,6 +149,11 @@ class CustomFreecam {
         this.rot_y += (0 - this.rot_y) * math.min(1, delta_time * this.recoil_recovery_speed);
 
         const base_recoil_addon = this.rot_x + this.rot_y;
+        this.displacement_x += base_recoil_addon * this.displacement_multiplier * (this.displacement_x_direction > 0 ? 1 : 0);
+        this.displacement_y += base_recoil_addon * this.displacement_multiplier * (this.displacement_y_direction > 0 ? 1 : 0);
+        this.displacement_x_direction += math.random(-this.displacement_random_addition, this.displacement_random_addition);
+        this.displacement_y_direction += math.random(-this.displacement_random_addition, this.displacement_random_addition);
+
         // if (this.iterative % 70 === 0) print(base_recoil_addon);
         this.stamina_left -= (base_recoil_addon * (delta_time * this.loss_multiplier)) / this.stamina_loss_threshold;
         const recoil_rate = (base_recoil_addon - this.last_base_recoil) / delta_time;
