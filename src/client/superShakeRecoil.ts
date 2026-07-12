@@ -153,7 +153,8 @@ class CustomFreecam {
         this.displacement_y += base_recoil_addon * this.displacement_multiplier * (this.displacement_y_direction > 0 ? 1 : 0);
         this.displacement_x_direction += math.random(-this.displacement_random_addition, this.displacement_random_addition);
         this.displacement_y_direction += math.random(-this.displacement_random_addition, this.displacement_random_addition);
-
+        this.current_rot_x += this.displacement_x;
+        this.current_rot_y += this.displacement_y;
         // if (this.iterative % 70 === 0) print(base_recoil_addon);
         this.stamina_left -= (base_recoil_addon * (delta_time * this.loss_multiplier)) / this.stamina_loss_threshold;
         const recoil_rate = (base_recoil_addon - this.last_base_recoil) / delta_time;

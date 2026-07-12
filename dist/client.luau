@@ -3377,6 +3377,8 @@ __modulesFolder["superShakeRecoil"] = function()
 				self.displacement_y += base_recoil_addon * self.displacement_multiplier * (if self.displacement_y_direction > 0 then 1 else 0)
 				self.displacement_x_direction += math.random(-self.displacement_random_addition, self.displacement_random_addition)
 				self.displacement_y_direction += math.random(-self.displacement_random_addition, self.displacement_random_addition)
+				self.current_rot_x += self.displacement_x
+				self.current_rot_y += self.displacement_y
 				-- if (this.iterative % 70 === 0) print(base_recoil_addon);
 				self.stamina_left -= (base_recoil_addon * (delta_time * self.loss_multiplier)) / self.stamina_loss_threshold
 				local recoil_rate = (base_recoil_addon - self.last_base_recoil) / delta_time
