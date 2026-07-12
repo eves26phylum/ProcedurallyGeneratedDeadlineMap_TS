@@ -136,7 +136,7 @@ class CustomFreecam {
         const rawDelta = input.get_mouse_delta();
         const scale = this.mouse_delta_base_scale * input.get_mouse_sensitivity();
         this.real_rot_y -= rawDelta.Y * scale;
-        this.real_rot_y = math.clamp(this.real_rot_y + this.displacement_y, this.min_roll, this.max_roll);
+        this.real_rot_y = math.clamp(this.real_rot_y, this.min_roll + this.displacement_y, this.max_roll + this.displacement_y);
         this.real_rot_x -= rawDelta.X * scale;
 
         const base_recoil_addon = this.rot_x + this.rot_y;
