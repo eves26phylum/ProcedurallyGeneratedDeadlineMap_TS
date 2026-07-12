@@ -3371,8 +3371,12 @@ __modulesFolder["superShakeRecoil"] = function()
 				self.displacement_y += base_recoil_addon * self.displacement_multiplier * (if self.displacement_y_direction > 0 then 1 else -1)
 				self.displacement_x = math.clamp(self.displacement_x, -self.displacement_max, self.displacement_max)
 				self.displacement_y = math.clamp(self.displacement_y, -self.displacement_max, self.displacement_max)
-				self.displacement_x_direction += math.clamp(math.random(-self.displacement_random_addition, self.displacement_random_addition), -1, 1)
-				self.displacement_y_direction += math.clamp(math.random(-self.displacement_random_addition, self.displacement_random_addition), -1, 1)
+				self.displacement_x_direction += math.random(-self.displacement_random_addition, self.displacement_random_addition)
+				self.displacement_x_direction = math.clamp(self.displacement_x_direction, -1, 1)
+				self.displacement_y_direction += math.random(-self.displacement_random_addition, self.displacement_random_addition)
+				self.displacement_y_direction = math.clamp(self.displacement_y_direction, -1, 1)
+				-- clear_console();
+				-- print(this.displacement_x, this.displacement_y, this.displacement_x_direction, this.displacement_y_direction);
 				self.real_rot_y += self.displacement_x
 				self.real_rot_x += self.displacement_y
 				self.current_rot_x += (self.real_rot_x - self.current_rot_x) * math.min(1, delta_time * self.look_damping_speed)

@@ -145,8 +145,12 @@ class CustomFreecam {
         this.displacement_y += base_recoil_addon * this.displacement_multiplier * (this.displacement_y_direction > 0 ? 1 : -1);
         this.displacement_x = math.clamp(this.displacement_x, -this.displacement_max, this.displacement_max);
         this.displacement_y = math.clamp(this.displacement_y, -this.displacement_max, this.displacement_max);
-        this.displacement_x_direction += math.clamp(math.random(-this.displacement_random_addition, this.displacement_random_addition), -1, 1);
-        this.displacement_y_direction += math.clamp(math.random(-this.displacement_random_addition, this.displacement_random_addition), -1, 1);
+        this.displacement_x_direction += math.random(-this.displacement_random_addition, this.displacement_random_addition)
+        this.displacement_x_direction = math.clamp(this.displacement_x_direction, -1, 1);
+        this.displacement_y_direction += math.random(-this.displacement_random_addition, this.displacement_random_addition)
+        this.displacement_y_direction = math.clamp(this.displacement_y_direction, -1, 1);
+        // clear_console();
+        // print(this.displacement_x, this.displacement_y, this.displacement_x_direction, this.displacement_y_direction);
         this.real_rot_y += this.displacement_x;
         this.real_rot_x += this.displacement_y;
         
