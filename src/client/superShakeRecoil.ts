@@ -89,10 +89,10 @@ class CustomFreecam {
         this.current_rot_x = 0;
         this.displacement_x = 0;
         this.displacement_y = 0;
-        this.displacement_multiplier = 0.05;
+        this.displacement_multiplier = 0.05 / 60;
         this.displacement_x_direction = 0;
         this.displacement_y_direction = 0;
-        this.displacement_random_addition = 10 / 60;
+        this.displacement_random_addition = 50 / 60;
         this.current_rot_y = 0;
         this.blur_intensity = 150;
         this.input = {
@@ -136,7 +136,7 @@ class CustomFreecam {
         const rawDelta = input.get_mouse_delta();
         const scale = this.mouse_delta_base_scale * input.get_mouse_sensitivity();
         this.real_rot_y -= rawDelta.Y * scale;
-        this.real_rot_y = math.clamp(this.real_rot_y, this.min_roll, this.max_roll);
+        this.real_rot_y = math.clamp(this.real_rot_y + this.displacement_y, this.min_roll, this.max_roll);
         this.real_rot_x -= rawDelta.X * scale;
 
         const base_recoil_addon = this.rot_x + this.rot_y;
