@@ -3322,8 +3322,7 @@ __modulesFolder["superShakeRecoil"] = function()
 				self.displacement_multiplier = 0.05
 				self.displacement_x_direction = 0
 				self.displacement_y_direction = 0
-				self.displacement_max = 0.1
-				self.displacement_random_addition = 2 / 60
+				self.displacement_random_addition = 10 / 60
 				self.current_rot_y = 0
 				self.blur_intensity = 150
 				self.input = {
@@ -3358,6 +3357,7 @@ __modulesFolder["superShakeRecoil"] = function()
 				self.camera_cframe = self.cam_position
 			end
 			function CustomFreecam:update(delta_time)
+				clear_console()
 				self.stamina_left += self.stamina_regen_secs * delta_time
 				self.stamina_left = math.clamp(self.stamina_left, 0, self.max_stamina)
 				self.iterative += 1
@@ -3367,18 +3367,12 @@ __modulesFolder["superShakeRecoil"] = function()
 				self.real_rot_y = math.clamp(self.real_rot_y, self.min_roll, self.max_roll)
 				self.real_rot_x -= rawDelta.X * scale
 				local base_recoil_addon = self.rot_x + self.rot_y
+				self.displacement_x_direction += (math.random() * 2 - 1) * self.displacement_random_addition
+				self.displacement_x_direction = math.clamp(self.displacement_x_direction, -1, 1)
+				self.displacement_y_direction += (math.random() * 2 - 1) * self.displacement_random_addition
+				self.displacement_y_direction = math.clamp(self.displacement_y_direction, -1, 1)
 				self.displacement_x += base_recoil_addon * self.displacement_multiplier * (if self.displacement_x_direction > 0 then 1 else -1)
 				self.displacement_y += base_recoil_addon * self.displacement_multiplier * (if self.displacement_y_direction > 0 then 1 else -1)
-				self.displacement_x = math.clamp(self.displacement_x, -self.displacement_max, self.displacement_max)
-				self.displacement_y = math.clamp(self.displacement_y, -self.displacement_max, self.displacement_max)
-				self.displacement_x_direction += math.random(-self.displacement_random_addition, self.displacement_random_addition)
-				self.displacement_x_direction = math.clamp(self.displacement_x_direction, -1, 1)
-				self.displacement_y_direction += math.random(-self.displacement_random_addition, self.displacement_random_addition)
-				self.displacement_y_direction = math.clamp(self.displacement_y_direction, -1, 1)
-				-- clear_console();
-				-- print(this.displacement_x, this.displacement_y, this.displacement_x_direction, this.displacement_y_direction);
-				self.real_rot_y += self.displacement_x
-				self.real_rot_x += self.displacement_y
 				self.current_rot_x += (self.real_rot_x - self.current_rot_x) * math.min(1, delta_time * self.look_damping_speed)
 				self.current_rot_y += (self.real_rot_y - self.current_rot_y) * math.min(1, delta_time * self.look_damping_speed)
 				local head_cframe = self.get_head_cframe()
@@ -3409,8 +3403,8 @@ __modulesFolder["superShakeRecoil"] = function()
 				local lateral_disp_y = math.noise(self.t * self.vertical_recoil_frequency, 3) * base_recoil_addon * self.recoil_lateral_fraction * self.recoil_lateral_displacement_scale
 				self.blur.Size = math.clamp(base_recoil_addon * self.blur_intensity, self.blur_bound_lower, self.blur_bound_upper)
 				local _camera_cframe = camera_cframe
-				local _arg0 = CFrame.Angles(0, self.current_rot_x + lateral_recoil + sway_x, 0)
-				local _arg0_1 = CFrame.Angles((self.current_rot_y - softened_rot_y) + half_recoil * self.horizontal_vis_multiplier + vertical_recoil + sway_y, 0, 0)
+				local _arg0 = CFrame.Angles(0, self.current_rot_x + lateral_recoil + sway_x + self.displacement_x, 0)
+				local _arg0_1 = CFrame.Angles((self.current_rot_y - softened_rot_y) + half_recoil * self.horizontal_vis_multiplier + vertical_recoil + sway_y + self.displacement_y, 0, 0)
 				local _arg0_2 = CFrame.Angles(vertical_shake_offset, 0, 0)
 				local _arg0_3 = CFrame.Angles(0, 0, roll_recoil)
 				local _condition = self.roll
@@ -3422,6 +3416,7 @@ __modulesFolder["superShakeRecoil"] = function()
 				camera_cframe = _camera_cframe * _arg0 * _arg0_1 * _arg0_2 * _arg0_3 * _arg0_4 * _cFrame
 				self.last_base_recoil = base_recoil_addon
 				self.camera_cframe = camera_cframe
+				print(string.format("%.4f", self.displacement_x), string.format("%.4f", self.displacement_y), self.displacement_x_direction, self.displacement_y_direction)
 			end
 		end
 		register_camera_mode("RecoilCam", CustomFreecam)

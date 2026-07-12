@@ -66,7 +66,6 @@ class CustomFreecam {
     displacement_x_direction: number;
     displacement_y_direction: number;
     displacement_random_addition: number;
-    displacement_max: number;
     constructor(get_head_cframe: () => CFrame) {
         this.get_head_cframe = get_head_cframe;
 
@@ -93,8 +92,7 @@ class CustomFreecam {
         this.displacement_multiplier = 0.05;
         this.displacement_x_direction = 0;
         this.displacement_y_direction = 0;
-        this.displacement_max = 0.1;
-        this.displacement_random_addition = 2 / 60;
+        this.displacement_random_addition = 10 / 60;
         this.current_rot_y = 0;
         this.blur_intensity = 150;
         this.input = {
@@ -131,6 +129,7 @@ class CustomFreecam {
     }
 
     update(delta_time: number): void {
+        clear_console();
         this.stamina_left += this.stamina_regen_secs * delta_time;
         this.stamina_left = math.clamp(this.stamina_left, 0, this.max_stamina);
         this.iterative += 1;
@@ -141,18 +140,12 @@ class CustomFreecam {
         this.real_rot_x -= rawDelta.X * scale;
 
         const base_recoil_addon = this.rot_x + this.rot_y;
+        this.displacement_x_direction += (math.random() * 2 - 1) * this.displacement_random_addition
+        this.displacement_x_direction = math.clamp(this.displacement_x_direction, -1, 1);
+        this.displacement_y_direction += (math.random() * 2 - 1) * this.displacement_random_addition
+        this.displacement_y_direction = math.clamp(this.displacement_y_direction, -1, 1);
         this.displacement_x += base_recoil_addon * this.displacement_multiplier * (this.displacement_x_direction > 0 ? 1 : -1);
         this.displacement_y += base_recoil_addon * this.displacement_multiplier * (this.displacement_y_direction > 0 ? 1 : -1);
-        this.displacement_x = math.clamp(this.displacement_x, -this.displacement_max, this.displacement_max);
-        this.displacement_y = math.clamp(this.displacement_y, -this.displacement_max, this.displacement_max);
-        this.displacement_x_direction += math.random(-this.displacement_random_addition, this.displacement_random_addition)
-        this.displacement_x_direction = math.clamp(this.displacement_x_direction, -1, 1);
-        this.displacement_y_direction += math.random(-this.displacement_random_addition, this.displacement_random_addition)
-        this.displacement_y_direction = math.clamp(this.displacement_y_direction, -1, 1);
-        // clear_console();
-        // print(this.displacement_x, this.displacement_y, this.displacement_x_direction, this.displacement_y_direction);
-        this.real_rot_y += this.displacement_x;
-        this.real_rot_x += this.displacement_y;
         
         this.current_rot_x += (this.real_rot_x - this.current_rot_x) * math.min(1, delta_time * this.look_damping_speed);
         this.current_rot_y += (this.real_rot_y - this.current_rot_y) * math.min(1, delta_time * this.look_damping_speed);
@@ -193,8 +186,8 @@ class CustomFreecam {
         this.blur.Size = math.clamp(base_recoil_addon * this.blur_intensity, this.blur_bound_lower, this.blur_bound_upper);
 
         camera_cframe = camera_cframe
-            .mul(CFrame.Angles(0, this.current_rot_x + lateral_recoil + sway_x, 0))
-            .mul(CFrame.Angles((this.current_rot_y - softened_rot_y) + half_recoil * this.horizontal_vis_multiplier + vertical_recoil + sway_y, 0, 0))
+            .mul(CFrame.Angles(0, this.current_rot_x + lateral_recoil + sway_x + this.displacement_x, 0))
+            .mul(CFrame.Angles((this.current_rot_y - softened_rot_y) + half_recoil * this.horizontal_vis_multiplier + vertical_recoil + sway_y + this.displacement_y, 0, 0))
             .mul(CFrame.Angles(vertical_shake_offset, 0, 0))
             .mul(CFrame.Angles(0, 0, roll_recoil))
             .mul(CFrame.Angles(0, 0, -(this.roll ?? 0)))
@@ -202,6 +195,7 @@ class CustomFreecam {
 
         this.last_base_recoil = base_recoil_addon;
         this.camera_cframe = camera_cframe;
+        print(string.format("%.4f", this.displacement_x), string.format("%.4f",this.displacement_y), this.displacement_x_direction, this.displacement_y_direction);
     }
 }
 
