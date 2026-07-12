@@ -3578,6 +3578,12 @@ task.defer(function()
 			assert(_arg0_1, "percentage is not a number")
 			look:setStatus2(percentage)
 		end
+		if eventType == "initialise" then
+			local isSuccessful = args[2]
+			local _arg0_1 = type(isSuccessful) == "boolean"
+			assert(_arg0_1, "isSuccessful is not a boolean")
+			Log[if isSuccessful then "info" else "warn"](Log, if isSuccessful then "initialising game has been executed on the remote server" else "initialise game is not an available method")
+		end
 	end)
 	local DroneFreecam
 	do
@@ -3715,6 +3721,9 @@ task.defer(function()
 	end, InputType.Ended, "lean_left")
 	if isDeadline then
 		bindRecoilCam()
+	end
+	Shared.initialise_game = function()
+		fire_server("initialise_game")
 	end
 
 end)

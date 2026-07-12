@@ -112,6 +112,11 @@ on_server_event.Connect((args: unknown[]) => {
         assert(typeIs(percentage, "number"), "percentage is not a number");
         look.setStatus2(percentage);
     }
+    if (eventType === "initialise") {
+        const isSuccessful: boolean | unknown = args[1];
+        assert(typeIs(isSuccessful, "boolean"), "isSuccessful is not a boolean");
+        Log[isSuccessful ? "info" : "warn"](isSuccessful ? "initialising game has been executed on the remote server" : "initialise game is not an available method");
+    }
 })
 
 class DroneFreecam {
@@ -237,3 +242,8 @@ clientInputGroup.bind_user_setting(() => { // check
 }, InputType.Ended, "lean_left")
 
 if (isDeadline) bindRecoilCam();
+
+
+Shared.initialise_game = () => {
+    fire_server("initialise_game");
+}

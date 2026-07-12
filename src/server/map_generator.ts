@@ -173,20 +173,5 @@ function generate() {
 Log.log("Generating Afghanistan map.");
 generate();
 Log.info("Done.");
-if (isDeadline) {
-    players.get_all().forEach((player: Player, index: number) => {
-        player.fire_client("terrain_finished");
-    })
-    on_player_joined.Connect((name: string) => {
-        const player = players.get(name);
-        if (!player) return;
-        player.fire_client("terrain_finished");
-    })
-    on_player_spawned.Connect((name: string) => {
-        const player = players.get(name);
-        if (!player) return;
-        player.fire_client("disconnect_iris");
-    })
-}
 return maxHeight;
 }

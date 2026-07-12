@@ -3772,31 +3772,6 @@ __modulesFolder["map_generator"] = function()
 		Log:log("Generating Afghanistan map.")
 		generate()
 		Log:info("Done.")
-		if isDeadline then
-			local _exp = players.get_all()
-			-- ▼ ReadonlyArray.forEach ▼
-			local _callback = function(player, index)
-				player.fire_client("terrain_finished")
-			end
-			for _k, _v in _exp do
-				_callback(_v, _k - 1, _exp)
-			end
-			-- ▲ ReadonlyArray.forEach ▲
-			on_player_joined:Connect(function(name)
-				local player = players.get(name)
-				if not player then
-					return nil
-				end
-				player.fire_client("terrain_finished")
-			end)
-			on_player_spawned:Connect(function(name)
-				local player = players.get(name)
-				if not player then
-					return nil
-				end
-				player.fire_client("disconnect_iris")
-			end)
-		end
 		return maxHeight
 	end
 	return {
@@ -3911,11 +3886,21 @@ task.defer(function()
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
 	local Log = Logger.new("main")
-	local dogRef = {}
-	loadPeoplesRepublicOfGermetistan()
-	if isDeadline then
+	local dogRef
+	local function loadMap()
+		-- heavy operation
+		if not isDeadline then
+			return nil
+		end
+		loadPeoplesRepublicOfGermetistan()
 		map.set_preset("afghanistan")
+		sharedvars.sv_spawning_enabled = false
+		chat.set_spawning_disabled_reason("The map is generating. Please be patient.")
+		local maxHeight = startMapGenerator()
+		dogRef.current = maxHeight + 20
+		sharedvars.sv_spawning_enabled = true
 	end
+	dogRef = {}
 	local function connect()
 		local disconnectAll
 		disconnectAll = kickStart(adapterToUse, getWorldRoot(), dogRef, function(team_alive)
@@ -3936,15 +3921,85 @@ task.defer(function()
 			connect()
 		end)
 	end
-	connect()
-	if isDeadline then
-		sharedvars.sv_spawning_enabled = false
-		chat.set_spawning_disabled_reason("The map is generating. Please be patient.")
+	--connect();
+	local function initialise_game()
+		local Log = Logger.new("main::initialise_game")
+		Log:log("Starting map generation function")
+		local terrain_generate_connection
+		if isDeadline then
+			local _exp = players.get_all()
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(player, index)
+				player.fire_client("terrain_generate")
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+			terrain_generate_connection = on_player_joined:Connect(function(name)
+				local player = players.get(name)
+				if not player then
+					return nil
+				end
+				player.fire_client("terrain_generate")
+			end)
+		end
+		loadMap()
+		if isDeadline then
+			local _exp = players.get_all()
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(player, index)
+				player.fire_client("terrain_finished")
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+			on_player_joined:Connect(function(name)
+				local player = players.get(name)
+				if not player then
+					return nil
+				end
+				player.fire_client("terrain_finished")
+			end)
+			on_player_spawned:Connect(function(name)
+				local player = players.get(name)
+				if not player then
+					return nil
+				end
+				player.fire_client("disconnect_iris")
+			end)
+			local _result = terrain_generate_connection
+			if _result ~= nil then
+				_result:Disconnect()
+			end
+		end
+		Log:log("Map generation function has finished")
+		Log:log("Starting ingame function")
+		connect()
+		Log:log("Ingame function has finished", "initialise_game has finished")
 	end
-	local maxHeight = startMapGenerator()
-	dogRef.current = maxHeight + 20
-	if isDeadline then
-		sharedvars.sv_spawning_enabled = true
-	end
+	Shared.should_initialise_game = true
+	on_client_event:Connect(function(playerName, args)
+		local player = players.get(playerName)
+		if not player then
+			return nil
+		end
+		local eventType = args[1]
+		if not (type(eventType) == "string") then
+			return player.kick()
+		end
+		if eventType ~= "initialise_game" then
+			return nil
+		end
+		local _value = Shared.should_initialise_game
+		if not (_value ~= 0 and _value == _value and _value ~= "" and _value) then
+			return player.fire_client("initialise", false)
+		end
+		Shared.should_initialise_game = false
+		player.fire_client("initialise", true)
+		Log:log(playerName, "has started the initialisation function.")
+		initialise_game()
+	end)
 
 end)
