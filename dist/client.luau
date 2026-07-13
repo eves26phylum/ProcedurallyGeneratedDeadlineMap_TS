@@ -3665,6 +3665,7 @@ __modulesFolder["superShakeRecoil"] = function()
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 	local candidates = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "restrictedAssets").candidates
 	local BlurCreator = TS.import(script, script.Parent, "blurCreator").BlurCreator
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
 	local blurCreator = BlurCreator.new()
 	local _lighting = candidates.Lighting
 	assert(_lighting, "Lighting candidate not found")
@@ -3672,6 +3673,7 @@ __modulesFolder["superShakeRecoil"] = function()
 		return blurCreator:destroyBlur()
 	end)
 	local function bindRecoilCam()
+		local Log = Logger.new("super_shake_recoil")
 		local CustomFreecam
 		do
 			CustomFreecam = setmetatable({}, {
@@ -3804,6 +3806,7 @@ __modulesFolder["superShakeRecoil"] = function()
 			end
 		end
 		register_camera_mode("RecoilCam", CustomFreecam)
+		Log:info("I am now making your recoil very cool")
 	end
 	return {
 		bindRecoilCam = bindRecoilCam,
@@ -3849,7 +3852,7 @@ task.defer(function()
 	connectPingLogic()
 	connectUILogic()
 	connectResetVelocity()
-	Log:info("Run this command to start the game and map generation!", 'shared.initialise_game\"\"')
+	Log:log("Run this command to start the game and map generation!", 'shared.initialise_game\"\"')
 	Shared.initialise_game = function()
 		fire_server("initialise_game")
 	end

@@ -22,7 +22,7 @@ connectPingLogic(); // connects ping keybinds, and listens for team pings to dis
 connectUILogic(); // connects biome status loading ui
 connectResetVelocity(); // connects the logic required for you to not fly into the air whenever you spawn
 
-Log.info("Run this command to start the game and map generation!", "shared.initialise_game\"\"")
+Log.log("Run this command to start the game and map generation!", "shared.initialise_game\"\"")
 
 Shared.initialise_game = () => {
     fire_server("initialise_game");
