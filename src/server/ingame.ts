@@ -294,6 +294,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
         if (eventType === "ping_at_position") {
             const pingPosition = args[1];
             if (!typeIs(pingPosition, "vector")) return player.kick();
+            if (!drones[player.name] || !drones[player.name].Parent) return;
             pingSystem.handlePlayerPing(player, pingPosition, droneNames[player.name] || "fucking dog");
         }
     })

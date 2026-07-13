@@ -3502,6 +3502,9 @@ __modulesFolder["ingame"] = function()
 				if not (type(pingPosition) == "vector") then
 					return player.kick()
 				end
+				if not drones[player.name] or not drones[player.name].Parent then
+					return nil
+				end
 				local _condition = droneNames[player.name]
 				if not (_condition ~= "" and _condition) then
 					_condition = "fucking dog"
@@ -3923,8 +3926,6 @@ task.defer(function()
 	end
 	--connect();
 	local function initialise_game()
-		local Log = Logger.new("main::initialise_game")
-		Log:log("Starting map generation function")
 		local terrain_generate_connection
 		if isDeadline then
 			local _exp = players.get_all()
@@ -3974,10 +3975,7 @@ task.defer(function()
 				_result:Disconnect()
 			end
 		end
-		Log:log("Map generation function has finished")
-		Log:log("Starting ingame function")
 		connect()
-		Log:log("Ingame function has finished", "initialise_game has finished")
 	end
 	Shared.should_initialise_game = true
 	on_client_event:Connect(function(playerName, args)
@@ -3998,8 +3996,10 @@ task.defer(function()
 		end
 		Shared.should_initialise_game = false
 		player.fire_client("initialise", true)
+		local Log = Logger.new("main::initialise_game")
 		Log:log(playerName, "has started the initialisation function.")
 		initialise_game()
+		Log:log("initialise_game has finished")
 	end)
 
 end)

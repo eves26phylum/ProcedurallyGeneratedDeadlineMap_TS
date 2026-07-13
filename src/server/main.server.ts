@@ -39,8 +39,6 @@ function connect() {
 //connect();
 
 function initialise_game() {
-    const Log = new Logger("main::initialise_game");
-    Log.log("Starting map generation function");
     let terrain_generate_connection;
     if (isDeadline) {
         players.get_all().forEach((player: Player, index: number) => {
@@ -69,10 +67,7 @@ function initialise_game() {
         })
         terrain_generate_connection?.Disconnect();
     }
-    Log.log("Map generation function has finished");
-    Log.log("Starting ingame function");
     connect();
-    Log.log("Ingame function has finished", "initialise_game has finished");
 }
 Shared.should_initialise_game = true;
 on_client_event.Connect((playerName: string, args: unknown[]) => {
@@ -86,6 +81,8 @@ on_client_event.Connect((playerName: string, args: unknown[]) => {
     }
     Shared.should_initialise_game = false;
     player.fire_client("initialise", true);
+    const Log = new Logger("main::initialise_game");
     Log.log(playerName, "has started the initialisation function.")
     initialise_game();
+    Log.log("initialise_game has finished");
 })

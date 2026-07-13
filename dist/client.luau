@@ -3125,6 +3125,392 @@ __modulesFolder["blurCreator"] = function()
 
 end
 
+__modulesFolder["connectDrone"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"connectDrone"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
+	local droneMaterialConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "droneMaterialConfig").droneMaterialConfig
+	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local function connectDroneLogic()
+		local Log = Logger.new("drone")
+		local _binding = {}
+		local body_gyro = _binding[1]
+		local body_velocity = _binding[2]
+		local dronePart = _binding[3]
+		on_server_event:Connect(function(args)
+			local eventType = args[1]
+			local _arg0 = type(eventType) == "string"
+			assert(_arg0, "Event is not a string")
+			if eventType == "player_ping" then
+				local drones = get_map_root().find_first_child("DronesFolder")
+				if not drones then
+					return Log:warn("Failed to find drones folder")
+				end
+				local drone_name = args[2]
+				local _arg0_1 = type(drone_name) == "string"
+				assert(_arg0_1, "Drone name is not a string")
+				local drone = adapterToUse.findFirstChild(drones, drone_name)
+				local _arg0_2 = drone and adapterToUse.isA(drone, "BasePart")
+				assert(_arg0_2, "drone does not exist or is not a BasePart")
+				adapterToUse.setProperty(drone, "Color", Color3.fromRGB(255, 255, 255))
+				adapterToUse.setProperty(drone, "Material", Enum.Material.SmoothPlastic)
+				assign(drone, droneMaterialConfig.selected, adapterToUse.setProperty)
+				task.delay(0.2, function()
+					assign(drone, droneMaterialConfig.normal, adapterToUse.setProperty)
+				end)
+			end
+			if eventType == "send_drone_info" then
+				local drones = get_map_root().find_first_child("DronesFolder")
+				if not drones then
+					return Log:warn("Failed to find drones folder")
+				end
+				local drone_name = args[2]
+				local _arg0_1 = type(drone_name) == "string"
+				assert(_arg0_1, "Drone name is not a string")
+				local drone = adapterToUse.findFirstChild(drones, drone_name)
+				if not drone then
+					return Log:warn(`Failed to find drone of {drone_name}`)
+				end
+				local bodyGyroCanidate = adapterToUse.findFirstChild(drone, "CoolGyro")
+				local bodyVelocityCanidate = adapterToUse.findFirstChild(drone, "CoolVelocity")
+				local _arg0_2 = bodyGyroCanidate and adapterToUse.isA(bodyGyroCanidate, "BodyGyro")
+				assert(_arg0_2, "CoolGyro does not exist or is not a BodyGyro")
+				local _arg0_3 = bodyVelocityCanidate and adapterToUse.isA(bodyVelocityCanidate, "BodyVelocity")
+				assert(_arg0_3, "CoolVelocity does not exist or is not a BodyVelocity")
+				local _arg0_4 = drone and adapterToUse.isA(drone, "BasePart")
+				assert(_arg0_4, "drone does not exist or is not a BasePart")
+				body_gyro = bodyGyroCanidate
+				body_velocity = bodyVelocityCanidate
+				dronePart = drone
+				dronePart.CanCollide = true
+			end
+		end)
+		local DroneFreecam
+		do
+			DroneFreecam = setmetatable({}, {
+				__tostring = function()
+					return "DroneFreecam"
+				end,
+			})
+			DroneFreecam.__index = DroneFreecam
+			function DroneFreecam.new(...)
+				local self = setmetatable({}, DroneFreecam)
+				return self:constructor(...) or self
+			end
+			function DroneFreecam:constructor(get_head_cframe)
+				local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
+				local raycast_params = query.create_raycast_params()
+				local posToHitStartFrom = Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z))
+				local hit = query.raycast(posToHitStartFrom, Vector3.new(0, -15000, 0), raycast_params)
+				if not hit then
+					Log:error(`Hit was not found when doing drone spawn logic`, `Position from: {posToHitStartFrom}`)
+				end
+				self.get_head_cframe = get_head_cframe
+				self.rot_x = 0
+				self.rot_y = 0
+				local _result = hit
+				if _result ~= nil then
+					local _position = _result.position
+					local _vector3 = Vector3.new(0, 26, 0)
+					_result = _position + _vector3
+				end
+				local _condition = _result
+				if not _condition then
+					_condition = Vector3.new(0, 2000, 0)
+				end
+				self.cam_position = CFrame.new(_condition)
+				self.min_roll = -math.pi / 2 + 0.2
+				self.max_roll = math.pi / 2 - 0.2
+				self.current_velocity = Vector3.zero
+				self.input = {
+					movementX = 0,
+					movementY = 0,
+					movementZ = 0,
+				}
+				self.camera_cframe = CFrame.new()
+			end
+			function DroneFreecam:update(delta_time)
+				if not body_gyro or not body_velocity or not dronePart then
+					return nil
+				end
+				local _exp = input.get_mouse_delta() * 0.1
+				local _arg0 = input.get_mouse_sensitivity()
+				local mouse_delta = _exp * _arg0
+				self.rot_y -= mouse_delta.Y
+				self.rot_y = math.clamp(self.rot_y, self.min_roll, self.max_roll)
+				self.rot_x -= mouse_delta.X
+				local _exp_1 = CFrame.Angles(0, self.rot_x, 0)
+				local _arg0_1 = CFrame.Angles(self.rot_y, 0, 0)
+				local full_cframe = _exp_1 * _arg0_1
+				body_gyro.CFrame = full_cframe
+				local target_velocity = full_cframe:VectorToWorldSpace(Vector3.new(-self.input.movementX * 32, self.input.movementZ * 8, -self.input.movementY * 32))
+				-- Lerp toward target so velocity builds and bleeds off like a real drone
+				-- Factor of 6 gives ~160ms ramp time; raise it for a snappier feel
+				self.current_velocity = self.current_velocity:Lerp(target_velocity, math.min(1, delta_time * 3))
+				body_velocity.Velocity = self.current_velocity
+				local _cFrame = dronePart.CFrame
+				local _cFrame_1 = CFrame.new(0, 0, 0)
+				self.camera_cframe = _cFrame * _cFrame_1
+			end
+		end
+		register_camera_mode("DroneFreecam", DroneFreecam)
+		Log:info("Registered DroneFreecam camera")
+	end
+	return {
+		connectDroneLogic = connectDroneLogic,
+	}
+
+end
+
+__modulesFolder["connectPing"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"connectPing"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local _pingfactory = TS.import(script, script.Parent, "pingfactory")
+	local Ping = _pingfactory.Ping
+	local PingNoisePlayer = _pingfactory.PingNoisePlayer
+	local PingUIItem = _pingfactory.PingUIItem
+	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
+	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local function connectPingLogic()
+		local pingFactory = Ping.new(PingUIItem.new(adapterToUse), PingNoisePlayer.new(adapterToUse), 10)
+		local Log = Logger.new("ping")
+		on_server_event:Connect(function(args)
+			local eventType = args[1]
+			local _arg0 = type(eventType) == "string"
+			assert(_arg0, "Event is not a string")
+			if eventType == "team_ping" then
+				local pingPosition = args[2]
+				local _arg0_1 = type(pingPosition) == "vector"
+				assert(_arg0_1, "Ping position is not a Vector3")
+				pingFactory:play(pingPosition)
+			end
+		end)
+		local function getRaycastOnCharacterLook(overrideCFrame, distance)
+			local camera_cframe = overrideCFrame or framework.character.get_camera_cframe()
+			local raycast_params = query.create_raycast_params()
+			local DroneFolder = deadlineAdapter.findFirstChild(get_map_root(), "DronesFolder")
+			if not DroneFolder then
+				return nil
+			end
+			raycast_params.filter_descendants_instances({ DroneFolder })
+			raycast_params.filter_type(Enum.RaycastFilterType.Exclude)
+			local origin = camera_cframe.Position
+			local _lookVector = camera_cframe.LookVector
+			local _condition = distance
+			if not (_condition ~= 0 and _condition == _condition and _condition) then
+				_condition = 15000
+			end
+			local direction = _lookVector * _condition
+			local hit = query.raycast(origin, direction, raycast_params)
+			if not hit then
+				return nil
+			end
+			return hit.position
+		end
+		local clientInputGroup = ClientInputGroup.new()
+		clientInputGroup:bind_user_setting(function()
+			local raycastPos = getRaycastOnCharacterLook()
+			if not raycastPos then
+				return nil
+			end
+			fire_server("ping_at_position", raycastPos)
+		end, InputType.Ended, "lean_left")
+		Log:info("Listening for ping requests from the server to display", "Listening for lean_left keybind pressed")
+	end
+	return {
+		connectPingLogic = connectPingLogic,
+	}
+
+end
+
+__modulesFolder["connectResetVelocity"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"connectResetVelocity"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local function connectResetVelocity()
+		local Log = Logger.new("reset_velocity")
+		on_server_event:Connect(function(args)
+			local eventType = args[1]
+			local _arg0 = type(eventType) == "string"
+			assert(_arg0, "Event is not a string")
+			if eventType == "reset_velocity" then
+				local thisPlayerCharacter = get_chars_root().find_first_child("StarterCharacter")
+				if not thisPlayerCharacter then
+					return nil
+				end
+				local thisHumanoidRootPart = thisPlayerCharacter.find_first_child("humanoid_root_part")
+				local _arg0_1 = thisHumanoidRootPart and thisHumanoidRootPart.is_a("BasePart")
+				assert(_arg0_1, "Humanoid Root Part is not a BasePart...")
+				thisHumanoidRootPart.AssemblyLinearVelocity = Vector3.zero
+				thisHumanoidRootPart.AssemblyAngularVelocity = Vector3.zero
+			end
+		end)
+		Log:info("Listening for server events to reset the character's velocity")
+	end
+	return {
+		connectResetVelocity = connectResetVelocity,
+	}
+
+end
+
+__modulesFolder["connectUI"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"connectUI"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local function connectUILogic()
+		local Log = Logger.new("ui")
+		local lookListener
+		do
+			lookListener = setmetatable({}, {
+				__tostring = function()
+					return "lookListener"
+				end,
+			})
+			lookListener.__index = lookListener
+			function lookListener.new(...)
+				local self = setmetatable({}, lookListener)
+				return self:constructor(...) or self
+			end
+			function lookListener:constructor()
+				self.windowSize = iris.State(Vector2.new(500, 100))
+				self.text = "Generating terrain. You cannot spawn until it is done generating."
+			end
+			function lookListener:renderThing()
+				iris.Window({ "BIOME STATUS (DRAGGABLE WINDOW)" }, {
+					size = self.windowSize,
+				})
+				local _value = self.status1
+				if _value ~= 0 and _value == _value and _value then
+					iris.Text({ `Building terrain heightmap... {self.status1 * 100}%` })
+				end
+				local _value_1 = self.status2
+				if _value_1 ~= 0 and _value_1 == _value_1 and _value_1 then
+					iris.Text({ `Building structures... {self.status2 * 100}%` })
+				end
+				iris.Text({ self.text })
+				iris.End()
+			end
+			function lookListener:kickStart()
+				self.irisConnection = iris:Connect(function()
+					self:renderThing()
+				end)
+			end
+			function lookListener:setText(text)
+				self.text = text
+			end
+			function lookListener:setStatus1(number)
+				self.status1 = number
+			end
+			function lookListener:setStatus2(number)
+				self.status2 = number
+			end
+			function lookListener:disable()
+				local _result = self.irisConnection
+				if _result ~= nil then
+					_result()
+				end
+			end
+		end
+		local look = lookListener.new()
+		on_server_event:Connect(function(args)
+			local eventType = args[1]
+			local _arg0 = type(eventType) == "string"
+			assert(_arg0, "Event is not a string")
+			if eventType == "terrain_finished" then
+				look:setText("Terrain has been generated. Feel free to spawn to get rid of this message.")
+			end
+			if eventType == "terrain_generate" then
+				look:disable()
+				look:kickStart()
+			end
+			if eventType == "disconnect_iris" then
+				look:disable()
+			end
+			if eventType == "biomeLoadingStatus_1" then
+				local percentage = args[2]
+				local _arg0_1 = type(percentage) == "number"
+				assert(_arg0_1, "percentage is not a number")
+				look:setStatus1(percentage)
+			end
+			if eventType == "biomeLoadingStatus_2" then
+				local percentage = args[2]
+				local _arg0_1 = type(percentage) == "number"
+				assert(_arg0_1, "percentage is not a number")
+				look:setStatus2(percentage)
+			end
+			if eventType == "initialise" then
+				local isSuccessful = args[2]
+				local _arg0_1 = type(isSuccessful) == "boolean"
+				assert(_arg0_1, "isSuccessful is not a boolean")
+				Log[if isSuccessful then "info" else "warn"](Log, if isSuccessful then "initialising game has been executed on the remote server" else "initialise game is not an available method")
+			end
+		end)
+		Log:info("Connected iris UI for displaying map generation status")
+	end
+	return {
+		connectUILogic = connectUILogic,
+	}
+
+end
+
 __modulesFolder["pingfactory"] = function()
 	local __modulesFolder = nil
 	local __customTS = nil
@@ -3442,307 +3828,27 @@ task.defer(function()
 
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local droneMaterialConfig = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "droneMaterialConfig").droneMaterialConfig
-	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
-	local assign = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "Util").assign
-	local _pingfactory = TS.import(script, script.Parent, "pingfactory")
-	local Ping = _pingfactory.Ping
-	local PingNoisePlayer = _pingfactory.PingNoisePlayer
-	local PingUIItem = _pingfactory.PingUIItem
-	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
-	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
 	local bindRecoilCam = TS.import(script, script.Parent, "superShakeRecoil").bindRecoilCam
+	local connectUILogic = TS.import(script, script.Parent, "connectUI").connectUILogic
+	local connectPingLogic = TS.import(script, script.Parent, "connectPing").connectPingLogic
+	local connectDroneLogic = TS.import(script, script.Parent, "connectDrone").connectDroneLogic
+	local _assetPreloader = TS.import(script, script.Parent, "assetPreloader")
+	local AssetPreloader = _assetPreloader.AssetPreloader
+	local AudioAsset = _assetPreloader.AudioAsset
+	local ThresholdUtility = _assetPreloader.ThresholdUtility
+	local connectResetVelocity = TS.import(script, script.Parent, "connectResetVelocity").connectResetVelocity
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local Log = Logger.new("main")
-	local lookListener
-	do
-		lookListener = setmetatable({}, {
-			__tostring = function()
-				return "lookListener"
-			end,
-		})
-		lookListener.__index = lookListener
-		function lookListener.new(...)
-			local self = setmetatable({}, lookListener)
-			return self:constructor(...) or self
-		end
-		function lookListener:constructor()
-			self.windowSize = iris.State(Vector2.new(500, 100))
-			self.text = "Generating terrain. You cannot spawn until it is done generating."
-		end
-		function lookListener:renderThing()
-			iris.Window({ "BIOME STATUS (DRAGGABLE WINDOW)" }, {
-				size = self.windowSize,
-			})
-			local _value = self.status1
-			if _value ~= 0 and _value == _value and _value then
-				iris.Text({ `Building terrain heightmap... {self.status1 * 100}%` })
-			end
-			local _value_1 = self.status2
-			if _value_1 ~= 0 and _value_1 == _value_1 and _value_1 then
-				iris.Text({ `Building structures... {self.status2 * 100}%` })
-			end
-			iris.Text({ self.text })
-			iris.End()
-		end
-		function lookListener:kickStart()
-			self.irisConnection = iris:Connect(function()
-				self:renderThing()
-			end)
-		end
-		function lookListener:setText(text)
-			self.text = text
-		end
-		function lookListener:setStatus1(number)
-			self.status1 = number
-		end
-		function lookListener:setStatus2(number)
-			self.status2 = number
-		end
-		function lookListener:disable()
-			local _result = self.irisConnection
-			if _result ~= nil then
-				_result()
-			end
-		end
-	end
-	local look = lookListener.new()
-	local pingFactory = Ping.new(PingUIItem.new(adapterToUse), PingNoisePlayer.new(adapterToUse), 10)
-	local _binding = {}
-	local body_gyro = _binding[1]
-	local body_velocity = _binding[2]
-	local dronePart = _binding[3]
-	on_server_event:Connect(function(args)
-		local eventType = args[1]
-		local _arg0 = type(eventType) == "string"
-		assert(_arg0, "Event is not a string")
-		if eventType == "terrain_finished" then
-			look:setText("Terrain has been generated. Feel free to spawn to get rid of this message.")
-		end
-		if eventType == "terrain_generate" then
-			look:disable()
-			look:kickStart()
-		end
-		if eventType == "disconnect_iris" then
-			look:disable()
-		end
-		if eventType == "player_ping" then
-			local drones = get_map_root().find_first_child("DronesFolder")
-			if not drones then
-				return Log:warn("Failed to find drones folder")
-			end
-			local drone_name = args[2]
-			local _arg0_1 = type(drone_name) == "string"
-			assert(_arg0_1, "Drone name is not a string")
-			local drone = adapterToUse.findFirstChild(drones, drone_name)
-			local _arg0_2 = drone and adapterToUse.isA(drone, "BasePart")
-			assert(_arg0_2, "drone does not exist or is not a BasePart")
-			adapterToUse.setProperty(drone, "Color", Color3.fromRGB(255, 255, 255))
-			adapterToUse.setProperty(drone, "Material", Enum.Material.SmoothPlastic)
-			assign(drone, droneMaterialConfig.selected, adapterToUse.setProperty)
-			task.delay(0.2, function()
-				assign(drone, droneMaterialConfig.normal, adapterToUse.setProperty)
-			end)
-		end
-		if eventType == "team_ping" then
-			local pingPosition = args[2]
-			local _arg0_1 = type(pingPosition) == "vector"
-			assert(_arg0_1, "Ping position is not a Vector3")
-			pingFactory:play(pingPosition)
-		end
-		if eventType == "send_drone_info" then
-			local drones = get_map_root().find_first_child("DronesFolder")
-			if not drones then
-				return Log:warn("Failed to find drones folder")
-			end
-			local drone_name = args[2]
-			local _arg0_1 = type(drone_name) == "string"
-			assert(_arg0_1, "Drone name is not a string")
-			local drone = adapterToUse.findFirstChild(drones, drone_name)
-			if not drone then
-				return Log:warn(`Failed to find drone of {drone_name}`)
-			end
-			local bodyGyroCanidate = adapterToUse.findFirstChild(drone, "CoolGyro")
-			local bodyVelocityCanidate = adapterToUse.findFirstChild(drone, "CoolVelocity")
-			local _arg0_2 = bodyGyroCanidate and adapterToUse.isA(bodyGyroCanidate, "BodyGyro")
-			assert(_arg0_2, "CoolGyro does not exist or is not a BodyGyro")
-			local _arg0_3 = bodyVelocityCanidate and adapterToUse.isA(bodyVelocityCanidate, "BodyVelocity")
-			assert(_arg0_3, "CoolVelocity does not exist or is not a BodyVelocity")
-			local _arg0_4 = drone and adapterToUse.isA(drone, "BasePart")
-			assert(_arg0_4, "drone does not exist or is not a BasePart")
-			body_gyro = bodyGyroCanidate
-			body_velocity = bodyVelocityCanidate
-			dronePart = drone
-			dronePart.CanCollide = true
-		end
-		if eventType == "reset_velocity" then
-			local thisPlayerCharacter = get_chars_root().find_first_child("StarterCharacter")
-			if not thisPlayerCharacter then
-				return nil
-			end
-			local thisHumanoidRootPart = thisPlayerCharacter.find_first_child("humanoid_root_part")
-			local _arg0_1 = thisHumanoidRootPart and thisHumanoidRootPart.is_a("BasePart")
-			assert(_arg0_1, "Humanoid Root Part is not a BasePart...")
-			thisHumanoidRootPart.AssemblyLinearVelocity = Vector3.zero
-			thisHumanoidRootPart.AssemblyAngularVelocity = Vector3.zero
-		end
-		if eventType == "biomeLoadingStatus_1" then
-			local percentage = args[2]
-			local _arg0_1 = type(percentage) == "number"
-			assert(_arg0_1, "percentage is not a number")
-			look:setStatus1(percentage)
-		end
-		if eventType == "biomeLoadingStatus_2" then
-			local percentage = args[2]
-			local _arg0_1 = type(percentage) == "number"
-			assert(_arg0_1, "percentage is not a number")
-			look:setStatus2(percentage)
-		end
-		if eventType == "initialise" then
-			local isSuccessful = args[2]
-			local _arg0_1 = type(isSuccessful) == "boolean"
-			assert(_arg0_1, "isSuccessful is not a boolean")
-			Log[if isSuccessful then "info" else "warn"](Log, if isSuccessful then "initialising game has been executed on the remote server" else "initialise game is not an available method")
-		end
-	end)
-	local DroneFreecam
-	do
-		DroneFreecam = setmetatable({}, {
-			__tostring = function()
-				return "DroneFreecam"
-			end,
-		})
-		DroneFreecam.__index = DroneFreecam
-		function DroneFreecam.new(...)
-			local self = setmetatable({}, DroneFreecam)
-			return self:constructor(...) or self
-		end
-		function DroneFreecam:constructor(get_head_cframe)
-			local firstPos, secondPos = Vector3.new(-5000, 5000, -5000), Vector3.new(5000, 5000, 5000)
-			local raycast_params = query.create_raycast_params()
-			local posToHitStartFrom = Vector3.new(math.random(firstPos.X, secondPos.X), math.random(firstPos.Y, secondPos.Y), math.random(firstPos.Z, secondPos.Z))
-			local hit = query.raycast(posToHitStartFrom, Vector3.new(0, -15000, 0), raycast_params)
-			if not hit then
-				Log:error(`Hit was not found when doing drone spawn logic`, `Position from: {posToHitStartFrom}`)
-			end
-			self.get_head_cframe = get_head_cframe
-			self.rot_x = 0
-			self.rot_y = 0
-			local _result = hit
-			if _result ~= nil then
-				local _position = _result.position
-				local _vector3 = Vector3.new(0, 26, 0)
-				_result = _position + _vector3
-			end
-			local _condition = _result
-			if not _condition then
-				_condition = Vector3.new(0, 2000, 0)
-			end
-			self.cam_position = CFrame.new(_condition)
-			self.min_roll = -math.pi / 2 + 0.2
-			self.max_roll = math.pi / 2 - 0.2
-			self.current_velocity = Vector3.zero
-			self.input = {
-				movementX = 0,
-				movementY = 0,
-				movementZ = 0,
-			}
-			self.camera_cframe = CFrame.new()
-		end
-		function DroneFreecam:update(delta_time)
-			if not body_gyro or not body_velocity or not dronePart then
-				return nil
-			end
-			local _exp = input.get_mouse_delta() * 0.1
-			local _arg0 = input.get_mouse_sensitivity()
-			local mouse_delta = _exp * _arg0
-			self.rot_y -= mouse_delta.Y
-			self.rot_y = math.clamp(self.rot_y, self.min_roll, self.max_roll)
-			self.rot_x -= mouse_delta.X
-			local _exp_1 = CFrame.Angles(0, self.rot_x, 0)
-			local _arg0_1 = CFrame.Angles(self.rot_y, 0, 0)
-			local full_cframe = _exp_1 * _arg0_1
-			body_gyro.CFrame = full_cframe
-			local target_velocity = full_cframe:VectorToWorldSpace(Vector3.new(-self.input.movementX * 32, self.input.movementZ * 8, -self.input.movementY * 32))
-			-- Lerp toward target so velocity builds and bleeds off like a real drone
-			-- Factor of 6 gives ~160ms ramp time; raise it for a snappier feel
-			self.current_velocity = self.current_velocity:Lerp(target_velocity, math.min(1, delta_time * 3))
-			body_velocity.Velocity = self.current_velocity
-			local _cFrame = dronePart.CFrame
-			local _cFrame_1 = CFrame.new(0, 0, 0)
-			self.camera_cframe = _cFrame * _cFrame_1
-		end
-	end
-	-- class DroneFreecamFactory {
-	--     constructor(body_gyro: AnyInstance<BodyGyro>, body_velocity: AnyInstance<BodyVelocity>, drone_part: AnyInstance<BasePart>) {
-	--         return class {
-	--             constructor(get_head_cframe: () => CFrame) { 
-	--                 return new DroneFreecam(get_head_cframe, body_gyro, body_velocity, drone_part);
-	--             }
-	--         }
-	--     }
-	-- }
-	register_camera_mode("DroneFreecam", DroneFreecam)
-	-- function CustomFreecam:update(delta_time)
-	-- 	if not body_gyro     then return end
-	-- 	if not body_velocity then return end
-	-- 	if not dronePart     then return end
-	-- 	local mouse_delta = input.get_mouse_delta() * 0.1 * input.get_mouse_sensitivity()
-	-- 	self.rot_y -= mouse_delta.Y
-	-- 	self.rot_y  = math.clamp(self.rot_y, self.min_roll, self.max_roll)
-	-- 	self.rot_x -= mouse_delta.X
-	-- 	local full_cframe = CFrame.Angles(0, self.rot_x, 0) * CFrame.Angles(self.rot_y, 0, 0)
-	-- 	body_gyro.CFrame = full_cframe
-	-- 	local target_velocity = full_cframe:VectorToWorldSpace(Vector3.new(
-	-- 		-self.input.movementX * 16,  -- Sideways
-	-- 		 self.input.movementZ * 4,   -- Y
-	-- 		-self.input.movementY * 16   -- Forward
-	-- 	))
-	-- 	-- Lerp toward target so velocity builds and bleeds off like a real drone
-	-- 	-- Factor of 6 gives ~160ms ramp time; raise it for a snappier feel
-	-- 	self.current_velocity = self.current_velocity:Lerp(target_velocity, math.min(1, delta_time * 3))
-	-- 	body_velocity.Velocity = self.current_velocity
-	-- 	self.camera_cframe = dronePart.CFrame * CFrame.new(0, 0, 0)
-	-- end
-	-- -- can also use Default to overwrite default cameramode
-	-- register_camera_mode("Freecam", CustomFreecam)
-	local function getRaycastOnCharacterLook(overrideCFrame, distance)
-		local camera_cframe = overrideCFrame or framework.character.get_camera_cframe()
-		local raycast_params = query.create_raycast_params()
-		local DroneFolder = deadlineAdapter.findFirstChild(get_map_root(), "DronesFolder")
-		if not DroneFolder then
-			return nil
-		end
-		raycast_params.filter_descendants_instances({ DroneFolder })
-		raycast_params.filter_type(Enum.RaycastFilterType.Exclude)
-		local origin = camera_cframe.Position
-		local _lookVector = camera_cframe.LookVector
-		local _condition = distance
-		if not (_condition ~= 0 and _condition == _condition and _condition) then
-			_condition = 15000
-		end
-		local direction = _lookVector * _condition
-		local hit = query.raycast(origin, direction, raycast_params)
-		if not hit then
-			return nil
-		end
-		return hit.position
-	end
-	local clientInputGroup = ClientInputGroup.new()
-	clientInputGroup:bind_user_setting(function()
-		if not dronePart or not dronePart.Parent then
-			return nil
-		end
-		local raycastPos = getRaycastOnCharacterLook()
-		if not raycastPos then
-			return nil
-		end
-		fire_server("ping_at_position", raycastPos)
-	end, InputType.Ended, "lean_left")
-	if isDeadline then
-		bindRecoilCam()
-	end
+	local PingAssetPreloader = AssetPreloader.new({ AudioAsset.new({
+		SoundId = "rbxassetid://17208204604",
+	}, ThresholdUtility.new(60)) })
+	PingAssetPreloader:preloadAll()
+	bindRecoilCam()
+	connectDroneLogic()
+	connectPingLogic()
+	connectUILogic()
+	connectResetVelocity()
 	Log:info("Run this command to start the game and map generation!", 'shared.initialise_game\"\"')
 	Shared.initialise_game = function()
 		fire_server("initialise_game")
