@@ -3051,6 +3051,54 @@ __modulesFolder["config"] = function()
 
 end
 
+__modulesFolder["connectIngame"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"connectIngame"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local kickStart = TS.import(script, game:GetService("ServerScriptService"), "TS", "ingame").kickStart
+	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
+	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local function connectIngameSystemsInALoop(dogRef)
+		local Log = Logger.new("in_game_systems_in_a_loop")
+		local disconnectAll
+		disconnectAll = kickStart(adapterToUse, getWorldRoot(), dogRef, function(team_alive)
+			if not disconnectAll then
+				return nil
+			end
+			disconnectAll()
+			local _exp = players.get_alive()
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(player)
+				player.kill()
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+			Log:info("someone won", team_alive)
+			connectIngameSystemsInALoop(dogRef)
+		end)
+	end
+	return {
+		connectIngameSystemsInALoop = connectIngameSystemsInALoop,
+	}
+
+end
+
 __modulesFolder["ingame"] = function()
 	local __modulesFolder = nil
 	local __customTS = nil
@@ -3528,6 +3576,150 @@ __modulesFolder["ingame"] = function()
 
 end
 
+__modulesFolder["initialiseDogRef"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"initialiseDogRef"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function makeDogRef()
+		return {}
+	end
+	return {
+		makeDogRef = makeDogRef,
+	}
+
+end
+
+__modulesFolder["initialise_game"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"initialise_game"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local makeDogRef = TS.import(script, game:GetService("ServerScriptService"), "TS", "initialiseDogRef").makeDogRef
+	local loadMap = TS.import(script, game:GetService("ServerScriptService"), "TS", "loadMap").loadMap
+	local connectIngameSystemsInALoop = TS.import(script, game:GetService("ServerScriptService"), "TS", "connectIngame").connectIngameSystemsInALoop
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	local function initialise_game()
+		local dogRef = makeDogRef()
+		local terrain_generate_connection
+		if isDeadline then
+			local _exp = players.get_all()
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(player, index)
+				player.fire_client("terrain_generate")
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+			terrain_generate_connection = on_player_joined:Connect(function(name)
+				local player = players.get(name)
+				if not player then
+					return nil
+				end
+				player.fire_client("terrain_generate")
+			end)
+		end
+		loadMap(dogRef)
+		if isDeadline then
+			local _exp = players.get_all()
+			-- ▼ ReadonlyArray.forEach ▼
+			local _callback = function(player, index)
+				player.fire_client("terrain_finished")
+			end
+			for _k, _v in _exp do
+				_callback(_v, _k - 1, _exp)
+			end
+			-- ▲ ReadonlyArray.forEach ▲
+			on_player_joined:Connect(function(name)
+				local player = players.get(name)
+				if not player then
+					return nil
+				end
+				player.fire_client("terrain_finished")
+			end)
+			on_player_spawned:Connect(function(name)
+				local player = players.get(name)
+				if not player then
+					return nil
+				end
+				player.fire_client("disconnect_iris")
+			end)
+			local _result = terrain_generate_connection
+			if _result ~= nil then
+				_result:Disconnect()
+			end
+		end
+		connectIngameSystemsInALoop(dogRef)
+	end
+	return {
+		initialise_game = initialise_game,
+	}
+
+end
+
+__modulesFolder["loadMap"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"loadMap"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local startMapGenerator = TS.import(script, game:GetService("ServerScriptService"), "TS", "map_generator").startMapGenerator
+	local loadPeoplesRepublicOfGermetistan = TS.import(script, game:GetService("ServerScriptService"), "TS", "loadPeoplesRepublicOfGermetistan").loadPeoplesRepublicOfGermetistan
+	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	local function loadMap(dogRef)
+		-- heavy operation
+		if not isDeadline then
+			return nil
+		end
+		loadPeoplesRepublicOfGermetistan()
+		map.set_preset("afghanistan")
+		sharedvars.sv_spawning_enabled = false
+		chat.set_spawning_disabled_reason("The map is generating. Please be patient.")
+		local maxHeight = startMapGenerator()
+		dogRef.current = maxHeight + 20
+		sharedvars.sv_spawning_enabled = true
+	end
+	return {
+		loadMap = loadMap,
+	}
+
+end
+
 __modulesFolder["loadPeoplesRepublicOfGermetistan"] = function()
 	local __modulesFolder = nil
 	local __customTS = nil
@@ -3881,102 +4073,10 @@ task.defer(function()
 
 	-- Compiled with roblox-ts v3.0.0-dev-9165cde
 	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
-	local startMapGenerator = TS.import(script, game:GetService("ServerScriptService"), "TS", "map_generator").startMapGenerator
-	local kickStart = TS.import(script, game:GetService("ServerScriptService"), "TS", "ingame").kickStart
-	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
-	local getWorldRoot = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "getRoot").getWorldRoot
-	local loadPeoplesRepublicOfGermetistan = TS.import(script, game:GetService("ServerScriptService"), "TS", "loadPeoplesRepublicOfGermetistan").loadPeoplesRepublicOfGermetistan
-	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local initialise_game = TS.import(script, game:GetService("ServerScriptService"), "TS", "initialise_game").initialise_game
 	local Log = Logger.new("main")
-	local dogRef
-	local function loadMap()
-		-- heavy operation
-		if not isDeadline then
-			return nil
-		end
-		loadPeoplesRepublicOfGermetistan()
-		map.set_preset("afghanistan")
-		sharedvars.sv_spawning_enabled = false
-		chat.set_spawning_disabled_reason("The map is generating. Please be patient.")
-		local maxHeight = startMapGenerator()
-		dogRef.current = maxHeight + 20
-		sharedvars.sv_spawning_enabled = true
-	end
-	dogRef = {}
-	local function connect()
-		local disconnectAll
-		disconnectAll = kickStart(adapterToUse, getWorldRoot(), dogRef, function(team_alive)
-			if not disconnectAll then
-				return nil
-			end
-			disconnectAll()
-			local _exp = players.get_alive()
-			-- ▼ ReadonlyArray.forEach ▼
-			local _callback = function(player)
-				player.kill()
-			end
-			for _k, _v in _exp do
-				_callback(_v, _k - 1, _exp)
-			end
-			-- ▲ ReadonlyArray.forEach ▲
-			Log:info("someone won", team_alive)
-			connect()
-		end)
-	end
 	--connect();
-	local function initialise_game()
-		local terrain_generate_connection
-		if isDeadline then
-			local _exp = players.get_all()
-			-- ▼ ReadonlyArray.forEach ▼
-			local _callback = function(player, index)
-				player.fire_client("terrain_generate")
-			end
-			for _k, _v in _exp do
-				_callback(_v, _k - 1, _exp)
-			end
-			-- ▲ ReadonlyArray.forEach ▲
-			terrain_generate_connection = on_player_joined:Connect(function(name)
-				local player = players.get(name)
-				if not player then
-					return nil
-				end
-				player.fire_client("terrain_generate")
-			end)
-		end
-		loadMap()
-		if isDeadline then
-			local _exp = players.get_all()
-			-- ▼ ReadonlyArray.forEach ▼
-			local _callback = function(player, index)
-				player.fire_client("terrain_finished")
-			end
-			for _k, _v in _exp do
-				_callback(_v, _k - 1, _exp)
-			end
-			-- ▲ ReadonlyArray.forEach ▲
-			on_player_joined:Connect(function(name)
-				local player = players.get(name)
-				if not player then
-					return nil
-				end
-				player.fire_client("terrain_finished")
-			end)
-			on_player_spawned:Connect(function(name)
-				local player = players.get(name)
-				if not player then
-					return nil
-				end
-				player.fire_client("disconnect_iris")
-			end)
-			local _result = terrain_generate_connection
-			if _result ~= nil then
-				_result:Disconnect()
-			end
-		end
-		connect()
-	end
 	Shared.should_initialise_game = true
 	on_client_event:Connect(function(playerName, args)
 		local player = players.get(playerName)
