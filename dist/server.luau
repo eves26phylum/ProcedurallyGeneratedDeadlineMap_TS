@@ -3092,6 +3092,7 @@ __modulesFolder["connectIngame"] = function()
 			Log:info("someone won", team_alive)
 			connectIngameSystemsInALoop(dogRef)
 		end)
+		Log:info("I am now starting the game cycle.")
 	end
 	return {
 		connectIngameSystemsInALoop = connectIngameSystemsInALoop,
@@ -3701,7 +3702,10 @@ __modulesFolder["loadMap"] = function()
 	local startMapGenerator = TS.import(script, game:GetService("ServerScriptService"), "TS", "map_generator").startMapGenerator
 	local loadPeoplesRepublicOfGermetistan = TS.import(script, game:GetService("ServerScriptService"), "TS", "loadPeoplesRepublicOfGermetistan").loadPeoplesRepublicOfGermetistan
 	local isDeadline = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "isDeadline").isDeadline
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
 	local function loadMap(dogRef)
+		local Log = Logger.new("load_map")
+		Log:info("Loading People's Republic of Germetistan")
 		-- heavy operation
 		if not isDeadline then
 			return nil

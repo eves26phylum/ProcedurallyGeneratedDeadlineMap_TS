@@ -15,4 +15,5 @@ export function connectIngameSystemsInALoop(dogRef: dogRefType) {
         Log.info("someone won", team_alive);
         connectIngameSystemsInALoop(dogRef);
     });
+    Log.info("I am now starting the game cycle.")
 }
