@@ -3301,6 +3301,7 @@ __modulesFolder["connectPing"] = function()
 	local deadlineAdapter = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "deadlineAdapter").deadlineAdapter
 	local adapterToUse = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "adapterToUse").adapterToUse
 	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local getRaycast = TS.import(script, script.Parent, "getRaycast").getRaycast
 	local function connectPingLogic()
 		local pingFactory = Ping.new(PingUIItem.new(adapterToUse), PingNoisePlayer.new(adapterToUse), 10)
 		local Log = Logger.new("ping")
@@ -3315,31 +3316,17 @@ __modulesFolder["connectPing"] = function()
 				pingFactory:play(pingPosition)
 			end
 		end)
-		local function getRaycastOnCharacterLook(overrideCFrame, distance)
-			local camera_cframe = overrideCFrame or framework.character.get_camera_cframe()
-			local raycast_params = query.create_raycast_params()
+		local clientInputGroup = ClientInputGroup.new()
+		clientInputGroup:bind_user_setting(function()
 			local DroneFolder = deadlineAdapter.findFirstChild(get_map_root(), "DronesFolder")
 			if not DroneFolder then
 				return nil
 			end
-			raycast_params.filter_descendants_instances({ DroneFolder })
-			raycast_params.filter_type(Enum.RaycastFilterType.Exclude)
-			local origin = camera_cframe.Position
-			local _lookVector = camera_cframe.LookVector
-			local _condition = distance
-			if not (_condition ~= 0 and _condition == _condition and _condition) then
-				_condition = 15000
+			local _raycastPos = getRaycast(framework.character.get_camera_cframe(), 15000, { DroneFolder })
+			if _raycastPos ~= nil then
+				_raycastPos = _raycastPos.position
 			end
-			local direction = _lookVector * _condition
-			local hit = query.raycast(origin, direction, raycast_params)
-			if not hit then
-				return nil
-			end
-			return hit.position
-		end
-		local clientInputGroup = ClientInputGroup.new()
-		clientInputGroup:bind_user_setting(function()
-			local raycastPos = getRaycastOnCharacterLook()
+			local raycastPos = _raycastPos
 			if not raycastPos then
 				return nil
 			end
@@ -3507,6 +3494,46 @@ __modulesFolder["connectUI"] = function()
 	end
 	return {
 		connectUILogic = connectUILogic,
+	}
+
+end
+
+__modulesFolder["getRaycast"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"getRaycast"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local function getRaycast(overrideCFrame, distance, exclude, filterType)
+		if exclude == nil then
+			exclude = {}
+		end
+		if filterType == nil then
+			filterType = Enum.RaycastFilterType.Exclude
+		end
+		local camera_cframe = overrideCFrame
+		local raycast_params = query.create_raycast_params()
+		raycast_params.filter_descendants_instances(exclude)
+		raycast_params.filter_type(filterType)
+		local origin = camera_cframe.Position
+		local _lookVector = camera_cframe.LookVector
+		local _distance = distance
+		local direction = _lookVector * _distance
+		local hit = query.raycast(origin, direction, raycast_params)
+		return hit
+	end
+	return {
+		getRaycast = getRaycast,
 	}
 
 end

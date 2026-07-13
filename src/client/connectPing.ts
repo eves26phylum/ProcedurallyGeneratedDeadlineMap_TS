@@ -2,6 +2,7 @@ import { Ping, PingNoisePlayer, PingUIItem } from "./pingfactory";
 import { deadlineAdapter } from "shared/deadlineAdapter";
 import { adapterToUse } from "shared/adapterToUse";
 import { Logger } from "shared/logger";
+import { getRaycast } from "./getRaycast";
 
 export function connectPingLogic() {
     const pingFactory = new Ping(new PingUIItem(adapterToUse), new PingNoisePlayer(adapterToUse), 10)
@@ -15,25 +16,11 @@ export function connectPingLogic() {
             pingFactory.play(pingPosition);
         }
     })
-    function getRaycastOnCharacterLook(overrideCFrame?: CFrame, distance?: number) { // function only compatible with deadline
-        const camera_cframe = overrideCFrame || framework.character.get_camera_cframe()
-        const raycast_params = query.create_raycast_params();
-        const DroneFolder = deadlineAdapter.findFirstChild(get_map_root(), "DronesFolder");
-        if (!DroneFolder) return;
-        raycast_params.filter_descendants_instances([ DroneFolder ]);
-        raycast_params.filter_type(Enum.RaycastFilterType.Exclude);
-
-        const origin = camera_cframe.Position
-        const direction = camera_cframe.LookVector.mul(distance || 15000)
-
-        const hit = query.raycast(origin, direction, raycast_params)
-
-        if (!hit) return;
-        return hit.position
-    }
     const clientInputGroup = new ClientInputGroup();
     clientInputGroup.bind_user_setting(() => { // check
-        const raycastPos = getRaycastOnCharacterLook()
+        const DroneFolder = deadlineAdapter.findFirstChild(get_map_root(), "DronesFolder");
+        if (!DroneFolder) return;
+        const raycastPos = getRaycast(framework.character.get_camera_cframe(), 15000, [ DroneFolder ])?.position
         if (!raycastPos) return;
         fire_server(
             "ping_at_position",
