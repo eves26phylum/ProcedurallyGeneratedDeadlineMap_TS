@@ -52,7 +52,7 @@ export function connectUILogic() {
         if (eventType === "disconnect_iris") {
             look.disable();
         }
-        if (eventType === "biomeLoadingStatus_1") {
+        if (eventType === "biomeLoadingStatus_1") { // TODO: Turn this into state. Not individual calls—the server will send full state updates to the client. Or, the server can store what the server THINKS the client's most up to date state is (so when someone joins late—they have no state—it will then update the entire state), then diff that and send the necessary diff to the client.
             const percentage: number | unknown = args[1];
             assert(typeIs(percentage, "number"), "percentage is not a number");
             look.setStatus1(percentage);
