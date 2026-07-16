@@ -3779,6 +3779,56 @@ __modulesFolder["loadPeoplesRepublicOfGermetistan"] = function()
 
 end
 
+__modulesFolder["logToSystemAdministrator"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"logToSystemAdministrator"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local system_administrator = { sharedvars.vip_owner }
+	local Log = Logger.new("log_to_system_administrator")
+	local function sendMessageToSystemAdministrators(message, system_administrators)
+		-- ▼ ReadonlyArray.forEach ▼
+		local _callback = function(player_name)
+			local playerFromSystemAdministratorString = players.get(player_name)
+			if not playerFromSystemAdministratorString then
+				-- ▼ ReadonlyArray.map ▼
+				local _newValue = table.create(#system_administrators)
+				local _callback_1 = function(player_name)
+					return `"{player_name}"`
+				end
+				for _k, _v in system_administrators do
+					_newValue[_k] = _callback_1(_v, _k - 1, system_administrators)
+				end
+				-- ▲ ReadonlyArray.map ▲
+				return Log:error(`System administrator query did not succeed, no player was found from players.get({table.concat(_newValue, ", ")})`)
+			end
+			playerFromSystemAdministratorString.fire_client("log", message)
+		end
+		for _k, _v in system_administrators do
+			_callback(_v, _k - 1, system_administrators)
+		end
+		-- ▲ ReadonlyArray.forEach ▲
+	end
+	return {
+		sendMessageToSystemAdministrators = sendMessageToSystemAdministrators,
+		system_administrator = system_administrator,
+	}
+
+end
+
 __modulesFolder["map_generator"] = function()
 	local __modulesFolder = nil
 	local __customTS = nil

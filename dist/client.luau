@@ -3277,6 +3277,44 @@ __modulesFolder["connectDrone"] = function()
 
 end
 
+__modulesFolder["connectLogListen"] = function()
+	local __modulesFolder = nil
+	local __customTS = nil
+	local getRobloxInstancePath = nil
+	local matchesRuntimeLibPath = nil
+	local resolveModuleRelativeSegs = nil
+	local __robloxTree = nil
+	local __OUTPUT_DIR_MAKER = nil
+	local __runtimeLibPath = nil
+	local __modulesCachedValues = nil
+	local old_require = nil
+	local old_game = nil
+	local script
+	script = newFakeInstance({"connectLogListen"})	local newFakeInstance = nil
+
+	-- Compiled with roblox-ts v3.0.0-dev-9165cde
+	local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
+	local Logger = TS.import(script, game:GetService("ReplicatedStorage"), "TS", "logger").Logger
+	local function connectLogListen()
+		local Log = Logger.new("log")
+		on_server_event:Connect(function(args)
+			local eventType = args[1]
+			local _arg0 = type(eventType) == "string"
+			assert(_arg0, "Event is not a string")
+			if eventType == "log" then
+				local logMessage = args[2]
+				local _arg0_1 = type(logMessage) == "string"
+				assert(_arg0_1, "Log message is not a string")
+				Log:log(logMessage)
+			end
+		end)
+	end
+	return {
+		connectLogListen = connectLogListen,
+	}
+
+end
+
 __modulesFolder["connectPing"] = function()
 	local __modulesFolder = nil
 	local __customTS = nil
@@ -3868,6 +3906,7 @@ task.defer(function()
 	local AudioAsset = _assetPreloader.AudioAsset
 	local ThresholdUtility = _assetPreloader.ThresholdUtility
 	local connectResetVelocity = TS.import(script, script.Parent, "connectResetVelocity").connectResetVelocity
+	local connectLogListen = TS.import(script, script.Parent, "connectLogListen").connectLogListen
 	-- !deadline-ts.customFinishSector_FinishModulesEnd
 	local Log = Logger.new("main")
 	local PingAssetPreloader = AssetPreloader.new({ AudioAsset.new({
@@ -3879,6 +3918,7 @@ task.defer(function()
 	connectPingLogic()
 	connectUILogic()
 	connectResetVelocity()
+	connectLogListen()
 	Log:log("Run this command to start the game and map generation!", 'shared.initialise_game\"\"')
 	Shared.initialise_game = function()
 		fire_server("initialise_game")

@@ -5,6 +5,7 @@ import { connectPingLogic } from "./connectPing";
 import { connectDroneLogic } from "./connectDrone";
 import { AssetPreloader, AudioAsset, ThresholdUtility } from "./assetPreloader";
 import { connectResetVelocity } from "./connectResetVelocity";
+import { connectLogListen } from "./connectLogListen";
 // !deadline-ts.customFinishSector_FinishModulesEnd
 const Log = new Logger("main");
 const PingAssetPreloader = new AssetPreloader(
@@ -21,6 +22,7 @@ connectDroneLogic(); // connects spectating drones, and listens for pings displa
 connectPingLogic(); // connects ping keybinds, and listens for team pings to display
 connectUILogic(); // connects biome status loading ui
 connectResetVelocity(); // connects the logic required for you to not fly into the air whenever you spawn
+connectLogListen(); // starts listening for important messages meant for system administrators from the server
 
 Log.log("Run this command to start the game and map generation!", "shared.initialise_game\"\"")
 
