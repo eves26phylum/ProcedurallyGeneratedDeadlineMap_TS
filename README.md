@@ -15,6 +15,6 @@ DEADLINE: https://www.roblox.com/games/12144402492/Deadline (Up as of 10/05/2026
 
 This is a fanmade version of Deadline's Afghanistan map—to extend it towards the 3 kilometer size boundary—and to torture ROBLOX servers
 
+![In-game Afghanistan with its hills and grassy valleys](docs/assets/afghanistan_scenery_from_a_hill.png)
 ![In-game Afghanistan with its hills, with a windowed tan polymer magazine dropped on the foreground hill](docs/assets/afghanistan_magazine.png)
 ![In-game Afghanistan with its hills and grassy valleys, with a blocky hands character pointing the Mk18 Mod 1 Block II CQBR inspired rifle to the left](docs/assets/afghanistan_mk18.png)
-![In-game Afghanistan with its hills and grassy valleys](docs/assets/afghanistan_scenery_from_a_hill.png)
