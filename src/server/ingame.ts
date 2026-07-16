@@ -70,7 +70,7 @@ export function createDrone(player: Player, adapterToUse: InstanceAdapter, Drone
     player.fire_client("send_drone_info", generatedName);
     return drone;
 }
-export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, dogRef: {current?: number}, onWin: (team_alive: string) => void) {
+export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, dogRef: {current?: number}, onWin: (team_alive: PlayerTeam) => void) {
     if (!isDeadline) return Log.info("Did not execute because the environment is not Deadline.");;
     Log.info("Listening for people spawning.");
     sharedvars.plr_ping_limit_sec = math.huge
