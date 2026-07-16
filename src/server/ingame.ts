@@ -97,6 +97,7 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
     sharedvars.ff_field_voicelines = true
     const game_vars: Record<string, unknown> = {};
     Shared.game = game_vars;
+    game_vars.immunityTime = 20;
     map.set_time(10)
     const lastSpawns: lastSpawnType = {
         defender: [],
@@ -243,7 +244,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
             thisPlayer.set_camera_mode("RecoilCam");
             thisPlayer.set_position(hitSpawnPos);
             task.delay(3, () => {
-                for (let i = 0; i < 20; i++) { 
+                if (!typeIs(game_vars.immunityTime, "number")) Log.error("game_vars.immunityTime is not a number; defaulted to 20 seconds.");
+                for (let i = 0; i < (typeIs(game_vars.immunityTime, "number") ? game_vars.immunityTime : 20); i++) { 
                     thisPlayer.set_health(100); 
                     task.wait(1);
                 }

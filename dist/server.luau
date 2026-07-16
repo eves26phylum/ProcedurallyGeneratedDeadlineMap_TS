@@ -3228,6 +3228,7 @@ __modulesFolder["ingame"] = function()
 		sharedvars.ff_field_voicelines = true
 		local game_vars = {}
 		Shared.game = game_vars
+		game_vars.immunityTime = 20
 		map.set_time(10)
 		local lastSpawns = {
 			defender = {},
@@ -3418,9 +3419,27 @@ __modulesFolder["ingame"] = function()
 				thisPlayer.set_camera_mode("RecoilCam")
 				thisPlayer.set_position(hitSpawnPos)
 				task.delay(3, function()
-					for i = 0, 19 do
-						thisPlayer.set_health(100)
-						task.wait(1)
+					local _immunityTime = game_vars.immunityTime
+					if not (type(_immunityTime) == "number") then
+						Log:error("game_vars.immunityTime is not a number; defaulted to 20 seconds.")
+					end
+					do
+						local i = 0
+						local _shouldIncrement = false
+						while true do
+							if _shouldIncrement then
+								i += 1
+							else
+								_shouldIncrement = true
+							end
+							local _exp_3 = i
+							local _immunityTime_1 = game_vars.immunityTime
+							if not (_exp_3 < (if type(_immunityTime_1) == "number" then game_vars.immunityTime else 20)) then
+								break
+							end
+							thisPlayer.set_health(100)
+							task.wait(1)
+						end
 					end
 				end)
 				if thisPlayer.is_bot() then
