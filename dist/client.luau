@@ -1266,7 +1266,11 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 			self.translateTerrain = translateTerrain
 			self.parent = parent
 			self.name = "NuristanBuildings"
-			self.roomHandlers = roomHandlers(self)
+			local _exp = roomHandlers(self)
+			table.sort(_exp, function(a, b)
+				return a.priority > b.priority
+			end)
+			self.roomHandlers = _exp
 			self.adapter = adapterToUse
 		end
 		function NuristanBuildings:mergeConfig(overrides)

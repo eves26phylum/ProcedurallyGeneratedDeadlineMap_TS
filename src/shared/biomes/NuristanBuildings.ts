@@ -240,7 +240,7 @@ export class NuristanBuildings implements Biome {
         this.translateTerrain = translateTerrain;
         this.parent = parent;
         this.name = "NuristanBuildings";
-        this.roomHandlers = roomHandlers(this);
+        this.roomHandlers = roomHandlers(this).sort((a, b) => a.priority > b.priority);
         this.adapter = adapterToUse;
     }
 
