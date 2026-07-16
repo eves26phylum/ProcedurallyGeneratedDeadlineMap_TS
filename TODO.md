@@ -4,3 +4,5 @@ Each grid space can contain multiple empty maximal space packed until it's full,
 For now, you can do an unoptimised approach and just random then find if this is in the bounds of another box. It's quite pointless anyway since you'd generate this terrain once per map set.
 
 Wave based point reduction system
+
+Fix the bug where the win condition is evaluated at spawn time rather than on player died time
