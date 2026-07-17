@@ -90,6 +90,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
     sharedvars.plr_movement_min_stiffness = 20
     sharedvars.plr_movement_max_stiffness = 30
     sharedvars.sv_day_cycle_speed = 1
+    sharedvars.plr_enable_markers = false
+    sharedvars.plr_enable_leaderboard_points = false
     map.set_time(math.random(0, 24))
     sharedvars.plr_speed = 0.95
     sharedvars.plr_recoil = 0.5

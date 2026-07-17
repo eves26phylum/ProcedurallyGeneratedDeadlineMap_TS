@@ -25,7 +25,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@eves26phylum/types": "^1.0.5",
+    "@eves26phylum/types": "^1.0.7",
     "deadline-ts": "^100.5.1"
   }
 }
