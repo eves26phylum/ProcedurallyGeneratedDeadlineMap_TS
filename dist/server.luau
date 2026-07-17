@@ -1241,6 +1241,7 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 			local _localCFrame = segment.localCFrame
 			local worldCFrame = _plateCFrame * _localCFrame
 			local wallPart = adapter.newInstance("Part")
+			adapter.addTag(wallPart, "voxel_destructible")
 			adapter.setProperty(wallPart, "CFrame", worldCFrame)
 			adapter.setProperty(wallPart, "Size", segment.size)
 			adapter.setProperty(wallPart, "Anchored", true)
@@ -1294,12 +1295,14 @@ __modulesFolder["biomes"]["NuristanBuildings"] = function()
 			local resolvedConfig = if configOverrides ~= nil then self:mergeConfig(configOverrides) else self.config
 			local roomSize = resolvedConfig.roomProps.RoomSize
 			local roomPlate = self.adapter.newInstance("Part")
+			self.adapter.addTag(roomPlate, "voxel_destructible")
 			self.adapter.setProperty(roomPlate, "CFrame", roomCFrame)
 			self.adapter.setProperty(roomPlate, "Size", roomSize)
 			self.adapter.setProperty(roomPlate, "Anchored", true)
 			assign(roomPlate, resolvedConfig.wallPartProps, self.adapter.setProperty)
 			self.adapter.setProperty(roomPlate, "Parent", self.parent)
 			local roomRoof = self.adapter.newInstance("Part")
+			self.adapter.addTag(roomRoof, "voxel_destructible")
 			local _adapter = self.adapter
 			local _roomCFrame = roomCFrame
 			local _upVector = roomCFrame.UpVector
@@ -3232,6 +3235,9 @@ __modulesFolder["ingame"] = function()
 		sharedvars.plr_recoil = 0.5
 		sharedvars.ac_sound_kill = false
 		sharedvars.ff_field_voicelines = true
+		sharedvars.voxel_default_grid_size = 0.05
+		sharedvars.voxel_bullet_destruction_radius = 0.05
+		sharedvars.voxel_destruction_radius = 0
 		local game_vars = {}
 		Shared.game = game_vars
 		game_vars.immunityTime = 20

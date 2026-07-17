@@ -218,6 +218,7 @@ function instantiateWallSegments(
     for (const segment of segments) {
         const worldCFrame = plateCFrame.mul(segment.localCFrame);
         const wallPart = adapter.newInstance("Part");
+        adapter.addTag(wallPart, "voxel_destructible");
         adapter.setProperty(wallPart, "CFrame", worldCFrame);
         adapter.setProperty(wallPart, "Size", segment.size);
         adapter.setProperty(wallPart, "Anchored", true);
@@ -277,6 +278,7 @@ export class NuristanBuildings implements Biome {
         const roomSize = resolvedConfig.roomProps.RoomSize;
 
         const roomPlate = this.adapter.newInstance("Part");
+        this.adapter.addTag(roomPlate, "voxel_destructible");
         this.adapter.setProperty(roomPlate, "CFrame", roomCFrame);
         this.adapter.setProperty(roomPlate, "Size", roomSize);
         this.adapter.setProperty(roomPlate, "Anchored", true);
@@ -284,6 +286,7 @@ export class NuristanBuildings implements Biome {
         this.adapter.setProperty(roomPlate, "Parent", this.parent);
 
         const roomRoof = this.adapter.newInstance("Part");
+        this.adapter.addTag(roomRoof, "voxel_destructible");
         this.adapter.setProperty(roomRoof, "CFrame", roomCFrame.add(roomCFrame.UpVector.mul(resolvedConfig.wall.height).add(roomCFrame.UpVector.mul(roomSize.Y / 2))));
         this.adapter.setProperty(roomRoof, "Size", roomSize);
         this.adapter.setProperty(roomRoof, "Name", "RoomRoof");
