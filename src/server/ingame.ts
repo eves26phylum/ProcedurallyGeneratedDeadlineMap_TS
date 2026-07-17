@@ -97,8 +97,8 @@ export function kickStart(adapterToUse: InstanceAdapter, parent: AnyInstance, do
     sharedvars.plr_recoil = 0.5
     sharedvars.ac_sound_kill = false
     sharedvars.ff_field_voicelines = true
-    sharedvars.voxel_default_grid_size = 0.05
-    sharedvars.voxel_bullet_destruction_radius = 0.05
+    sharedvars.voxel_default_grid_size = 0.5
+    sharedvars.voxel_bullet_destruction_radius = 0.5
     sharedvars.voxel_destruction_radius = 0
     const game_vars: Record<string, unknown> = {};
     Shared.game = game_vars;
